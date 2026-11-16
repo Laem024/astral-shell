@@ -1,0 +1,6 @@
+ClipboardContent 1.0 ClipboardContent.qml
+ClipboardPanel 1.0 ClipboardPanel.qml
+ClipboardPreview 1.0 ClipboardPreview.qml
+ClipboardRoot 1.0 ClipboardRoot.qml
+ClipboardService 1.0 ClipboardService.qml
+ShortcutHint 1.0 ShortcutHint.qml
