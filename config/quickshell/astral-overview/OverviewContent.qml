@@ -342,7 +342,7 @@ FocusScope {
       Components.KeyHint { tokens: root.tokens; key: "TAB"; label: "spaces" }
       Components.KeyHint { tokens: root.tokens; key: "ENTER"; label: "open" }
       Components.KeyHint { tokens: root.tokens; key: "DRAG"; label: "move windows" }
-      Components.KeyHint { tokens: root.tokens; key: "▣"; label: "change monitor" }
+      Components.KeyHint { tokens: root.tokens; monitorIcon: true; label: "click to change monitor" }
       Components.KeyHint { tokens: root.tokens; key: "ESC"; label: "close" }
       Item { Layout.fillWidth: true }
       Text {

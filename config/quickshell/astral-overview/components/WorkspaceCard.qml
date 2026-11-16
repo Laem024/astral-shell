@@ -188,11 +188,9 @@ Item {
         id: chipRow
         anchors.centerIn: parent
         spacing: 5
-        Text {
-          text: "▣"
-          color: root.canMoveMonitor ? root.tokens.cyan : Qt.alpha(root.tokens.muted, 0.7)
-          font.family: root.tokens.mono
-          font.pixelSize: 15
+        MonitorGlyph {
+          anchors.verticalCenter: parent.verticalCenter
+          ink: root.canMoveMonitor ? root.tokens.cyan : Qt.alpha(root.tokens.muted, 0.7)
         }
         Text {
           text: root.monitorLabel
