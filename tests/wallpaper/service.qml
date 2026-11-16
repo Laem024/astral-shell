@@ -31,9 +31,19 @@ Scope {
         const snapshot = JSON.stringify(service.state);
         const savedKey = service.keySaved; service.setKey("invalid\nkey");
         root.check(service.keySaved === savedKey, "invalid key rejected");
-        for (const payload of ['{', '{}', JSON.stringify({data:new Array(101).fill({}),meta:{current_page:1,last_page:1}}), JSON.stringify({data:[],meta:{current_page:2,last_page:1}})]) {
+        const latest = Remote.parse(JSON.stringify({data: [], meta: {current_page: 1, last_page: 26216}}));
+        root.check(latest.meta.last_page === 26216, "latest feed accepts more than 10000 pages");
+        for (const payload of ['{', '{}', JSON.stringify({data:new Array(101).fill({}),meta:{current_page:1,last_page:1}}), JSON.stringify({data:[],meta:{current_page:2,last_page:1}}), JSON.stringify({data:[],meta:{current_page:1,last_page:0}}), JSON.stringify({data:[],meta:{current_page:1,last_page:1.5}}), JSON.stringify({data:[],meta:{current_page:1,last_page:9007199254740992}})]) {
           let rejected = false; try { Remote.parse(payload); } catch (e) { rejected = true; }
           root.check(rejected, "invalid or oversized response rejected");
+        }
+        root.check(Remote.searchUrl({query: "", page: 1}, "").includes("sorting=date_added"), "empty search uses latest");
+        root.check(Remote.searchUrl({query: "space", page: 1}, "").includes("sorting=relevance"), "keyword search uses relevance");
+        root.check(Remote.searchUrl({query: "", page: 1, filters: {sorting: "toplist", topRange: "1w", resolutions: "2560x1440"}}, "").includes("topRange=1w"), "toplist and exact resolution filters");
+        for (const filters of [{categories: "000"}, {purity: "001"}, {sorting: "invalid"}, {colors: "bad"}, {ratios: "16x9&apikey=bad"}, {resolutions: "1920x1080", atleast: "1920x1080"}]) {
+          let rejected = false;
+          try { Remote.searchUrl({query: "", page: 1, filters: filters}, ""); } catch (e) { rejected = true; }
+          root.check(rejected, "invalid filters or unauthenticated NSFW rejected");
         }
         service.update("minutes", -1);
         root.check(JSON.stringify(service.state) === snapshot, "invalid preference rejected");

@@ -63,7 +63,8 @@ Scope {
         root.check(content.items.length === 0 && !content.selected && !content.previewEntry, "filter clears stale selection and preview");
         content.searchText = "";
         content.tab = "Wallhaven";
-        controller.search("landscape", 2); root.stage = 2;
+        root.check(controller.remoteBusy && controller.remoteRequest.query === "" && controller.remoteRequest.page === 1, "opening Wallhaven queries latest automatically");
+        content.filtersOpen = true; root.stage = 2;
       } else if (root.stage === 2) {
         root.check(content.items.length === 1 && !content.selected, "Wallhaven results populate mosaic without selecting");
         root.check(!content.previewEntry && !content.confirmationOpen, "remote browsing does not preview or open confirmation");

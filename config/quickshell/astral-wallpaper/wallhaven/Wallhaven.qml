@@ -14,6 +14,7 @@ Scope {
   property string destination: ""
   property string target: ""
   property string error: ""
+  property string requestedPurity: "100"
   property string authenticatedUrl: ""
   signal finished(int code, var result, string error)
   Common.Command { id: command; timeout: 30000 }
@@ -25,8 +26,9 @@ Scope {
     if (running) return;
     operation = kind; running = true; error = "";
     if (kind === "search") {
-      if (!Number.isInteger(request.page) || request.page < 1 || request.page > 1000 || typeof request.query !== "string" || request.query.length > 2048 || !/^[a-zA-Z0-9]*$/.test(key)) { running = false; finished(1, {}, "Invalid Wallhaven search."); return; }
-      url = "https://wallhaven.cc/api/v1/search?purity=100&categories=111&sorting=relevance&q=" + encodeURIComponent(request.query) + "&page=" + request.page;
+      try { url = Logic.searchUrl(request, key); }
+      catch (e) { running = false; finished(1, {}, e.message); return; }
+      requestedPurity = (request.filters || {}).purity || "100";
     } else {
       if (!Logic.downloadUrl(request.url) || !["light", "dark", "shared"].includes(request.collection) || !request.folder.startsWith("/") || request.folder.includes("\0")) { running = false; finished(1, {}, "Invalid Wallhaven download URL or destination."); return; }
       url = request.url;
@@ -58,7 +60,7 @@ Scope {
       if (code !== 0 || status !== 0) { root.complete(1, {}, "Network error. Check your connection and try again."); return; }
       if (http.text.trim() !== "200") { root.complete(1, {}, Logic.httpError(http.text.trim())); return; }
       if (root.operation === "search") {
-        try { body.reload(); const result = Logic.parse(body.text()); root.complete(0, result, ""); }
+        try { body.reload(); const result = Logic.parse(body.text(), root.requestedPurity); root.complete(0, result, ""); }
         catch (e) { root.complete(1, {}, "Invalid Wallhaven response."); }
       } else {
         command.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=codec_name", "-of", "default=noprint_wrappers=1:nokey=1", root.work + "/body"], (code, output) => {

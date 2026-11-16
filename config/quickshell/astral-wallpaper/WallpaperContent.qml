@@ -10,6 +10,15 @@ Pane {
   required property var tokens
   property string tab: "Local"
   property string searchText: ""
+  property bool filtersOpen: false
+  function setFilter(name, value) {
+    service.searchFilters = Object.assign({}, service.searchFilters, {[name]: value});
+  }
+  function browseLatest() {
+    search.text = "";
+    service.searchFilters = ({});
+    service.openWallhaven();
+  }
   property string downloadTarget: "mode"
   property string draftLayout: "Mirror"
   property string targetMonitor: service.screens.length ? service.screens[0].name : ""
@@ -36,6 +45,7 @@ Pane {
   function reset() {
     confirmation.close(); selected = null; grid.currentIndex = -1;
     search.text = tab === "Wallhaven" ? service.query : searchText;
+    if (tab === "Wallhaven") browseLatest();
     search.forceActiveFocus();
   }
   function choose(index) {
@@ -46,6 +56,7 @@ Pane {
     service.invalidateDownloadTarget()
     confirmation.close(); selected = null; grid.currentIndex = -1;
     search.text = tab === "Wallhaven" ? service.query : searchText;
+    if (tab === "Wallhaven") browseLatest();
   }
   onItemsChanged: {
     grid.currentIndex = -1;
@@ -129,6 +140,101 @@ Pane {
         text: root.remote ? "Search" : "Refresh"
         enabled: !root.service.scanning && !root.service.remoteBusy
         onClicked: if (root.remote) root.service.search(search.text, 1); else root.service.refresh()
+      }
+    }
+    RowLayout {
+      visible: root.remote
+      Layout.fillWidth: true
+      WallpaperButton { tokens: root.tokens; text: root.filtersOpen ? "Hide filters" : "Search filters"; onClicked: root.filtersOpen = !root.filtersOpen }
+      WallpaperButton { tokens: root.tokens; text: "Latest / Reset"; enabled: !root.service.remoteBusy; onClicked: root.browseLatest() }
+      Label { Layout.fillWidth: true; text: root.service.keySaved ? "API key saved · authenticated searches" : "Public search · no API key"; color: root.tokens.muted; wrapMode: Text.Wrap; font.pixelSize: 11 }
+    }
+    ScrollView {
+      visible: root.remote && root.filtersOpen
+      Layout.fillWidth: true
+      Layout.preferredHeight: 170
+      clip: true
+      contentWidth: availableWidth
+      GridLayout {
+        width: parent.width
+        columns: 2; columnSpacing: 12; rowSpacing: 8
+        Label { text: "Categories" }
+        RowLayout {
+          Repeater {
+            model: ["General", "Anime", "People"]
+            CheckBox {
+              required property string modelData
+              required property int index
+              text: modelData
+              checked: (root.service.searchFilters.categories || "111")[index] === "1"
+              onToggled: {
+                const bits = (root.service.searchFilters.categories || "111").split("");
+                bits[index] = checked ? "1" : "0";
+                root.setFilter("categories", bits.join(""));
+              }
+            }
+          }
+        }
+        Label { text: "Content" }
+        RowLayout {
+          Repeater {
+            model: ["SFW", "Sketchy", "NSFW"]
+            CheckBox {
+              required property string modelData
+              required property int index
+              text: modelData
+              enabled: index !== 2 || root.service.keySaved
+              checked: (root.service.searchFilters.purity || "100")[index] === "1"
+              onToggled: {
+                const bits = (root.service.searchFilters.purity || "100").split("");
+                bits[index] = checked ? "1" : "0";
+                root.setFilter("purity", bits.join(""));
+              }
+            }
+          }
+        }
+        Label { text: "Sort" }
+        WallpaperComboBox {
+          tokens: root.tokens; Layout.fillWidth: true
+          property var values: ["", "date_added", "relevance", "random", "views", "favorites", "toplist"]
+          model: ["Automatic (latest for empty search)", "Date added", "Relevance", "Random", "Views", "Favorites", "Toplist"]
+          currentIndex: Math.max(0, values.indexOf(root.service.searchFilters.sorting || ""))
+          onActivated: root.setFilter("sorting", values[currentIndex])
+        }
+        Label { text: "Order" }
+        WallpaperComboBox {
+          tokens: root.tokens; Layout.fillWidth: true; model: ["Descending", "Ascending"]
+          currentIndex: root.service.searchFilters.order === "asc" ? 1 : 0
+          onActivated: root.setFilter("order", currentIndex === 1 ? "asc" : "desc")
+        }
+        Label { text: "Toplist period" }
+        WallpaperComboBox {
+          tokens: root.tokens; Layout.fillWidth: true; model: ["1d", "3d", "1w", "1M", "3M", "6M", "1y"]
+          enabled: root.service.searchFilters.sorting === "toplist"
+          currentIndex: Math.max(0, model.indexOf(root.service.searchFilters.topRange || "1M"))
+          onActivated: root.setFilter("topRange", currentText)
+        }
+        Label { text: "Minimum resolution" }
+        TextField { Layout.fillWidth: true; placeholderText: "1920x1080"; text: root.service.searchFilters.atleast || ""; onTextEdited: { root.setFilter("atleast", text.trim()); root.setFilter("resolutions", ""); } }
+        Label { text: "Exact resolution" }
+        TextField { Layout.fillWidth: true; placeholderText: "2560x1440"; text: root.service.searchFilters.resolutions || ""; onTextEdited: { root.setFilter("resolutions", text.trim()); root.setFilter("atleast", ""); } }
+        Label { text: "Aspect ratio" }
+        WallpaperComboBox {
+          tokens: root.tokens; Layout.fillWidth: true
+          property var values: ["", "landscape", "portrait", "16x9", "16x10", "21x9", "32x9", "48x9", "9x16", "10x16", "9x18", "1x1", "3x2", "4x3", "5x4"]
+          model: ["Any", "Landscape", "Portrait", "16x9", "16x10", "21x9", "32x9", "48x9", "9x16", "10x16", "9x18", "1x1", "3x2", "4x3", "5x4"]
+          currentIndex: Math.max(0, values.indexOf(root.service.searchFilters.ratios || ""))
+          onActivated: root.setFilter("ratios", values[currentIndex])
+        }
+        Label { text: "Color (hex)" }
+        WallpaperComboBox {
+          tokens: root.tokens; Layout.fillWidth: true
+          property var values: ["", "660000", "990000", "cc0000", "cc3333", "ea4c88", "993399", "663399", "333399", "0066cc", "0099cc", "66cccc", "77cc33", "669900", "336600", "666600", "999900", "cccc33", "ffff00", "ffcc33", "ff9900", "ff6600", "cc6633", "996633", "663300", "000000", "999999", "cccccc", "ffffff", "424153"]
+          model: ["Any"].concat(values.slice(1))
+          currentIndex: Math.max(0, values.indexOf(root.service.searchFilters.colors || ""))
+          onActivated: root.setFilter("colors", values[currentIndex])
+        }
+        Label { Layout.columnSpan: 2; Layout.fillWidth: true; wrapMode: Text.Wrap; text: "Apply filters with Search. Query syntax: +tag -tag, @username, id:123, type:png, like:ID."; color: root.tokens.muted }
       }
     }
     Label {
@@ -243,17 +349,17 @@ Pane {
             Label { width: parent.width; horizontalAlignment: Text.AlignHCenter; text: root.service.scanning || root.service.remoteBusy ? "Searching images…" : root.remote ? "Your next wallpaper starts here" : "No images in this view"; font.pixelSize: 20; font.bold: true; wrapMode: Text.Wrap }
             Label {
               width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.Wrap; color: root.tokens.muted
-              text: root.remote ? "Type a search and press Search to explore Wallhaven." : "Open a folder with images or clear the filter. This view shows the active mode and shared wallpapers."
+              text: root.remote ? "No results. Adjust the filters or try another search." : "Open a folder with images or clear the filter. This view shows the active mode and shared wallpapers."
             }
           }
         }
         RowLayout {
           visible: root.remote
-          WallpaperButton { tokens: root.tokens; text: "← Previous"; enabled: !root.service.remoteBusy && root.service.page > 1; onClicked: root.service.search(root.service.query, root.service.page - 1) }
+          WallpaperButton { tokens: root.tokens; text: "← Previous"; enabled: !root.service.remoteBusy && root.service.page > 1; onClicked: root.service.search(root.service.query, root.service.page - 1, root.service.appliedSearchFilters) }
           Item { Layout.fillWidth: true }
           Label { text: root.service.page + " / " + root.service.lastPage; color: root.tokens.muted }
           Item { Layout.fillWidth: true }
-          WallpaperButton { tokens: root.tokens; text: "Next →"; enabled: !root.service.remoteBusy && root.service.page < root.service.lastPage; onClicked: root.service.search(root.service.query, root.service.page + 1) }
+          WallpaperButton { tokens: root.tokens; text: "Next →"; enabled: !root.service.remoteBusy && root.service.page < root.service.lastPage; onClicked: root.service.search(root.service.query, root.service.page + 1, root.service.appliedSearchFilters) }
         }
       }
     }

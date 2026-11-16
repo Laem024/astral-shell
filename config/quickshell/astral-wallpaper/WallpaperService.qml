@@ -31,6 +31,10 @@ Scope {
   property bool restorePending: true
   property bool suppressRestore: false
   property int contextRevision: 0
+  property var searchFilters: ({})
+  property var appliedSearchFilters: ({})
+  property string randomSeed: ""
+  property bool latestPending: false
   property string query: ""
   property var remoteEntries: []
   property int page: 1
@@ -193,11 +197,26 @@ Scope {
     }
     prepare(paths, "rotation");
   }
-  function search(text, requestedPage) {
-    if (remoteBusy) return;
+  function openWallhaven() {
+    latestPending = true;
+    loadLatest();
+  }
+  function loadLatest() {
+    if (!latestPending || !ready || remoteBusy) return;
+    latestPending = false;
+    search("", 1, {});
+  }
+  function search(text, requestedPage, filters) {
+    if (remoteBusy || !ready) return;
+    text = text.trim();
+    requestedPage = requestedPage || 1;
+    const nextFilters = filters !== undefined ? filters : requestedPage !== 1 ? appliedSearchFilters : searchFilters;
+    const options = Object.assign({}, nextFilters);
+    if (requestedPage !== 1 && randomSeed) options.seed = randomSeed;
+    else randomSeed = "";
     query = text;
     remoteOperation = "search";
-    remoteRequest = {query: text, page: requestedPage};
+    remoteRequest = {query: text, page: requestedPage, filters: options};
     remoteBusy = true; error = ""; remote.start(remoteOperation, remoteRequest);
   }
   function invalidateDownloadTarget() {
@@ -225,7 +244,7 @@ Scope {
       try { if (contents.trim()) root.state = Logic.parse(contents, root.state.folder); }
       catch (e) { root.warning = "The saved wallpaper state is invalid. Defaults will be used."; }
       root.keySaved = !!storage.key;
-      root.ready = true; root.refresh();
+      root.ready = true; root.refresh(); Qt.callLater(root.loadLatest);
     }
   }
   Library.Library {
@@ -256,9 +275,12 @@ Scope {
     key: storage.key
     onFinished: (code, result, failure) => {
       root.remoteBusy = false;
+      Qt.callLater(root.loadLatest);
       if (code !== 0) { root.pendingDownloadApply = null; root.error = failure || "The Wallhaven request failed."; return; }
       try {
         if (root.remoteOperation === "search") {
+          root.appliedSearchFilters = Object.assign({}, root.remoteRequest.filters);
+          root.randomSeed = result.meta.seed || "";
           root.remoteEntries = result.data; root.page = result.meta.current_page; root.lastPage = result.meta.last_page;
         } else {
           if (root.pendingDownloadApply) root.pendingDownloadApply = Object.assign({}, root.pendingDownloadApply, {path: result.path});

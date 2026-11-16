@@ -35,15 +35,23 @@ while (( $# )); do
 done
 [[ $config == - ]]
 config=$(cat)
-if [[ ${ASTRAL_NETWORK_CASE:-} == success ]]; then [[ $config == *apikey=TESTSECRET123* ]]; fi
+if [[ -n ${ASTRAL_NETWORK_CASE:-} && $config == *'/api/v1/search?'* ]]; then [[ $config == *apikey=TESTSECRET123* ]]; fi
+if [[ ${ASTRAL_NETWORK_CASE:-} == success ]]; then
+  if [[ $config == *'q=&'* ]]; then [[ $config == *sorting=date_added* && $config == *order=desc* ]]; fi
+  if [[ $config == *q=filtered* ]]; then
+    [[ $config == *categories=010* && $config == *purity=110* && $config == *sorting=random* && $config == *order=asc* && $config == *ratios=16x9* && $config == *atleast=1920x1080* && $config == *colors=0066cc* ]]
+    if [[ $config == *page=3* ]]; then [[ $config == *seed=abc123* ]]; fi
+  fi
+fi
 if [[ -f $ASTRAL_TEST_DIR/network-fail ]]; then exit 7; fi
 if [[ -f $ASTRAL_TEST_DIR/http-code ]]; then cat "$ASTRAL_TEST_DIR/http-code"; exit 0; fi
 if [[ -f $ASTRAL_TEST_DIR/invalid-response ]]; then printf '{bad' > "$output"; printf 200; exit 0; fi
 if [[ $config == *'/api/v1/search?'* ]]; then
-  [[ $config == *purity=100* ]]
+  [[ $config == *purity=100* || ( ${ASTRAL_NETWORK_CASE:-} == success && $config == *purity=110* ) ]]
   cat > "$output" <<'JSON'
-{"data":[{"id":"abc123","purity":"sfw","path":"https://w.wallhaven.cc/full/ab/wallhaven-abc123.png","resolution":"160x90","thumbs":{"large":"","small":""}},{"id":"skip","purity":"sketchy"}],"meta":{"current_page":2,"last_page":3}}
+{"data":[{"id":"abc123","purity":"sfw","path":"https://w.wallhaven.cc/full/ab/wallhaven-abc123.png","resolution":"160x90","thumbs":{"large":"","small":""}},{"id":"skip","purity":"sketchy"}],"meta":{"current_page":2,"last_page":3,"seed":"abc123"}}
 JSON
+  if [[ ${ASTRAL_NETWORK_CASE:-} == success ]]; then sed -i 's/"last_page":3/"last_page":26216/' "$output"; fi
 else
   if [[ -f $ASTRAL_TEST_DIR/interrupted ]]; then printf partial > "$output"; exit 18; fi
   if [[ -f $ASTRAL_TEST_DIR/damaged-download ]]; then printf damaged > "$output"; else cp "$HOME/Pictures/Wallpapers/00 first.png" "$output"; fi
@@ -120,6 +128,7 @@ printf '%s\n' "$output"
 sed 's|../../config/quickshell/|./|g' tests/wallpaper/network.qml > "$runtime/config/network.qml"
 for scenario in success 401 403 429 500 offline invalid interrupted damaged; do
   rm -f "$runtime/http-code" "$runtime/network-fail" "$runtime/invalid-response" "$runtime/interrupted" "$runtime/damaged-download"
+  printf TESTSECRET123 > "$runtime/state/astral-shell/astral-wallpaper/api-key"
   case $scenario in
     401|403|429|500) printf '%s' "$scenario" > "$runtime/http-code" ;;
     offline) touch "$runtime/network-fail" ;;

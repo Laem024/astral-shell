@@ -20,7 +20,7 @@ Scope {
     onSaved: { root.writing = false; root.flushed(); Qt.callLater(root.flush); }
     onSaveFailed: { root.writing = false; root.failure("Could not save wallpaper preferences."); }
   }
-  FileView { id: keyFile; path: root.ready ? root.directory + "/api-key" : ""; printErrors: false; blockLoading: true; blockWrites: true; atomicWrites: true }
+  FileView { id: keyFile; path: root.directory + "/api-key"; printErrors: false; blockLoading: true; blockWrites: true; atomicWrites: true }
   function ensureFile(path, done) {
     setup.run(["test", "-e", path], code => {
       if (code === 0) setup.run(["chmod", "600", "--", path], done);
@@ -55,6 +55,7 @@ Scope {
           ensureFile(directory + "/api-key", code => {
             if (code !== 0) { failure("Cannot prepare API key storage."); return; }
             ready = true;
+            keyFile.reload(); keyFile.waitForJob();
             key = keyFile.text().trim();
             if (!/^[a-zA-Z0-9]*$/.test(key)) { key = ""; failure("The saved API key is invalid."); }
             loaded(stateFile.text()); flush();

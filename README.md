@@ -83,7 +83,7 @@ Clipboard preferences (`historySize`, `maxImageBytes`, `enterAction`, and `paste
 | `config/quickshell/astral-wallpaper/` | Selector, carousel and reusable coordinated renderer |
 | `config/quickshell/astral-wallpaper/library/` | FileView state and NUL-delimited library scan |
 | `config/quickshell/astral-wallpaper/thumbnails/` | Bounded metadata-keyed ffmpeg thumbnail queue |
-| `config/quickshell/astral-wallpaper/wallhaven/` | SFW curl requests, response validation and atomic downloads |
+| `config/quickshell/astral-wallpaper/wallhaven/` | Authenticated Wallhaven searches and filters, response validation and atomic downloads |
 | `config/quickshell/wallpaper-control.qml` | Single-start readiness and IPC command coordination |
 | `config/quickshell/dispatch.sh` | Public bar, launcher and wallpaper command dispatch |
 | `config/hyprland/` | Hyprland configuration and workspace grouping |
