@@ -1,0 +1,22 @@
+singleton SettingsData 1.0 SettingsData.qml
+singleton Paths 1.0 Paths.qml
+SettingsStore 1.0 SettingsStore.qml
+Theme 1.0 Theme.qml
+Command 1.0 Command.qml
+PopupDismiss 1.0 PopupDismiss.qml
+PopupShield 1.0 PopupShield.qml
+singleton Privacy 1.0 Privacy.qml
+ApplicationLaunch 1.0 ApplicationLaunch.qml
+singleton Overlays 1.0 Overlays.qml
+singleton UserData 1.0 UserData.qml
+singleton MediaData 1.0 MediaData.qml
+MediaService 1.0 MediaService.qml
+singleton SessionActions 1.0 SessionActions.qml
+StartupLock 1.0 StartupLock.qml
+InstanceControl 1.0 InstanceControl.qml
+AutomaticPolicy 1.0 AutomaticPolicy.qml
+UserService 1.0 UserService.qml
+SessionService 1.0 SessionService.qml
+RoundedClip 1.0 RoundedClip.qml
+SessionHint 1.0 SessionHint.qml
+PanelControl 1.0 PanelControl.qml
