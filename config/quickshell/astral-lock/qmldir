@@ -1,0 +1,6 @@
+LockRoot 1.0 LockRoot.qml
+LockContent 1.0 LockContent.qml
+LockMedia 1.0 LockMedia.qml
+LockPreview 1.0 LockPreview.qml
+IdleService 1.0 IdleService.qml
+SleepGuard 1.0 SleepGuard.qml
