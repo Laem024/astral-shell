@@ -1,0 +1,11 @@
+# Flathub applications installed for the current user.
+# Format: category | status | application ID # purpose
+
+# Category: Documents
+Documents | optional | org.gnome.Papers # PDF document viewer.
+
+# Category: Multimedia
+Multimedia | optional | com.obsproject.Studio # Screen recording and video streaming.
+
+# Category: AppImages
+AppImages | recommended | it.mijorus.gearlever | fuse2 # Integrate, organize and update AppImages with Gear Lever.

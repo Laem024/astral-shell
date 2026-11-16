@@ -1,0 +1,87 @@
+# Format: category | status | package [| comma-separated pacman dependencies] # purpose
+# Status: required, recommended, optional. Dependencies reference entries below.
+# @aur-helper@ is resolved in memory to paru or yay.
+
+# Category: Desktop
+Desktop | required | hyprland # Wayland compositor for the desktop.
+Desktop | required | sddm # Graphical login manager; install.sh enables it for next boot unless already active.
+Desktop | required | quickshell | ttf-jetbrains-mono-nerd,jq,networkmanager,bluez,bluez-utils,brightnessctl,grim,slurp,ddcutil,wf-recorder,libpulse,upower,power-profiles-daemon,qt6-multimedia,qt6-multimedia-ffmpeg,qt6-imageformats,ffmpeg,curl # QtQuick toolkit for building the desktop interface.
+
+# Category: Package management
+Package management | required | @aur-helper@ # AUR helper chosen at installation time.
+
+# Category: Terminal
+Terminal | required | fish # Interactive shell for the supplied configuration.
+Terminal | required | cachyos-fish-config | fish # CachyOS Fish configuration and prompt dependencies.
+Terminal | recommended | kitty # Terminal emulator.
+Terminal | required | btop # System resource dashboard for the Ctrl+Shift+Esc monitor workspace.
+
+# Category: Productivity
+Productivity | recommended | qalculate-gtk # Scientific and everyday graphical calculator.
+Productivity | recommended | libreoffice-fresh | libreoffice-fresh-es # Documents, spreadsheets and presentations.
+Productivity | optional | libreoffice-fresh-es # Spanish language pack for LibreOffice.
+Productivity | recommended | mousepad # Simple text editor and notepad.
+
+# Category: Files
+# Thunar companions extend the file manager: previews, removable devices,
+# MTP, archive actions and icons. They are installed with Thunar.
+Files | recommended | thunar | thunar-volman,tumbler,ffmpegthumbnailer,gvfs,gvfs-mtp,thunar-archive-plugin,file-roller,papirus-icon-theme # File manager with removable devices, previews, MTP and archive integration.
+Files | optional | thunar-volman # Removable device management for Thunar.
+Files | optional | tumbler # Thumbnail service for file previews.
+Files | optional | ffmpegthumbnailer # Audio and video thumbnails for Tumbler.
+Files | optional | gvfs # Trash, mounting and virtual filesystem support.
+Files | optional | gvfs-mtp | gvfs # Access MTP devices such as Android phones.
+Files | optional | thunar-archive-plugin | file-roller # Archive actions in the Thunar context menu.
+
+# Category: Fonts
+Fonts | optional | ttf-jetbrains-mono-nerd # JetBrains Mono typography and Nerd Font glyphs for the Astral Quickshell bar.
+
+# Category: Themes
+Themes | recommended | qt6ct # Tema de iconos y estilo para aplicaciones Qt 6.
+Themes | optional | qt5ct # Tema de iconos y estilo para aplicaciones Qt 5.
+Themes | optional | papirus-icon-theme # Icon theme used in thunar
+
+# Category: Archives
+Archives | optional | file-roller | 7zip # Graphical archive manager used by Thunar.
+# 7zip replaces p7zip, which is no longer available in the repositories.
+Archives | recommended | 7zip # Create/extract ZIP and 7z; extract RAR. Replaces zip, unzip and unrar.
+
+# Category: Internet
+Internet | recommended | firefox # Web browser.
+
+# Category: Multimedia
+Multimedia | recommended | loupe # Simple image viewer.
+Multimedia | recommended | haruna # Qt/QML video player using libmpv.
+
+# Category: Utilities
+Utilities | required | wl-clipboard # Clipboard history capture and replay for the astral-clipboard module.
+Utilities | optional | keepassxc # Manage passwords in a local encrypted database.
+Utilities | recommended | gnome-disk-utility # Inspect disks, partitions and filesystem health.
+Utilities | optional | grim # Take Wayland screenshots from the terminal.
+
+# Category: Wayland integration
+Wayland integration | recommended | xdg-desktop-portal # Desktop portal service for sandboxed application integration.
+Wayland integration | recommended | xdg-desktop-portal-hyprland | xdg-desktop-portal # Hyprland portal backend for screen sharing and screenshots.
+Wayland integration | recommended | xdg-desktop-portal-gtk | xdg-desktop-portal # GTK portal backend for file dialogs and other desktop integration.
+
+# Category: AppImages
+AppImages | optional | fuse2 # Compatibility runtime for older AppImages; associated with Gear Lever.
+
+# Category: Shell integration
+Shell integration | optional | networkmanager # nmcli network state and Wi-Fi operations.
+Shell integration | optional | networkmanager-openvpn | networkmanager # Import and activate OpenVPN profiles from the VPN panel.
+Shell integration | optional | bluez # Bluetooth daemon required by Shell panel.
+Shell integration | optional | bluez-utils | bluez # Interactive bluetoothctl pairing agent and device operations.
+Shell integration | optional | brightnessctl # Backlight brightness controls on supported hardware.
+Shell integration | optional | wf-recorder # Wayland screen recording.
+Shell integration | optional | libpulse # pactl for temporary recording audio mixes; requires pipewire-pulse.
+Shell integration | optional | upower # Battery presence, charge and charging state.
+Shell integration | optional | power-profiles-daemon # Available system power profiles.
+Shell integration | optional | slurp # Select a Wayland capture region.
+Shell integration | optional | ddcutil # DDC/CI brightness for external monitors.
+Shell integration | optional | jq # Read Hyprland monitor geometry for capture and brightness.
+Shell integration | optional | qt6-multimedia | qt6-multimedia-ffmpeg # Animated wallpaper video playback.
+Shell integration | optional | qt6-multimedia-ffmpeg | ffmpeg # Qt Multimedia FFmpeg backend.
+Shell integration | optional | ffmpeg # Wallpaper thumbnails and downloaded image validation.
+Shell integration | optional | curl # Wallhaven searches and downloads.
+Shell integration | optional | qt6-imageformats # WebP wallpaper decoding in Qt Quick.

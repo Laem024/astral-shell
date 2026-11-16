@@ -1,0 +1,13 @@
+# Format: category | status | package # purpose
+
+# Category: Development
+Development | optional | visual-studio-code-bin # Visual Studio Code editor, binary distribution.
+
+# Category: Multimedia
+Multimedia | recommended | spotify # Spotify music client.
+
+# Category: Archives
+Archives | optional | rar # Create RAR archives; includes UnRAR, so no separate unrar package is needed.
+
+# Category: Themes
+Themes | required | catppuccin-gtk-theme-mocha # theme pack for customization
