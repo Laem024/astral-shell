@@ -61,7 +61,10 @@ Singleton {
   function ipc(method, args, callback) { control.run(["qs", "ipc", "-p", workerPath, "call", "recorder", method].concat(args || []), callback); }
   function poll() {
     if (control.running || kind !== "record" || !busy) return;
+    const token = client;
     ipc("status", [], (code, output) => {
+      // A reply belongs only to the recording that requested it.
+      if (kind !== "record" || client !== token || !busy) return;
       let data;
       try { if (code !== 0) throw new Error(); data = JSON.parse(output); }
       catch (_) { if (!connecting || Date.now() > connectDeadline) fail("Recording worker unavailable."); return; }
@@ -70,7 +73,8 @@ Singleton {
         if (!data.ready || data.blocked) return;
         if (!requested) {
           requested = true;
-          ipc("start", [client, JSON.stringify({kind: kind, mode: mode, monitor: monitor, audio: audio})], (code, output) => {
+          ipc("start", [token, JSON.stringify({kind: kind, mode: mode, monitor: monitor, audio: audio})], (code, output) => {
+            if (kind !== "record" || client !== token || !busy) return;
             if (code !== 0 || output.trim() !== "started") fail("A recording is already running or the session is blocked.");
             else connecting = false;
           });
@@ -79,7 +83,7 @@ Singleton {
       }
       if (data.client !== client) { fail("Recording worker ownership changed."); return; }
       monitor = data.monitor; startedAt = data.startedAt; state = data.state; error = data.error;
-      if (data.resultFile && data.resultFile !== resultFile) saved(data.resultFile);
+      if (data.state === "idle" && data.resultFile && data.resultFile !== resultFile) saved(data.resultFile);
     });
   }
   Timer {

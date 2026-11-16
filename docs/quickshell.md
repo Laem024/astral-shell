@@ -37,12 +37,14 @@ Every replacement is an `Item` with `required property var context`. It supplies
 | `workspaces` | `spaces`, `specials`, `active`, `count`, `activeSpecial`, `display`, `interactive`, `step`, `normalLength` | `selected(workspace)`, `specialSelected(name)` |
 | `window` | `title`, `available`, `expanded` | `activated()` |
 | `music` | `media` (MediaData) | `activated()` |
-| `capture` | `recording`, `captureState`, `duration` | `clicked()` |
+| `capture` | `recording`, `captureKind`, `captureState`, `duration` | `clicked()` |
 | `network` | `connectionLabel`, `connectionDetail`, `strength` | `activated()` |
 | `audio` | `volume`, `muted`, `audioDetail` | `activated()` |
 | `battery` | `percent`, `discharging`, `batteryState`, `externalPower` | `activated()` |
 | `notifications` | `count` | `activated()`, `summaryActivated()` |
 | `tray` | `panel`, `navigation`, `nativeWindow` | use `navigation` to open/close the tray |
+
+For capture visuals, `recording` indicates any active capture; `captureKind` distinguishes `shot` from `record`. Show the recording stop icon and elapsed time only for video.
 
 Optionally expose `hovered`, `ink`, `accent`, and `warning` on the replacement root for the shared hover and battery indicators. The wrapper also forwards stock component signals. External visuals can invoke context actions directly:
 

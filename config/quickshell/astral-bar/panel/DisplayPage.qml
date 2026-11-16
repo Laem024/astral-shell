@@ -17,7 +17,7 @@ ScrollView {
   readonly property bool canCapture: !busy && (outputs.count > 0 || mode !== "monitor")
   readonly property string lastResult: task === "record" ? Data.CaptureData.lastVideo : Data.CaptureData.lastScreenshot
   readonly property var lastEntry: Data.NotificationData.entries.find(entry => entry.file === root.lastResult) || null
-  readonly property string statusLabel: ({idle: "Ready to capture", hiding: "Preparing capture", selecting: "Select your source", preparing: "Preparing recording", recording: "Recording in progress", finalizing: "Saving recording", error: "Capture failed"})[Data.CaptureData.state] || "Ready to capture"
+  readonly property string statusLabel: ({idle: "Ready to capture", hiding: "Preparing capture", selecting: "Select your source", preparing: Data.CaptureData.kind === "shot" ? "Preparing screenshot" : "Preparing recording", recording: "Recording in progress", finalizing: Data.CaptureData.kind === "shot" ? "Finishing screenshot" : "Saving recording", error: "Capture failed"})[Data.CaptureData.state] || "Ready to capture"
   readonly property string audioSummary: {
     const sink = Data.AudioData.label(Data.AudioData.sink);
     const source = Data.AudioData.label(Data.AudioData.source);

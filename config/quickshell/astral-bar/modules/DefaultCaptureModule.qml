@@ -11,13 +11,15 @@ AbstractButton {
   property bool vertical: false
   property bool compact: false
   property bool recording: false
+  property string captureKind: "record"
+  readonly property bool recordingVideo: recording && captureKind === "record"
   property string captureState: "idle"
   property int duration: 0
-  readonly property bool showElapsed: recording && ["recording", "finalizing"].includes(captureState)
+  readonly property bool showElapsed: recordingVideo && ["recording", "finalizing"].includes(captureState)
   readonly property color ink: recording ? tokens.alert : hovered ? tokens.lavender : tokens.cyan
   readonly property string elapsed: Math.floor(duration / 60).toString().padStart(2, "0") + ":" + (duration % 60).toString().padStart(2, "0")
   readonly property string detail: recording
-    ? (({hiding: "Preparing capture", selecting: "Selecting source", preparing: "Preparing recording", recording: "Recording · " + elapsed, finalizing: "Finishing recording"})[captureState] || "Capture in progress") + " · Stop"
+    ? (({hiding: "Preparing capture", selecting: "Selecting source", preparing: captureKind === "shot" ? "Preparing screenshot" : "Preparing recording", recording: "Recording · " + elapsed, finalizing: captureKind === "shot" ? "Finishing screenshot" : "Finishing recording"})[captureState] || "Capture in progress") + (captureKind === "shot" ? " · Cancel capture" : " · Stop")
     : "Screen & capture"
   // Keep the shortcut compact, with room for the timer in either orientation.
   implicitWidth: vertical ? 48 : compact ? 34 : 40
@@ -51,12 +53,13 @@ AbstractButton {
         Components.CaptureGlyph {
           objectName: "captureGlyph"
           anchors.centerIn: parent
-          visible: !root.recording
+          visible: !root.recordingVideo
           ink: root.ink
         }
         Rectangle {
           id: recordingRing
-          visible: root.recording
+          objectName: "recordingStopGlyph"
+          visible: root.recordingVideo
           anchors.centerIn: parent
           width: 20; height: 20; radius: 4
           color: "transparent"
@@ -67,7 +70,7 @@ AbstractButton {
             color: root.ink
           }
           SequentialAnimation on opacity {
-            running: root.recording && root.captureState === "recording" && root.tokens.settings.value.animations && !root.hovered
+            running: root.recordingVideo && root.captureState === "recording" && root.tokens.settings.value.animations && !root.hovered
             loops: Animation.Infinite
             NumberAnimation { to: 0.5; duration: 800; easing.type: Easing.InOutSine }
             NumberAnimation { to: 1; duration: 800; easing.type: Easing.InOutSine }

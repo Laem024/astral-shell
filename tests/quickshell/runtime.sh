@@ -137,10 +137,25 @@ import Quickshell
 import Quickshell.Io
 import "astral-bar/data" as Data
 import "astral-bar/settings" as Bar
+import "astral-bar/modules" as Modules
 import "common" as Common
 ShellRoot {
   Component.onCompleted: { if (typeof Quickshell.inhibitReloadPopup === "function") Quickshell.inhibitReloadPopup(); }
   Connections { target: Quickshell; function onReloadCompleted() { Quickshell.inhibitReloadPopup(); } }
+  Common.Theme { id: theme; settings: Bar.SettingsData }
+  Modules.CaptureModule {
+    id: indicator
+    tokens: theme
+    recording: Data.CaptureData.busy
+    captureKind: Data.CaptureData.kind
+    captureState: Data.CaptureData.state
+    duration: Data.CaptureData.duration
+  }
+  function find(item, name) {
+    if (item.objectName === name) return item;
+    for (const child of item.children || []) { const found = find(child, name); if (found) return found; }
+    return null;
+  }
   property string commandResult: "waiting"
   Common.Command { id: missingCommand; timeout: 1000 }
   IpcHandler {
@@ -157,6 +172,13 @@ ShellRoot {
     }
     function state(): string { return Data.CaptureData.state; }
     function result(): string { return Data.CaptureData.resultFile; }
+    function notifications(): string { return String(Data.NotificationData.entries.length); }
+    function captureVisual(): string {
+      const button = find(indicator, "recordingIndicator");
+      return JSON.stringify({glyph: find(button, "captureGlyph").visible,
+        stop: find(button, "recordingStopGlyph").visible,
+        elapsed: find(button, "captureElapsed").visible, detail: button.detail});
+    }
     function stop(): void { Data.CaptureData.stop(); }
   }
 }
@@ -189,10 +211,27 @@ ipc "$entry" fixture capture shot region none >/dev/null
 wait_value "$entry" fixture state idle
 file=$(ipc "$entry" fixture result)
 [[ -s $file ]] || fail 'Region screenshot did not save.'
+notifications=$(ipc "$entry" fixture notifications)
 touch "$scratch/cancel-selection"
 ipc "$entry" fixture capture shot region none >/dev/null
 wait_value "$entry" fixture state idle
+[[ -z $(ipc "$entry" fixture result) ]] || fail 'Cancelled screenshot published a result.'
+[[ $(ipc "$entry" fixture notifications) == "$notifications" ]] || fail 'Cancelled screenshot emitted a saved notification.'
 rm "$scratch/cancel-selection"
+# Hold the selector open so the bar cancellation path and visual are observable.
+cat > "$scratch/bin/slurp" <<'MOCK'
+#!/usr/bin/env bash
+cat >/dev/null
+exec sleep 30
+MOCK
+ipc "$entry" fixture capture shot region none >/dev/null
+wait_value "$entry" fixture state selecting
+visual=$(ipc "$entry" fixture captureVisual)
+jq -e '.glyph and (.stop | not) and (.elapsed | not) and (.detail | contains("Cancel capture"))' <<< "$visual" >/dev/null || fail 'Screenshot uses the recording visual.'
+ipc "$entry" fixture stop >/dev/null
+wait_value "$entry" fixture state idle
+[[ -z $(ipc "$entry" fixture result) ]] || fail 'Stopped screenshot published a result.'
+[[ $(ipc "$entry" fixture notifications) == "$notifications" ]] || fail 'Stopped screenshot emitted a saved notification.'
 touch "$scratch/fail-shot"
 ipc "$entry" fixture capture shot monitor none >/dev/null
 wait_value "$entry" fixture state error
@@ -205,6 +244,8 @@ rm "$scratch/disconnected"
 # Reloading the bar finalizes its worker without replacing the worker process.
 ipc "$entry" fixture capture record monitor none >/dev/null
 wait_value "$entry" fixture state recording
+visual=$(ipc "$entry" fixture captureVisual)
+jq -e '(.glyph | not) and .stop and .elapsed' <<< "$visual" >/dev/null || fail 'Recording lost its stop visual or timer.'
 printf '\n' >> "$scratch/config/check.qml"
 wait_value "$entry" fixture ready ready
 for ((attempt=0;attempt<120;attempt++)); do
@@ -222,6 +263,11 @@ done
 wait_value "$entry" fixture state idle
 : > "$scratch/events"
 # Audio cleanup and Bluetooth profile/policy restoration after client SIGKILL.
+cat > "$scratch/bin/slurp" <<'MOCK'
+#!/usr/bin/env bash
+cat >/dev/null
+printf '10,20 100x200\n'
+MOCK
 touch "$scratch/bluetooth"
 ipc "$entry" fixture capture record region both >/dev/null
 wait_value "$entry" fixture state recording

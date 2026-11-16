@@ -265,6 +265,7 @@ Item {
           tokens: root.tokens
           vertical: root.vertical
           recording: Data.CaptureData.busy
+          captureKind: Data.CaptureData.kind
           captureState: Data.CaptureData.state
           duration: Data.CaptureData.duration
           Layout.alignment: Qt.AlignCenter

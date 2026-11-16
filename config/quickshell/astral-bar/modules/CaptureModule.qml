@@ -9,6 +9,7 @@ Item {
   property bool vertical: false
   property bool compact: false
   property bool recording: false
+  property string captureKind: "record"
   property string captureState: "idle"
   property int duration: 0
   signal clicked()
@@ -29,6 +30,7 @@ Item {
     loader.setSource(url, external ? {context: root} : {
           tokens: Qt.binding(() => root.tokens),
           recording: Qt.binding(() => root.recording),
+          captureKind: Qt.binding(() => root.captureKind),
           captureState: Qt.binding(() => root.captureState),
           duration: Qt.binding(() => root.duration),
           vertical: Qt.binding(() => root.vertical),
@@ -45,6 +47,7 @@ Item {
       setSource(Qt.resolvedUrl("DefaultCaptureModule.qml"), {
           tokens: Qt.binding(() => root.tokens),
           recording: Qt.binding(() => root.recording),
+          captureKind: Qt.binding(() => root.captureKind),
           captureState: Qt.binding(() => root.captureState),
           duration: Qt.binding(() => root.duration),
           vertical: Qt.binding(() => root.vertical),
