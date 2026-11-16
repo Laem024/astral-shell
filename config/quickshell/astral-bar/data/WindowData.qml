@@ -2,8 +2,9 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
-import Quickshell.Io
 import Quickshell.Wayland
+import "../../common" as Common
+import "WindowLogic.js" as WindowLogic
 
 Singleton {
   id: root
@@ -15,7 +16,6 @@ Singleton {
   readonly property string title: activeWindow
     ? (activeWindow.title || activeWindow.appId || "Untitled window")
     : "Desktop"
-  property string pendingKillAddress: ""
 
   // Quickshell only refreshes lastIpcObject when it fetches the client list, so
   // the floating flag would stay at the value captured when the bar started.
@@ -47,29 +47,24 @@ Singleton {
       : "togglefloating");
   }
 
-  // Resolve the PID right before signalling it so a focus change between the
-  // menu click and the query cannot target an unrelated process.
+  // The panel can release focus before hyprctl replies. Resolve the captured
+  // address in the client list instead of consulting the newly active window.
   function forceClose(): void {
-    if (!available || !hyprlandWindow || killer.running) return;
-    pendingKillAddress = hyprlandWindow.address.replace(/^0x/, "");
-    killer.running = true;
+    if (!hyprlandWindow || killer.running) return;
+    const address = hyprlandWindow.address;
+    if (!address) return;
+    killer.run(["hyprctl", "-j", "clients"], (code, text, error) => {
+      if (code !== 0) {
+        console.warn("Force close: could not query Hyprland clients:", error);
+        return;
+      }
+      const pid = WindowLogic.pidForAddress(text, address);
+      if (pid > 1) Quickshell.execDetached(["kill", "-9", String(pid)]);
+    });
   }
 
-  Process {
+  Common.Command {
     id: killer
-    command: ["hyprctl", "-j", "activewindow"]
-    stdout: StdioCollector { id: output }
-    stderr: StdioCollector {}
-    onExited: (code, status) => {
-      if (code !== 0 || status !== 0) { root.pendingKillAddress = ""; return; }
-      try {
-        const info = JSON.parse(output.text);
-        const address = String(info.address || "").replace(/^0x/, "");
-        const pid = Math.trunc(Number(info.pid));
-        if (root.pendingKillAddress && address === root.pendingKillAddress && pid > 0)
-          Quickshell.execDetached(["kill", "-9", String(pid)]);
-      } catch (_) {}
-      root.pendingKillAddress = "";
-    }
+    timeout: 3000
   }
 }

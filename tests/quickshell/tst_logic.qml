@@ -5,11 +5,26 @@ import "../../config/quickshell/common/Defaults.js" as Defaults
 import "../../config/quickshell/common/Validation.js" as Validation
 import "../../config/quickshell/astral-bar/data/BrightnessLogic.js" as Brightness
 import "../../config/quickshell/astral-bar/data/CaptureLogic.js" as Capture
+import "../../config/quickshell/astral-bar/data/WindowLogic.js" as WindowLogic
 
 TestCase {
   name: "MigrationLogic"
   function copy(value) { return JSON.parse(JSON.stringify(value)); }
   function rejects(action) { let rejected = false; try { action(); } catch (_) { rejected = true; } verify(rejected); }
+  function test_force_close_target() {
+    // A different window may have focus by the time the client query finishes.
+    const clients = JSON.stringify([{address: "0xbb", pid: 202, focusHistoryID: 0},
+      {address: "0xaa", pid: 101, focusHistoryID: 1}]);
+    compare(WindowLogic.pidForAddress(clients, "aa"), 101);
+    compare(WindowLogic.pidForAddress(clients, "0xaa"), 101);
+    // A disappeared target must never fall back to the newly focused client.
+    compare(WindowLogic.pidForAddress(clients, "0xcc"), 0);
+    compare(WindowLogic.pidForAddress(clients, ""), 0);
+    compare(WindowLogic.pidForAddress("{}", "aa"), 0);
+    compare(WindowLogic.pidForAddress("{broken", "aa"), 0);
+    for (const pid of [-1, 0, 1, 12.5, "101", null])
+      compare(WindowLogic.pidForAddress(JSON.stringify([{address: "0xaa", pid: pid}]), "aa"), 0);
+  }
   function test_settings() {
     compare(Validation.parse(JSON.stringify(Defaults.common), "common").modules.length, 10);
     compare(Validation.parse(JSON.stringify(Defaults.bar), "bar").position, "top");

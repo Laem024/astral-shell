@@ -37,6 +37,8 @@ Preview requires `qs` in a Wayland session. It makes a unique configuration copy
 
 The automated entry point checks shell syntax, disposable installations, configuration validation, registry filtering, safe brightness mapping, and capture geometry. With `qs`, it also runs mocked backend integration checks. Real display, audio, Bluetooth, and compositor behavior must be checked on CachyOS; see [validation](docs/pruebas.md).
 
+Focus's **Force close** resolves the selected window's address against Hyprland's client list, so returning focus from the menu cannot redirect or cancel the kill. Address and PID validation lives in `config/quickshell/astral-bar/data/WindowLogic.js`, with regression checks in `tests/quickshell/tst_logic.qml`.
+
 ## Install
 
 ```bash
