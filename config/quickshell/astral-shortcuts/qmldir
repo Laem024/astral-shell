@@ -1,0 +1,7 @@
+KeyCap 1.0 KeyCap.qml
+ShortcutCard 1.0 ShortcutCard.qml
+ShortcutRow 1.0 ShortcutRow.qml
+ShortcutsContent 1.0 ShortcutsContent.qml
+ShortcutsMenu 1.0 ShortcutsMenu.qml
+ShortcutsPreview 1.0 ShortcutsPreview.qml
+ShortcutsRoot 1.0 ShortcutsRoot.qml
