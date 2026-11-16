@@ -1,0 +1,6 @@
+SessionRoot 1.0 SessionRoot.qml
+SessionMenu 1.0 SessionMenu.qml
+SessionContent 1.0 SessionContent.qml
+ActionTile 1.0 ActionTile.qml
+RoundedClip 1.0 RoundedClip.qml
+SessionPreview 1.0 SessionPreview.qml
