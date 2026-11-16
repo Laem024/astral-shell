@@ -58,6 +58,8 @@ Scope {
   function activate(id: int): void {
     if (!ready || id < blockStart + 1 || id > blockStart + slots) return;
     focusMonitor();
+    // Re-selecting the active workspace can trigger Hyprland's back-and-forth.
+    if (id === normalId) return;
     // Global IDs follow an existing workspace on another monitor; never move it.
     Hyprland.dispatch("hl.dsp.focus({ workspace = " + id + " })");
   }
