@@ -1,0 +1,8 @@
+AppLauncher 1.0 AppLauncher.qml
+LauncherService 1.0 LauncherService.qml
+LauncherContent 1.0 LauncherContent.qml
+ShortcutHint 1.0 ShortcutHint.qml
+RoundedClip 1.0 RoundedClip.qml
+StateStore 1.0 StateStore.qml
+LauncherRoot 1.0 LauncherRoot.qml
+LauncherPreview 1.0 LauncherPreview.qml
