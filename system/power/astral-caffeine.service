@@ -1,0 +1,13 @@
+[Unit]
+Description=Astral caffeine idle inhibitor
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/qs -p %h/.local/lib/astral-shell/common/Caffeine.qml --no-duplicate
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

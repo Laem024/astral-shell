@@ -1,0 +1,10 @@
+[Unit]
+Description=Restore verified Astral battery charge threshold
+After=systemd-modules-load.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/astral-charge-limit reapply
+
+[Install]
+WantedBy=multi-user.target

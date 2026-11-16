@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+# No user-controlled environment or paths in the system sleep hook.
+if [[ ${1:-} == post ]]; then
+  /usr/bin/systemctl --no-block restart astral-charge-limit.service
+fi

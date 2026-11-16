@@ -1,0 +1,85 @@
+#!/usr/bin/bash
+# Installed root-owned. Fixed paths, no sourced files, no arbitrary commands.
+set -euo pipefail
+export PATH=/usr/bin:/usr/sbin
+umask 022
+sys=/sys/class/power_supply
+store=/var/lib/astral-shell
+policy=$store/charge-limit
+fail() { printf '%s\n' "$*" >&2; exit 1; }
+valid_device() {
+  [[ $1 =~ ^[a-zA-Z0-9_-]+$ && -d $sys/$1 && $(cat "$sys/$1/type") == Battery \
+    && -f $sys/$1/charge_control_end_threshold ]]
+}
+read_policy() {
+  saved_device=''; saved_value=''
+  if [[ -f $policy ]]; then
+    read -r saved_device saved_value < "$policy" || fail 'Incomplete charge policy.'
+    [[ $saved_device =~ ^[a-zA-Z0-9_-]+$ && $saved_value =~ ^([1-9][0-9]?|100)$ ]] || fail 'Invalid charge policy.'
+  fi
+}
+write_threshold() {
+  valid_device "$1" || fail 'The battery does not expose a compatible charge_control_end_threshold.'
+  local previous
+  previous=$(cat "$sys/$1/charge_control_end_threshold")
+  if ! printf '%s\n' "$2" > "$sys/$1/charge_control_end_threshold"; then
+    fail 'The driver rejected the percentage; the policy was not saved.'
+  fi
+  if [[ $(cat "$sys/$1/charge_control_end_threshold") != "$2" ]]; then
+    printf '%s\n' "$previous" > "$sys/$1/charge_control_end_threshold" || true
+    fail 'Readback mismatch; attempted to restore the previous threshold.'
+  fi
+}
+case ${1:-status} in
+  status)
+    [[ $# -le 1 ]] || fail 'Unexpected arguments.'
+    read_policy
+    for battery in "$sys"/*; do
+      device=${battery##*/}
+      if valid_device "$device"; then
+        printf '%s\n%s\n%s\n%s\n' "$device" "$(cat "$battery/charge_control_end_threshold")" "$saved_device" "$saved_value"
+        exit 0
+      fi
+    done
+    fail 'Unavailable: msi-ec exposes no charge threshold. Check the native module; no limit was applied.'
+    ;;
+  apply|disable|reapply|probe-native) ;;
+  *) fail 'Charge operation not allowed.' ;;
+esac
+[[ $EUID -eq 0 ]] || fail 'Administrator authentication required.'
+exec 9>/run/lock/astral-charge-limit.lock
+flock 9
+case $1 in
+  probe-native)
+    [[ $# == 1 ]] || fail 'Unexpected arguments.'
+    # No force flags, firmware override, EC register access, or external module.
+    modprobe msi-ec
+    exec "$0" status
+    ;;
+  apply)
+    [[ $# == 3 ]] || fail 'Usage: apply BATTERY PERCENT'
+    [[ $3 =~ ^([1-9][0-9]?|100)$ ]] || fail 'Enter a whole number between 1 and 100.'
+    read_policy
+    [[ -z $saved_device || $saved_device == "$2" ]] || fail 'Disable the other battery policy first.'
+    mkdir -p -- "$store"
+    write_threshold "$2" "$3"
+    temporary=$(mktemp "$store/charge-limit.XXXXXX")
+    printf '%s %s\n' "$2" "$3" > "$temporary"
+    chmod 644 "$temporary"
+    mv -f -- "$temporary" "$policy"
+    ;;
+  disable)
+    [[ $# == 2 ]] || fail 'Usage: disable BATTERY'
+    read_policy
+    [[ -z $saved_device || $saved_device == "$2" ]] || fail 'The policy belongs to another battery.'
+    write_threshold "$2" 100
+    rm -f -- "$policy"
+    ;;
+  reapply)
+    [[ $# == 1 ]] || fail 'Unexpected arguments.'
+    read_policy
+    [[ -n $saved_device ]] || exit 0
+    if ! valid_device "$saved_device"; then modprobe msi-ec; fi
+    write_threshold "$saved_device" "$saved_value"
+    ;;
+esac
