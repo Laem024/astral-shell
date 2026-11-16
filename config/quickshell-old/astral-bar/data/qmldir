@@ -1,0 +1,25 @@
+singleton ClockData 1.0 ClockData.qml
+singleton WindowData 1.0 WindowData.qml
+singleton SystemData 1.0 SystemData.qml
+singleton WeatherData 1.0 WeatherData.qml
+singleton UserData 1.0 UserData.qml
+singleton BannerData 1.0 BannerData.qml
+singleton NetworkData 1.0 NetworkData.qml
+singleton VpnData 1.0 VpnData.qml
+NmCommand 1.0 NmCommand.qml
+singleton BluetoothData 1.0 BluetoothData.qml
+singleton AudioData 1.0 AudioData.qml
+singleton MediaData 1.0 MediaData.qml
+MediaService 1.0 MediaService.qml
+
+singleton NotificationData 1.0 NotificationData.qml
+NotificationService 1.0 NotificationService.qml
+NotificationSoundPolicy 1.0 NotificationSoundPolicy.qml
+singleton SessionData 1.0 SessionData.qml
+singleton PowerData 1.0 PowerData.qml
+PowerService 1.0 PowerService.qml
+
+singleton BrightnessData 1.0 BrightnessData.qml
+singleton CaptureData 1.0 CaptureData.qml
+
+singleton CapturePreferences 1.0 CapturePreferences.qml

@@ -1,0 +1,2 @@
+singleton ShortcutsData 1.0 ShortcutsData.qml
+singleton SessionData 1.0 SessionData.qml
