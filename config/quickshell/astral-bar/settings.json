@@ -1,0 +1,39 @@
+{
+  "position": "top",
+  "margin": 8,
+  "workspaceDisplay": "icons",
+  "modules": {
+    "logo": true,
+    "workspaces": true,
+    "window": true,
+    "clock": true,
+    "music": true,
+    "network": true,
+    "audio": true,
+    "battery": true,
+    "notifications": true,
+    "tray": true,
+    "capture": true
+  },
+  "weather": {
+    "temperatureUnit": "celsius",
+    "windUnit": "kmh"
+  },
+  "logo": {
+    "glyph": "",
+    "image": ""
+  },
+  "components": {
+    "logo": "",
+    "workspaces": "",
+    "window": "",
+    "clock": "",
+    "music": "",
+    "network": "",
+    "audio": "",
+    "battery": "",
+    "notifications": "",
+    "tray": "",
+    "capture": ""
+  }
+}

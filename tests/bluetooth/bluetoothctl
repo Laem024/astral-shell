@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+address=AA:BB:CC:DD:EE:FF
+paired=no
+connected=no
+waiting=''
+while IFS= read -r command; do
+  # Do not log agent responses.
+  if [[ -n $waiting ]]; then
+    if [[ $command == 123456 || $command == yes ]]; then
+      paired=yes
+      printf '\nPairing successful\n'
+    else
+      printf '\nFailed to pair: AuthenticationRejected\n'
+    fi
+    waiting=''
+    continue
+  fi
+  printf '%s\n' "$command" >> "${BLUETOOTH_FIXTURE_LOG:?}"
+  case "$command" in
+    list) printf 'Controller 11:22:33:44:55:66 Test adapter [default]\n' ;;
+    show) printf 'Controller 11:22:33:44:55:66\n\tPowered: yes\n' ;;
+    devices) printf 'Device %s Test headphones\n' "$address" ;;
+    info*) printf 'Device %s (public)\n\tName: Test headphones\n\tPaired: %s\n\tConnected: %s\n' "$address" "$paired" "$connected" ;;
+    'agent KeyboardDisplay') printf 'Agent registered\n' ;;
+    pair*) waiting=pin; printf '[agent] Enter PIN'; sleep 0.05; printf ' code:' ;;
+    trust*) printf 'Changing %s trust succeeded\n' "$address" ;;
+    connect*) connected=yes; printf 'Connection successful\n' ;;
+    disconnect*)
+      connected=no
+      case "${BLUETOOTH_DISCONNECT_MODE:-reply}" in
+        reply) printf 'Disconnection successful\n' ;;
+        event)
+          printf '\033[0;33m[CHG]\033[0m Device %s Connected: ' "$address"
+          sleep 0.05
+          printf 'no\n'
+          ;;
+        legacy) printf 'Successful disconnected\n' ;;
+      esac
+      ;;
+    remove*) paired=no; printf 'Device has been removed\n' ;;
+    'scan on') printf 'Discovery started\n' ;;
+    'scan off') printf 'Discovery stopped\n' ;;
+  esac
+done

@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+[[ ${LC_ALL:-} == C ]] || exit 99
+# No credentials may appear in argv, even in this deliberately isolated test.
+for argument in "$@"; do [[ $argument != *test-secret* ]] || exit 98; done
+args=" $* "
+printf '%s\n' "$args" >> "${NETWORK_FIXTURE_LOG:?}"
+mode=normal
+[[ ! -f "$NETWORK_FIXTURE_LOG.mode" ]] || read -r mode < "$NETWORK_FIXTURE_LOG.mode"
+case $args in
+  *' test-timeout ') sleep 1 ;;
+  *' test-mode '*) printf '%s\n' "${!#}" > "$NETWORK_FIXTURE_LOG.mode" ;; 
+  *' monitor '*) printf 'event\n'; exit 0 ;;
+  *' device status '*)
+    [[ $mode != unavailable ]] || exit 10
+    if [[ $mode == absent ]]; then printf 'en0:ethernet:connected:Cable:eth-id\n'; exit 0; fi
+    printf 'wlan0:wifi:connected:Home:active-id\nwlan1:wifi:disconnected::\nen0:ethernet:connected:Cable:eth-id\n' ;;
+  *' general status '*)
+    case $mode in
+      off) printf 'disabled:enabled\n' ;;
+      blocked) printf 'disabled:disabled\n' ;;
+      *) printf 'enabled:enabled\n' ;;
+    esac ;;
+  *' device wifi list '*) printf 'wlan0:*:Caf\\:é\\\\Home:77:WPA2\nwlan0::Caf\\:é\\\\Home:90:WPA2\nwlan0::Caf\\:é\\\\Home:99:--\nwlan1::Other:50:WPA3\n' ;;
+  *' connection show uuid '*) printf 'Caf\\:é\\\\Home\nwpa-psk\n\n' ;;
+  *' connection show '*) printf 'active-id:Duplicate:802-11-wireless:wlan0\nsaved-id:Duplicate:802-11-wireless:--\n' ;;
+  *' connection up '*'/dev/stdin '*)
+    IFS= read -r secret
+    [[ $secret == '802-11-wireless-security.psk:test-secret' ]] || exit 97
+    exit 10 ;;
+  *' connection delete uuid saved-id '*) exit 4 ;;
+  *' connection add '*|*' connection delete '*|*' connection modify '*|*' device wifi rescan '*|*' radio wifi '*|*' device disconnect '*|*' connection up '*) exit 0 ;;
+  *) exit 96 ;;
+esac
