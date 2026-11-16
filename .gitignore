@@ -1,0 +1,57 @@
+# Local development, test artifacts, and agent configuration.
+/.test-artifacts/
+/.test-scratch/
+/.astral/
+/.astral-tests/
+/.agents/
+/.codex/
+/.aws/
+
+# Generated caches and runtime output.
+.cache/
+qmlcache/
+__pycache__/
+*.qmlc
+*.jsc
+*.pyc
+*.log
+
+# Backups and editor temporary files.
+.backups/
+*.bak
+*.backup-*
+*.orig
+*.rej
+*.swp
+*.swo
+*~
+
+# Private environment files and local settings; keep reusable examples.
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+*.local.json
+api-key
+credentials.json
+
+# Private keys and credential stores.
+.ssh/
+.gnupg/
+.pki/
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.kdb
+*.kdbx
+.netrc
+.git-credentials
+keyrings/
