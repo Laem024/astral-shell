@@ -1,0 +1,6 @@
+PolkitContent 1.0 PolkitContent.qml
+PolkitDialog 1.0 PolkitDialog.qml
+PolkitPreview 1.0 PolkitPreview.qml
+PolkitRoot 1.0 PolkitRoot.qml
+PolkitService 1.0 PolkitService.qml
+PolkitSurface 1.0 PolkitSurface.qml
