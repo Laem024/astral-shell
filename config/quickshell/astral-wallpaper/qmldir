@@ -1,0 +1,17 @@
+DismissPeers 1.0 DismissPeers.qml
+Thumbnail 1.0 Thumbnail.qml
+WallpaperButton 1.0 WallpaperButton.qml
+WallpaperCarousel 1.0 WallpaperCarousel.qml
+WallpaperCarouselView 1.0 WallpaperCarouselView.qml
+WallpaperComboBox 1.0 WallpaperComboBox.qml
+WallpaperContent 1.0 WallpaperContent.qml
+WallpaperMedia 1.0 WallpaperMedia.qml
+WallpaperRenderer 1.0 WallpaperRenderer.qml
+WallpaperRoot 1.0 WallpaperRoot.qml
+WallpaperSection 1.0 WallpaperSection.qml
+WallpaperSegment 1.0 WallpaperSegment.qml
+WallpaperSelector 1.0 WallpaperSelector.qml
+WallpaperService 1.0 WallpaperService.qml
+WallpaperSurface 1.0 WallpaperSurface.qml
+WallpaperSwitch 1.0 WallpaperSwitch.qml
+WallpaperPreview 1.0 WallpaperPreview.qml
