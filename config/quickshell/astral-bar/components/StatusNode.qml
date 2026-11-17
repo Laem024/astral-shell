@@ -28,7 +28,7 @@ Item {
   Behavior on ink { ColorAnimation { duration: root.tokens.hoverDuration } }
   signal activated()
   signal summaryActivated()
-  implicitWidth: vertical ? 44 : hasValue ? 70 : unread && !compact ? 58 : 36
+  implicitWidth: vertical ? 44 : hasValue ? 70 : unread && !compact ? 58 : compact ? 32 : 36
   implicitHeight: vertical && hasValue ? 52 : 36
   Accessible.name: detail
   Accessible.role: Accessible.Button
@@ -37,9 +37,6 @@ Item {
   Keys.onSpacePressed: root.activated()
   Keys.onReturnPressed: root.activated()
   Keys.onEnterPressed: root.activated()
-  ToolTip.visible: hovered
-  ToolTip.text: detail
-  ToolTip.delay: 650
 
   BarTile {
     anchors.fill: parent

@@ -81,7 +81,7 @@ Clipboard preferences (`historySize`, `maxImageBytes`, `enterAction`, and `paste
 | `config/quickshell/common/` | One settings loader/validator, theme, paths, argument runner, privacy, popup dismissal, caffeine worker |
 | `config/quickshell/astral-bar/settings.json` | Position, margins, visibility, replacements, weather and logo |
 | `config/quickshell/astral-bar/modules/` | Visual slots and their stock `Default*.qml` implementations |
-| `config/quickshell/astral-bar/components/` | Reusable visuals, vector icons (`BarGlyph.qml`, `StatusGlyph.qml`), animated edge marker (`HoverIndex.qml`) and workspace hover outline (`NeonOutline.qml`) |
+| `config/quickshell/astral-bar/components/` | Reusable visuals, vector icons (`BarGlyph.qml`, `StatusGlyph.qml`), subtle end accents (`AstralSurface.qml`) and workspace hover outline (`NeonOutline.qml`) |
 | `config/quickshell/astral-bar/panel/` | Panels, tray menu, and notification presentation |
 | `config/quickshell/astral-bar/data/` | Native services and Qt JavaScript logic |
 | `config/quickshell/astral-bar/display/` | Native window capture and independent recording entry |

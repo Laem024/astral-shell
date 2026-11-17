@@ -24,12 +24,14 @@ InfoTile {
   }
   BarGlyph {
     anchors.centerIn: parent
-    width: 26; height: 26
+    width: 24; height: 24
+    rotation: root.hovered ? 90 : 0
+    Behavior on rotation {
+      NumberAnimation { duration: root.tokens.workspaceDuration; easing.type: Easing.InOutCubic }
+    }
     kind: "astral"
     ink: root.ink
     visible: image.status !== Image.Ready && (root.logoGlyph === "" || image.status === Image.Error)
-    rotation: root.hovered ? 90 : 0
-    Behavior on rotation { NumberAnimation { duration: root.tokens.workspaceDuration; easing.type: Easing.InOutCubic } }
   }
   Text {
     anchors.centerIn: parent

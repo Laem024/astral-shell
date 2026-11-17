@@ -25,7 +25,7 @@ Item {
         PathSvg {
           path: root.kind === "audio" ? "M3 9 H7 L13 4.5 Q14 4 14 5.5 V18.5 Q14 20 13 19.5 L7 15 H3 Q2 15 2 14 V10 Q2 9 3 9 Z"
             : root.kind === "notifications" ? "M12 2 A1.5 1.5 0 0 1 13.5 3.5 V4 Q18 5 18 10 V13 Q18 15 20 16.5 V18 H4 V16.5 Q6 15 6 13 V10 Q6 5 10.5 4 V3.5 A1.5 1.5 0 0 1 12 2 Z M9 20 H15 A3 3 0 0 1 9 20 Z"
-            : root.kind === "tray" ? "M5 3 H14 Q16 3 16 5 V7 H10 Q7 7 7 10 V16 H5 Q3 16 3 14 V5 Q3 3 5 3 Z M11 9 H19 Q21 9 21 11 V19 Q21 21 19 21 H11 Q9 21 9 19 V11 Q9 9 11 9 Z"
+            : root.kind === "tray" ? "M4 4 H10 V10 H4 Z M14 4 H20 V10 H14 Z M4 14 H10 V20 H4 Z M14 14 H20 V20 H14 Z"
             : root.kind === "ethernet" ? "M6 3 H18 Q20 3 20 5 V15 H15 V18 H9 V15 H4 V5 Q4 3 6 3 Z M6 20 H18 V22 H6 Z"
             : ""
         }

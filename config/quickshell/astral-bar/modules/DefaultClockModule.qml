@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Layouts
 import "../../common" as Design
 import "../components" as Components
 import "../data/TimeFormat.js" as TimeFormat
@@ -40,18 +41,19 @@ Item {
   readonly property int horizontalPadding: 8
   property color accent: hover.hovered ? tokens.cyan : tokens.text
   implicitWidth: vertical ? 50
-    : Math.max(96, Math.max(timeRow.implicitWidth, dateLabel.implicitWidth) + 2 * horizontalPadding)
-  implicitHeight: stack.implicitHeight + 2
+    : stack.implicitWidth + 2 * horizontalPadding
+  implicitHeight: vertical ? stack.implicitHeight + 2 : 40
   Behavior on accent { ColorAnimation { duration: root.tokens.hoverDuration } }
-  Column {
+  GridLayout {
     id: stack
-    width: root.width
-    anchors.verticalCenter: parent.verticalCenter
-    spacing: root.vertical ? 6 : 1
+    anchors.centerIn: parent
+    columns: root.vertical ? 1 : 2
+    columnSpacing: 10
+    rowSpacing: 6
     Row {
       id: timeRow
       objectName: "clockTimeRow"
-      anchors.horizontalCenter: parent.horizontalCenter
+      Layout.alignment: Qt.AlignCenter
       spacing: 3
       Text {
         id: timeLabel
@@ -60,7 +62,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: root.accent
         font.family: root.tokens.mono
-        font.pixelSize: root.vertical ? 23 : root.tokens.clockSize - 4
+        font.pixelSize: root.vertical ? 23 : 18
         font.weight: Font.DemiBold
         lineHeight: 0.9
       }
@@ -78,7 +80,7 @@ Item {
     Text {
       id: dateLabel
       objectName: "clockDate"
-      width: parent.width
+      Layout.alignment: Qt.AlignCenter
       horizontalAlignment: Text.AlignHCenter
       text: root.vertical ? root.date.split("·")[1].trim() : root.date
       color: root.tokens.muted

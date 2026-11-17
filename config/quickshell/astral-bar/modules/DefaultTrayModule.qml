@@ -11,6 +11,7 @@ Item {
   required property Item panel
   required property var navigation
   property var nativeWindow: null
+  property bool compact: false
   function toggle(): void {
     if (navigation.tray && navigation.owner === panel) navigation.close();
     else { navigation.anchor = root; navigation.openTray(panel); }
@@ -19,7 +20,7 @@ Item {
   readonly property bool hovered: hover.hovered
   readonly property color ink: hovered || expanded ? tokens.cyan : tokens.text
 
-  implicitWidth: 36
+  implicitWidth: compact ? 32 : 36
   implicitHeight: 36
   Accessible.role: Accessible.Button
   Accessible.name: "Background applications"
@@ -30,9 +31,6 @@ Item {
   Keys.onSpacePressed: root.toggle()
   Keys.onReturnPressed: root.toggle()
   Keys.onEnterPressed: root.toggle()
-  ToolTip.visible: hovered
-  ToolTip.text: "Background applications"
-  ToolTip.delay: 650
   Components.BarTile {
     anchors.fill: parent
     tokens: root.tokens
@@ -40,12 +38,14 @@ Item {
     selected: root.expanded
     focused: root.activeFocus
   }
-  Components.StatusGlyph {
+  Components.BarGlyph {
     objectName: "trayArrow"
     anchors.centerIn: parent
-    width: 19; height: 19
+    width: 20; height: 20
     kind: "tray"
     ink: root.ink
+    rotation: root.expanded ? 180 : 0
+    Behavior on rotation { NumberAnimation { duration: root.tokens.hoverDuration } }
   }
   HoverHandler { id: hover }
   TapHandler { onTapped: root.toggle() }

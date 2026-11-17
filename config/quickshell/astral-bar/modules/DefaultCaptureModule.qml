@@ -22,7 +22,7 @@ AbstractButton {
     ? (({hiding: "Preparing capture", selecting: "Selecting source", preparing: captureKind === "shot" ? "Preparing screenshot" : "Preparing recording", recording: "Recording · " + elapsed, finalizing: captureKind === "shot" ? "Finishing screenshot" : "Finishing recording"})[captureState] || "Capture in progress") + (captureKind === "shot" ? " · Cancel capture" : " · Stop")
     : "Screen & capture"
   // Keep the shortcut compact, with room for the timer in either orientation.
-  implicitWidth: vertical ? 48 : compact ? 34 : 40
+  implicitWidth: vertical ? 48 : compact ? 32 : 40
   implicitHeight: vertical ? 38 : 40
   padding: 0
   Accessible.name: detail
@@ -58,6 +58,7 @@ AbstractButton {
         Components.BarGlyph {
           kind: "capture"
           objectName: "captureGlyph"
+          width: 20; height: 20
           anchors.centerIn: parent
           visible: !root.recordingVideo
           ink: root.ink

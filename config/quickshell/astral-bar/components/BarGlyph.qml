@@ -25,7 +25,7 @@ Item {
     case "notifications": return "M5 16 Q7 14 7 10 V9 A5 5 0 0 1 17 9 V10 Q17 14 19 16 Z M10 20 Q12 22 14 20 M12 2 V4";
     case "window": return "M5 4 H19 Q21 4 21 6 V18 Q21 20 19 20 H5 Q3 20 3 18 V6 Q3 4 5 4 Z M3 9 H21 M7 6.5 H7.01";
     case "capture": return "M8 5 L9.5 3 H14.5 L16 5 H19 Q21 5 21 7 V18 Q21 20 19 20 H5 Q3 20 3 18 V7 Q3 5 5 5 Z M16 12.5 A4 4 0 1 1 8 12.5 A4 4 0 1 1 16 12.5";
-    case "tray": return "M5 4 H9 V8 H5 Z M15 4 H19 V8 H15 Z M5 14 H9 V18 H5 Z M15 14 H19 V18 H15 Z";
+    case "tray": return "M6 9 L12 15 L18 9";
     case "browser": return "M21 12 A9 9 0 1 1 3 12 A9 9 0 1 1 21 12 M3 12 H21 M12 3 C7 8 7 16 12 21 C17 16 17 8 12 3";
     case "code": return "M8 7 L3 12 L8 17 M16 7 L21 12 L16 17 M14 4 L10 20";
     case "folder": return "M3 8 V6 Q3 4 5 4 H10 L13 7 H19 Q21 7 21 9 V18 Q21 20 19 20 H5 Q3 20 3 18 Z M3 10 H21";
@@ -47,11 +47,33 @@ Item {
       preferredRendererType: Shape.CurveRenderer
       ShapePath {
         strokeColor: root.ink
-        strokeWidth: 1.65
+        strokeWidth: root.kind === "astral" ? 0.6 : 1.65
         capStyle: ShapePath.RoundCap
         joinStyle: ShapePath.RoundJoin
-        fillColor: root.kind === "astral" || root.kind === "play" ? Qt.alpha(root.ink, 0.18) : "transparent"
+        fillColor: root.kind === "astral" ? root.ink : root.kind === "play" ? Qt.alpha(root.ink, 0.18) : "transparent"
         PathSvg { path: root.outline }
+      }
+      // Alternating facets give the four-point emblem a carved surface.
+      ShapePath {
+        strokeColor: "transparent"
+        fillColor: Qt.lighter(root.ink, 1.4)
+        PathSvg {
+          path: root.kind === "astral"
+            ? "M12 2 L12 12 L9.2 9.2 Z M12 12 L22 12 L14.8 9.2 Z M12 12 L12 22 L14.8 14.8 Z M2 12 L12 12 L9.2 14.8 Z" : ""
+        }
+      }
+      ShapePath {
+        strokeColor: "transparent"
+        fillColor: Qt.darker(root.ink, 1.5)
+        PathSvg {
+          path: root.kind === "astral"
+            ? "M12 2 L14.8 9.2 L12 12 Z M12 12 L14.8 14.8 L22 12 Z M12 12 L9.2 14.8 L12 22 Z M2 12 L9.2 9.2 L12 12 Z" : ""
+        }
+      }
+      ShapePath {
+        strokeColor: "transparent"
+        fillColor: Qt.lighter(root.ink, 1.7)
+        PathSvg { path: root.kind === "astral" ? "M12 10.5 L13.5 12 L12 13.5 L10.5 12 Z" : "" }
       }
     }
   }

@@ -16,8 +16,8 @@ Item {
   readonly property bool hovered: hover.hovered
   readonly property color ink: hovered ? tokens.cyan : tokens.lavender
   signal activated()
-  implicitWidth: vertical ? 48 : compact ? 124 : 340
-  implicitHeight: vertical ? 134 : 42
+  implicitWidth: vertical ? 48 : compact ? 148 : 340
+  implicitHeight: vertical ? 134 : 46
   HoverHandler { id: hover }
 
   component Transport: Button {
@@ -67,12 +67,14 @@ Item {
     rowSpacing: 3
     Button {
       id: information
+      objectName: "barMediaInformation"
       Layout.fillWidth: true
       Layout.fillHeight: !root.vertical
-      Layout.preferredHeight: root.vertical || root.compact ? 30 : 36
-      Layout.minimumWidth: 30
-      Layout.rightMargin: root.vertical || root.compact ? 0 : root.tokens.gap
-      padding: 0
+      Layout.preferredHeight: root.vertical ? 34 : 40
+      Layout.minimumWidth: root.vertical ? 34 : 40
+      Layout.rightMargin: root.vertical ? 0 : root.tokens.gap
+      padding: 3
+      horizontalPadding: root.vertical ? 3 : 6
       focusPolicy: Qt.StrongFocus
       Accessible.name: root.media.title + " · " + root.media.artist + ". Open Music"
       onClicked: root.activated()
@@ -85,6 +87,9 @@ Item {
         spacing: 10
         Components.RoundedClip {
           id: sleeve
+          objectName: "barMediaArtwork"
+          Layout.minimumWidth: Layout.preferredWidth
+          Layout.maximumWidth: Layout.preferredWidth
           Layout.preferredWidth: root.vertical || root.compact ? 28 : 32
           Layout.preferredHeight: Layout.preferredWidth
           Layout.alignment: Qt.AlignCenter

@@ -111,12 +111,12 @@ Scope {
         Qt.quit(); return;
       }
       let previousEnd = -1;
-      for (const name of ["music", "recordingIndicator", "tray", "network", "audio", "battery", "notifications"]) {
+      for (const name of ["music", "tray", "recordingIndicator", "network", "audio", "battery", "notifications"]) {
         const item = root.find(bar, name);
         if (!item || !item.visible) continue;
         const left = item.mapToItem(bar, 0, 0).x;
         const right = item.mapToItem(bar, item.width, 0).x;
-        const minimum = name === "music" ? 124 : item.implicitWidth;
+        const minimum = name === "music" ? 148 : item.implicitWidth;
         if (item.width < minimum - 1 || left < previousEnd - 1 || right > bar.width - theme.inset + 1) {
           console.log("MEDIA_LAYOUT_FAIL", "Module clipped or overlapping", name, item.width, left, right);
           Qt.quit(); return;
@@ -127,26 +127,63 @@ Scope {
       const instrument = root.find(capture, "captureInstrument");
       const captureCenter = instrument.mapToItem(bar, instrument.width / 2, instrument.height / 2);
       const glyph = root.find(capture, "captureGlyph");
-      const glyphCenter = glyph.mapToItem(bar, 12, 12);
-      if (glyph.width !== 24 || glyph.height !== 24 || Math.abs(glyphCenter.x - captureCenter.x) > 0.5 || Math.abs(glyphCenter.y - captureCenter.y) > 0.5) {
+      const glyphCenter = glyph.mapToItem(bar, glyph.width / 2, glyph.height / 2);
+      if (glyph.width !== 20 || glyph.height !== 20 || Math.abs(glyphCenter.x - captureCenter.x) > 0.5 || Math.abs(glyphCenter.y - captureCenter.y) > 0.5) {
         console.log("MEDIA_LAYOUT_FAIL", "Capture path canvas is off center"); Qt.quit(); return;
+      }
+      const artwork = root.find(music, "barMediaArtwork");
+      const previousTrack = root.find(music, "barMedia-previous");
+      const artworkEnd = artwork.mapToItem(bar, artwork.width, 0).x;
+      if (artwork.width < 28 || previousTrack.mapToItem(bar, 0, 0).x - artworkEnd < theme.gap) {
+        console.log("MEDIA_LAYOUT_FAIL", "Artwork lost its width or spacing before transport controls");
+        Qt.quit(); return;
+      }
+      const information = root.find(music, "barMediaInformation");
+      const artworkInset = artwork.mapToItem(information, 0, 0);
+      if (artworkInset.x < 6 || artworkInset.y < 3
+          || artworkInset.x + artwork.width > information.width - 5
+          || artworkInset.y + artwork.height > information.height - 3) {
+        console.log("MEDIA_LAYOUT_FAIL", "Artwork touches the hover border", artworkInset.x, artworkInset.y, artwork.width, artwork.height, information.width, information.height); Qt.quit(); return;
       }
       const playerCenter = music.mapToItem(bar, music.width / 2, music.height / 2);
       if (Math.abs(captureCenter.y - playerCenter.y) > 0.5) { console.log("MEDIA_LAYOUT_FAIL", "Capture and player baselines differ"); Qt.quit(); return; }
       const clock = root.find(bar, "clock");
-      const clockCenter = clock.mapToItem(bar, clock.width / 2, 0).x;
       const clockTime = root.find(clock, "clockTimeRow");
       const clockDate = root.find(clock, "clockDate");
-      for (const item of [clockTime, clockDate]) {
-        const center = item.mapToItem(bar, item.width / 2, 0).x;
-        if (Math.abs(center - clockCenter) > 0.5) {
-          console.log("MEDIA_LAYOUT_FAIL", "Clock label is off center", center, clockCenter);
+      const timeRight = clockTime.mapToItem(clock, clockTime.width, 0).x;
+      const dateLeft = clockDate.mapToItem(clock, 0, 0).x;
+      const timeCenter = clockTime.mapToItem(bar, clockTime.width / 2, clockTime.height / 2);
+      const dateCenter = clockDate.mapToItem(bar, clockDate.width / 2, clockDate.height / 2);
+      if (dateLeft <= timeRight || Math.abs(timeCenter.y - dateCenter.y) > 0.5
+          || clock.width < clockTime.width + clockDate.width + 10 + 2 * clock.horizontalPadding - 1) {
+        console.log("MEDIA_LAYOUT_FAIL", "Clock and date must share a row with symmetric padding");
+        Qt.quit(); return;
+      }
+      for (const name of ["emblem", "clock", "window", "music", "tray", "recordingIndicator", "network", "audio", "battery", "notifications"]) {
+        const item = root.find(bar, name);
+        if (!item || !item.visible) continue;
+        const center = item.mapToItem(bar, item.width / 2, item.height / 2);
+        if (Math.abs(center.y - bar.height / 2) > 0.5) {
+          console.log("MEDIA_LAYOUT_FAIL", "Module is not vertically centered", name, center.y);
           Qt.quit(); return;
         }
       }
-      if (clock.width < Math.max(clockTime.width, clockDate.implicitWidth) + 2 * clock.horizontalPadding - 1) {
-        console.log("MEDIA_LAYOUT_FAIL", "Clock lost its symmetric padding");
+      const divider = root.find(bar, "musicTrayDivider");
+      const tray = root.find(bar, "tray");
+      const dividerStart = divider.mapToItem(bar, 0, 0).x;
+      if (!divider.visible || dividerStart < music.mapToItem(bar, music.width, 0).x
+          || divider.mapToItem(bar, divider.width, 0).x > tray.mapToItem(bar, 0, 0).x) {
+        console.log("MEDIA_LAYOUT_FAIL", "Missing divider between player and background apps");
         Qt.quit(); return;
+      }
+      const trayEnd = tray.mapToItem(bar, tray.width, 0).x;
+      const captureStart = capture.mapToItem(bar, 0, 0).x;
+      const notifications = root.find(bar, "notifications");
+      const plate = root.find(bar, "endPlate");
+      const notificationEnd = notifications.mapToItem(bar, notifications.width, 0).x;
+      if (Math.abs(captureStart - trayEnd - 2) > 0.5
+          || plate.mapToItem(bar, plate.width, 0).x - notificationEnd < 11) {
+        console.log("MEDIA_LAYOUT_FAIL", "Status dock spacing regressed"); Qt.quit(); return;
       }
       const artist = root.find(music, "barMediaArtist");
       if (!music.compact && (!artist.visible || artist.font.pixelSize < 11)) {

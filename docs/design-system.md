@@ -33,13 +33,14 @@ Derived tones (`raised`, `sunken`, `border`, `hairline`, `scrim`) are computed i
 
 ## Behaviour
 
-- Default bar modules use subtle icon and text tones on hover, with no per-module hover plates or floating tooltips; the workspace hover outline and shared animated edge marker remain. Keyboard focus keeps a visible outline and accessible names.
+- Default bar modules use subtle icon and text tones on hover, with no per-module hover plates or floating tooltips; the workspace hover outline remains. Keyboard focus keeps a visible outline and accessible names.
 - Destructive actions use `alert` and require confirmation.
 - Animations follow `settings.animations`; when disabled, durations are zero.
 
 ## Astral depurado composition
 
-- The bar keeps its outer surface, segment plates, logo border and shared expanding edge marker in all four positions. Connection, volume, battery and notification instruments share line icons and short values; compact mode keeps icons and indicators. Normal workspace selection is square, special selection stays circular, and both retain their transitions.
+- The bar keeps its outer surface, segment plates, logo border and static cyan accents at both ends in all four positions. Connection, volume, battery and notification instruments share line icons and short values; compact mode keeps icons and indicators. Normal workspace selection is square, special selection stays circular, and both retain their transitions.
+- Horizontal bars place time and date side by side in a 40 px control. Modules share a vertical center; the background applications chevron follows the player and a divider, and shares the status dock with screen capture at a 2 px gap. The launcher emblem uses a four-point star with alternating light and shadow facets, a bright diamond center and a 90-degree hover rotation. The capture glyph is 20 px. Media artwork has internal padding inside its hover border; compact media reserves an 8 px gap before transport controls. Horizontal notifications keep a 12 px inset from the group edge; compact system controls use 32 px widths. Bar controls do not show native hover tooltips. There is no divider between background applications and capture.
 - Sound starts with compact output and microphone controls, then application streams. Connections uses Wi-Fi/Bluetooth/VPN tabs and one visible section; switching tabs keeps transport controllers alive.
 - Media artwork uses `astral-bar/components/RoundedClip.qml` in the bar and player. Scrollable content and selectors remain available on small panels.
 - The launcher is a compact search window with category tabs and application rows containing icon, name, available description and favorite control.

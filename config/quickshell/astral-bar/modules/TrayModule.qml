@@ -28,6 +28,7 @@ Item {
     const url = external ? (replacement.startsWith("/") ? "file://" + replacement.split("/").map(encodeURIComponent).join("/") : Qt.resolvedUrl("../" + replacement)) : Qt.resolvedUrl("DefaultTrayModule.qml");
     loader.setSource(url, external ? {context: root} : {
           tokens: Qt.binding(() => root.tokens),
+          compact: Qt.binding(() => root.compact),
           panel: Qt.binding(() => root.panel),
           navigation: Qt.binding(() => root.navigation),
           nativeWindow: Qt.binding(() => root.nativeWindow)
@@ -42,6 +43,7 @@ Item {
       console.warn("Cannot load replacement for tray; using the default visual.");
       setSource(Qt.resolvedUrl("DefaultTrayModule.qml"), {
           tokens: Qt.binding(() => root.tokens),
+          compact: Qt.binding(() => root.compact),
           panel: Qt.binding(() => root.panel),
           navigation: Qt.binding(() => root.navigation),
           nativeWindow: Qt.binding(() => root.nativeWindow)
