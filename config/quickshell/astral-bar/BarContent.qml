@@ -256,6 +256,7 @@ Item {
           visible: root.shown.music
           Layout.alignment: Qt.AlignCenter
           tokens: root.tokens
+          expanded: root.navigation.destination === "Media" && root.navigation.owner === root
           onActivated: root.navigate("Media", music)
           vertical: root.vertical
           compact: root.compact || (!root.vertical && width < 220)
