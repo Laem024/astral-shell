@@ -74,6 +74,7 @@ const common = {
 const bar = {
   "position": "top",
   "margin": 8,
+  "frame": "off",
   "workspaceDisplay": "icons",
   "modules": {
     "logo": true,

@@ -30,26 +30,31 @@ PanelWindow {
   readonly property bool tray: navigation ? navigation.tray : false
   readonly property bool menu: navigation ? navigation.windowMenu : false
   readonly property bool vertical: edge === "left" || edge === "right"
-  readonly property real barX: edge === "right" ? barWindow.screen.width - settings.value.margin - barWindow.width : settings.value.margin
-  readonly property real barY: edge === "bottom" ? barWindow.screen.height - settings.value.margin - barWindow.height : settings.value.margin
+  readonly property real barX: edge === "right" ? barWindow.screen.width - barWindow.frameGeometry.margin - barWindow.width : barWindow.frameGeometry.margin
+  readonly property real barY: edge === "bottom" ? barWindow.screen.height - barWindow.frameGeometry.margin - barWindow.height : barWindow.frameGeometry.margin
   readonly property point control: navigation && navigation.anchor ? navigation.anchor.mapToItem(barWindow.contentItem, navigation.anchor.width / 2, navigation.anchor.height / 2) : Qt.point(barWindow.width / 2, barWindow.height / 2)
   // The focused module's width in screen units. On a horizontal bar the menu
   // covers that same plate and starts at its left edge; vertical bars keep a
   // readable minimum because the module itself is only one bar wide.
   readonly property real anchorWidth: navigation && navigation.anchor ? navigation.anchor.width * factor : 0
   readonly property real menuWidth: Math.max((vertical ? 300 : 240) * factor, anchorWidth)
+  readonly property var geometry: barWindow.frameGeometry
+  readonly property real leftInset: geometry.reservation("left")
+  readonly property real rightInset: geometry.reservation("right")
+  readonly property real topInset: geometry.reservation("top")
+  readonly property real bottomInset: geometry.reservation("bottom")
   function clamp(value: real, maximum: real): real { return Math.max(0, Math.min(value, Math.max(0, maximum))); }
-  implicitWidth: Math.max(1, Math.min((menu ? menuWidth : (tray ? 248 : 760) * factor), barWindow.screen.width - (vertical ? barWindow.width + settings.value.margin + 6 * factor : 0)))
+  implicitWidth: Math.max(1, Math.min((menu ? menuWidth : (tray ? 248 : 760) * factor), barWindow.screen.width - leftInset - rightInset - 6 * factor))
   // The tray cap fits four complete 72px rows plus its header and margins, so
   // scrolling only appears once a fifth row would be needed.
   implicitHeight: Math.max(1, Math.min((menu
     ? Math.max(120, (contentLoader.item ? (contentLoader.item as Item).implicitHeight : 176) + 32)
-    : tray ? Math.min(364, (contentLoader.item ? (contentLoader.item as Item).implicitHeight : 108) + 32) : 760) * factor, barWindow.screen.height - (!vertical ? barWindow.height + settings.value.margin + 6 * factor : 0)))
-  readonly property real popupX: clamp(edge === "left" ? barX + barWindow.width + 6 * factor
-    : edge === "right" ? barX - width - 6 * factor
+    : tray ? Math.min(364, (contentLoader.item ? (contentLoader.item as Item).implicitHeight : 108) + 32) : 760) * factor, barWindow.screen.height - topInset - bottomInset - 6 * factor))
+  readonly property real popupX: leftInset + clamp((edge === "left" ? leftInset + 6 * factor
+    : edge === "right" ? barWindow.screen.width - rightInset - width - 6 * factor
     : menu && navigation && navigation.anchor ? barX + control.x - anchorWidth / 2
-    : barX + control.x - width / 2, barWindow.screen.width - width)
-  readonly property real popupY: clamp(edge === "top" ? barY + barWindow.height + 6 * factor : edge === "bottom" ? barY - height - 6 * factor : barY + control.y - height / 2, barWindow.screen.height - height)
+    : barX + control.x - width / 2) - leftInset, barWindow.screen.width - leftInset - rightInset - width)
+  readonly property real popupY: topInset + clamp((edge === "top" ? topInset + 6 * factor : edge === "bottom" ? barWindow.screen.height - bottomInset - height - 6 * factor : barY + control.y - height / 2) - topInset, barWindow.screen.height - topInset - bottomInset - height)
   screen: barWindow.screen
   anchors { top: true; left: true }
   exclusionMode: ExclusionMode.Ignore

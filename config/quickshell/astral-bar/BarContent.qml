@@ -69,7 +69,7 @@ Item {
     enabled: root.settings.value.animations
     NumberAnimation { duration: root.tokens.entryDuration }
   }
-  Components.AstralSurface { anchors.fill: parent; tokens: root.tokens; vertical: root.vertical; position: root.settings.value.position }
+  Components.AstralSurface { visible: (root.settings.value.frame || "off") === "off"; anchors.fill: parent; tokens: root.tokens; vertical: root.vertical; position: root.settings.value.position }
   // Vertical content fits the available height, including a visible special.
   // Horizontal bars retain their scroll fallback on narrow screens.
   Flickable {

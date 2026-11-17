@@ -5,6 +5,7 @@ Column {
   required property var tokens
   property date dateTime: new Date()
   property bool compact: false
+  property bool centered: true
 
   spacing: root.compact ? 4 : 8
 
@@ -22,7 +23,7 @@ Column {
     width: root.width
     text: root.dateText
     color: root.tokens.muted
-    horizontalAlignment: Text.AlignHCenter
+    horizontalAlignment: root.centered ? Text.AlignHCenter : Text.AlignLeft
     font {
       family: root.tokens.mono
       pixelSize: root.tokens.captionSize + 1
@@ -37,7 +38,7 @@ Column {
 
     Row {
       id: clockRow
-      anchors.centerIn: parent
+      x: root.centered ? (parent.width - width) / 2 : 0
       spacing: 8
 
       Text {
@@ -46,7 +47,7 @@ Column {
         color: root.tokens.text
         font {
           family: root.tokens.mono
-          pixelSize: root.compact ? 56 : root.tokens.displaySize
+          pixelSize: root.compact ? 56 : 88
           weight: Font.Light
           letterSpacing: -2
         }

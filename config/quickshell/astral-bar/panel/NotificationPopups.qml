@@ -6,12 +6,14 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import "../data" as Data
+import ".." as Bar
 import "../../common" as Design
 
 Scope {
   id: root
   required property Design.Theme tokens
   required property var settings
+  Bar.FrameGeometry { id: geometry; settings: root.settings; tokens: root.tokens }
   readonly property var service: Data.NotificationData
   // Capture the focused output on receipt, then keep each popup on that output.
   Binding {
@@ -50,18 +52,15 @@ Scope {
       WlrLayershell.layer: WlrLayer.Overlay
       WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
       readonly property real factor: root.tokens.scale
-      readonly property real topGap: root.settings.value.position === "top"
-        ? root.tokens.horizontalSize * factor + root.settings.value.margin : 0
-      readonly property real rightGap: root.settings.value.position === "right"
-        ? root.tokens.verticalSize * factor + root.settings.value.margin : 0
-      readonly property real leftGap: root.settings.value.position === "left"
-        ? root.tokens.verticalSize * factor + root.settings.value.margin : 0
+      readonly property real topGap: geometry.reservation("top")
+      readonly property real rightGap: geometry.reservation("right")
+      readonly property real leftGap: geometry.reservation("left")
       // qmllint disable missing-property
       margins { top: window.topGap + 12 * window.factor; right: window.rightGap + 12 * window.factor }
       // qmllint enable missing-property
       implicitWidth: Math.max(1, Math.min(380 * factor, modelData.width - rightGap - leftGap - 24 * factor))
       implicitHeight: Math.max(1, Math.min((notices.length > 0 ? stack.implicitHeight * factor : 1), modelData.height - topGap - 24 * factor
-        - (root.settings.value.position === "bottom" ? root.tokens.horizontalSize * factor + root.settings.value.margin : 0)))
+        - geometry.reservation("bottom")))
       ScrollView {
         id: viewport
         visible: window.notices.length > 0

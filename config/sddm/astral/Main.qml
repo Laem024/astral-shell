@@ -64,6 +64,14 @@ Rectangle {
     }
   }
 
+  Rectangle {
+    anchors.fill: parent
+    anchors.margins: 12 * root.chrome
+    radius: 24 * root.chrome
+    color: "transparent"
+    border.color: Qt.alpha(theme.text, 0.16)
+  }
+
   Item {
     id: activeContent
     anchors.fill: parent
@@ -78,19 +86,67 @@ Rectangle {
       scale: root.factor * (0.985 + 0.015 * root.entrance)
       transform: Translate { y: (1 - root.entrance) * 16 }
 
-      Components.ClockBlock {
+      Rectangle {
+        visible: !root.compact
+        x: parent.width - theme.panelWidth - 112
+        y: 88
+        width: theme.panelWidth + 48
+        height: parent.height - 176
+        radius: theme.panelRadius + 12
+        color: Qt.alpha(theme.background, 0.48)
+        border.color: theme.border
+      }
+
+      Column {
         id: mainClock
-        x: root.compact ? (parent.width - width) / 2 : parent.width - width - 64
+        x: root.compact ? (parent.width - width) / 2 : 88
         y: root.compact ? Math.max(64, (parent.height - loginLoader.height - height - 24) / 2) : (parent.height - height) / 2
         width: Math.min(theme.panelWidth, parent.width - 48)
-        compact: root.compact
-        tokens: theme
-        dateTime: root.now
+        spacing: root.compact ? 8 : 28
+
+        Text {
+          visible: !root.compact
+          text: "YOUR SPACE. YOUR ORBIT."
+          color: theme.cyan
+          font { family: theme.mono; pixelSize: 11; letterSpacing: 2 }
+        }
+
+        Components.ClockBlock {
+          width: parent.width
+          compact: root.compact
+          centered: root.compact
+          tokens: theme
+          dateTime: root.now
+        }
+
+        Rectangle {
+          visible: !root.compact
+          width: 48
+          height: 2
+          color: theme.cyan
+        }
+
+        Text {
+          visible: !root.compact
+          width: parent.width
+          text: "Welcome back."
+          color: theme.text
+          font { family: theme.font; pixelSize: 34; weight: Font.Light }
+        }
+
+        Text {
+          visible: !root.compact
+          width: parent.width
+          text: "A little focus. A world of possibilities."
+          wrapMode: Text.WordWrap
+          color: theme.muted
+          font { family: theme.font; pixelSize: 14 }
+        }
       }
 
       Loader {
         id: loginLoader
-        x: root.compact ? (parent.width - width) / 2 : 64
+        x: root.compact ? (parent.width - width) / 2 : parent.width - width - 88
         y: root.compact ? mainClock.y + mainClock.height + 24 : (parent.height - height) / 2
         width: Math.min(theme.panelWidth, parent.width - 48)
         active: root.active
@@ -101,7 +157,7 @@ Rectangle {
 
     Row {
       id: powerRow
-      x: root.compact ? (parent.width - width) / 2 : 64 * root.factor
+      x: root.compact ? (parent.width - width) / 2 : parent.width - theme.panelWidth * root.factor - 88 * root.factor
       anchors {
         bottom: parent.bottom
         bottomMargin: 24 * root.chrome

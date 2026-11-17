@@ -68,7 +68,7 @@ Item {
     width: parent.width
     height: content.implicitHeight + 2 * card.tokens.section
     radius: card.tokens.panelRadius
-    color: Qt.alpha(card.tokens.surface, 0.92)
+    color: Qt.alpha(card.tokens.surface, 0.97)
     border.width: 1
     border.color: Qt.alpha(card.tokens.border, 0.6)
 
@@ -83,6 +83,23 @@ Item {
         topMargin: card.tokens.section
       }
       spacing: card.tokens.inset
+
+      Column {
+        width: parent.width
+        spacing: 6
+
+        Text {
+          text: "SIGN IN"
+          color: card.tokens.cyan
+          font { family: card.tokens.mono; pixelSize: 10; letterSpacing: 2 }
+        }
+
+        Text {
+          text: "Make yourself at home."
+          color: card.tokens.text
+          font { family: card.tokens.font; pixelSize: 22; weight: Font.Light }
+        }
+      }
 
       Item {
         id: identity
@@ -218,6 +235,7 @@ Item {
 
       Rectangle {
         id: sessionRow
+        objectName: "sessionSelector"
         width: parent.width
         height: 40
         visible: card.tokens.showSession
@@ -400,11 +418,13 @@ Item {
 
   Popup {
     id: sessionPopup
-    parent: card
-    width: content.width
+    objectName: "sessionPopup"
+    parent: sessionRow
+    width: sessionRow.width
     height: Math.min(260, sessionList.contentHeight) + 16
-    x: content.x
-    y: Math.max(8, content.y + sessionRow.y - height - 8)
+    x: 0
+    y: sessionRow.height + 8
+    margins: 8
     padding: 8
     modal: true
     focus: true

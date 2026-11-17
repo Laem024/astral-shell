@@ -16,7 +16,7 @@ cleanup() {
   local path
   for path in clipboard overview shortcuts; do qs kill -p "$preview/config/quickshell/$path-preview.qml" >/dev/null 2>&1 || true; done
   # Every path is inside our unique copy; installed/repository instances are untouched.
-  for path in "$preview/config/quickshell/shell.qml" "$preview/config/quickshell/bar.qml" "$preview/config/quickshell/recorder.qml" "$preview/config/quickshell/launcher-preview.qml" "$preview/config/quickshell/wallpaper-preview.qml" "$preview/config/quickshell/polkit-preview.qml" "$preview/config/quickshell/lock-preview.qml" "$preview/config/quickshell/session-preview.qml"; do
+  for path in "$preview/config/quickshell/shell.qml" "$preview/config/quickshell/bar.qml" "$preview/config/quickshell/bar-preview.qml" "$preview/config/quickshell/recorder.qml" "$preview/config/quickshell/launcher-preview.qml" "$preview/config/quickshell/wallpaper-preview.qml" "$preview/config/quickshell/polkit-preview.qml" "$preview/config/quickshell/lock-preview.qml" "$preview/config/quickshell/session-preview.qml"; do
     qs kill -p "$path" >/dev/null 2>&1 || true
   done
   [[ -z $process ]] || wait "$process" 2>/dev/null || true
@@ -40,6 +40,11 @@ if [[ $mode == wallpaper || $mode == all ]]; then
   chmod 600 "$preview/state/astral-shell/astral-wallpaper/state.json"
   printf 'import "astral-wallpaper" as Wallpaper\nWallpaper.WallpaperPreview {}\n' > "$preview/config/quickshell/wallpaper-preview.qml"
   jq '(.modules[] | select(.id=="astral-wallpaper") | .path)="wallpaper-preview.qml"' "$base/settings.json" > "$preview/config/quickshell/settings.json"
+fi
+printf 'import "astral-bar" as Bar\nBar.BarPreview {}\n' > "$preview/config/quickshell/bar-preview.qml"
+if [[ $mode == all ]]; then
+  jq '(.modules[] | select(.id=="astral-bar") | .path)="bar-preview.qml"' "$preview/config/quickshell/settings.json" > "$preview/settings.json"
+  mv -- "$preview/settings.json" "$preview/config/quickshell/settings.json"
 fi
 printf 'import "astral-launcher" as Launcher\nLauncher.LauncherPreview {}\n' > "$preview/config/quickshell/launcher-preview.qml"
 printf 'import "astral-polkit" as Polkit\nPolkit.PolkitPreview {}\n' > "$preview/config/quickshell/polkit-preview.qml"
@@ -76,7 +81,7 @@ entry=$preview/config/quickshell/shell.qml
 [[ $mode != lock ]] || entry=$preview/config/quickshell/lock-preview.qml
 for panel in clipboard overview shortcuts; do [[ $mode != "$panel" ]] || entry=$preview/config/quickshell/$panel-preview.qml; done
 [[ $mode != session ]] || entry=$preview/config/quickshell/session-preview.qml
-[[ $mode != bar ]] || entry=$preview/config/quickshell/bar.qml
+[[ $mode != bar ]] || entry=$preview/config/quickshell/bar-preview.qml
 printf 'Previewing %s. Close with Ctrl+C.\n' "$mode"
 qs -p "$entry" --no-duplicate &
 process=$!

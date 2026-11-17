@@ -2,9 +2,11 @@
 
 Tema de inicio de sesión para SDDM 0.21 o superior con Qt 6. Usa los modos
 oscuro y claro de Astral Shell, un fondo configurable y una composición con el
-acceso a la izquierda y el reloj a la derecha. En pantallas pequeñas, reloj y
-formulario se centran en una columna. La cabecera del usuario es compacta y las
-acciones de energía se alinean con el acceso. La interfaz está en inglés.
+reloj y la bienvenida a la izquierda y el acceso a la derecha, sobre una banda
+atenuada y dentro de un marco fino. En pantallas pequeñas, reloj y
+formulario se centran en una columna. El formulario incluye una cabecera de
+bienvenida, la identidad del usuario es compacta y las acciones de energía
+se alinean con el acceso. La interfaz está en inglés.
 El formulario solo existe en la pantalla activa: al perderla se borra la
 contraseña y se destruye su componente.
 

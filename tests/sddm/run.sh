@@ -16,6 +16,11 @@ bash -n install.sh scripts/install-sddm.sh scripts/sddm-background.sh || fail 's
 
 temporary=$(astral_test_scratch sddm)
 trap 'rm -rf -- "$temporary"' EXIT
+runner=/usr/lib/qt6/bin/qmltestrunner
+if [[ -x $runner ]]; then
+  XDG_CACHE_HOME="$temporary/cache" QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software QT_QUICK_CONTROLS_STYLE=Basic \
+    "$runner" -input tests/sddm
+fi
 stage=$temporary/stage
 theme=$stage/usr/share/sddm/themes/astral
 config=$stage/etc/sddm.conf.d/zz-astral-theme.conf

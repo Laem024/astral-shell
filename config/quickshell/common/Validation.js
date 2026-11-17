@@ -5,7 +5,7 @@ const palette = {
   cyan: "color", lavender: "color", gold: "color", alert: "color"
 };
 const shape = {
-  position: "string", mode: "string", scale: "number", margin: "number", animations: "boolean",
+  position: "string", frame: "string", mode: "string", scale: "number", margin: "number", animations: "boolean",
   colors: { light: palette, dark: palette },
   clockFormat: "string", workspaceDisplay: "string",
   modules: {
@@ -18,6 +18,7 @@ const shape = {
   logo: { glyph: "string", image: "string" }
 };
 const choices = {
+  frame: ["off", "folds", "full"],
   position: ["top", "bottom", "left", "right"], mode: ["light", "dark"],
   clockFormat: ["12h", "24h"], workspaceDisplay: ["icons", "numbers"],
   temperatureUnit: ["celsius", "fahrenheit"], windUnit: ["kmh", "mph", "ms", "kn"]
@@ -64,6 +65,7 @@ function argv(value, path, optional) {
 function parse(text, scope) {
   const value = JSON.parse(text);
   if (!value || Array.isArray(value) || typeof value !== "object") throw new Error("settings");
+  if (scope !== "common" && value.frame === undefined) value.frame = "off";
   const commonKeys = ["mode", "scale", "animations", "colors", "clockFormat", "applications"];
   const schema = {};
   for (const key of Object.keys(shape))

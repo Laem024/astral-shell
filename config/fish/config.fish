@@ -88,6 +88,11 @@ function fish_greeting
     set_color $fish_color_comment
     echo "astral · "(date '+%a %d %b %H:%M')
     set_color normal
+    if command -q fastfetch
+        command fastfetch --structure Title:Separator:OS:Host:Kernel:Uptime:Packages:Shell:Display:DE:WM:WMTheme:Theme:Icons:Font:Cursor:Terminal:TerminalFont:CPU:GPU:Memory:Swap:Disk:LocalIp:Battery:Locale:Break:Colors
+    else
+        printf 'Equipo: %s · Kernel: %s\n' (hostname) (uname -r)
+    end
 end
 
 function clear

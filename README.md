@@ -79,7 +79,7 @@ Clipboard preferences (`historySize`, `maxImageBytes`, `enterAction`, and `paste
 | `config/quickshell/lock.qml`, `idle.qml`, `session.qml` | Root entries for lock, idle and session modules |
 | `config/quickshell/settings.json` | Shared workspace count, idle, colors, mode, scale, animation, clock, apps, providers, registry |
 | `config/quickshell/common/` | One settings loader/validator, theme, paths, argument runner, privacy, popup dismissal, caffeine worker |
-| `config/quickshell/astral-bar/settings.json` | Position, margins, visibility, replacements, weather and logo |
+| `config/quickshell/astral-bar/settings.json` | Position, frame style, margins, visibility, replacements, weather and logo |
 | `config/quickshell/astral-bar/modules/` | Visual slots and their stock `Default*.qml` implementations |
 | `config/quickshell/astral-bar/components/` | Reusable visuals, vector icons (`BarGlyph.qml`, `StatusGlyph.qml`), subtle end accents (`AstralSurface.qml`) and workspace hover outline (`NeonOutline.qml`) |
 | `config/quickshell/astral-bar/panel/` | Panels, tray menu, and notification presentation |
@@ -95,13 +95,31 @@ Clipboard preferences (`historySize`, `maxImageBytes`, `enterAction`, and `paste
 | `config/quickshell/dispatch.sh` | Public bar, launcher and wallpaper command dispatch |
 | `config/hyprland/` | Hyprland configuration and workspace grouping |
 | `config/monitor/` | Separate `astral-monitor` resource workspace |
-| `config/sddm/` | SDDM theme |
+| `config/sddm/` | SDDM theme with welcome, clock and separate sign-in panel |
+| `config/fish/config.fish` | Astral prompt and Fastfetch welcome with RAM, swap, disks, display, desktop and system information |
 | `scripts/` | Installers, preview, configuration management |
 | `system/power/` | Privileged charge administration and caffeine unit |
 | `tests/wallpaper/` | Wallpaper services, renderer, network and command checks |
 | `tests/xdg-scratch.sh`, `tests/scratch/run.sh` | Private XDG scratch and D-Bus helper; isolation and cleanup checks |
 | `tests/notifications/` | Notification UI, independent file opens, fallback and user-service lifetime checks |
 | `tests/quickshell/` | Migration checks and mocked integration fixtures |
+
+The bar's `frame` setting accepts `off` (the existing floating bar), `folds`
+(an edge-integrated bar with two curved folds), or `full` (a continuous screen
+frame). It defaults to `off`, including for older settings files. Active frames
+use the theme surface color, an `8 × scale` border and `panelRadius × scale`
+inner curves on every bar orientation and monitor. They preserve the saved
+`margin` and module layout; switching back to `off` restores the margin.
+`astral-bar/FrameLogic.js` calculates geometry; `FrameGeometry.qml` shares
+offsets with panels and notifications;
+`FrameDrawing.qml` paints the shared curves, `BarPreview.qml` simulates an
+output in an ordinary window, and `FrameEdge.qml` draws click-through edges
+and owns the space reservations in every mode, including `off`, for tiled and
+maximized windows without changing Hyprland gaps. Reservations cover only the
+solid bar and borders; curves do not add an extra window gap. Folds taper to
+the screen edge, while full-frame curves join the side borders.
+Reservations remain during lock and fullscreen; lock surfaces and real
+fullscreen apps cover the frame. Floating windows follow compositor behavior.
 
 The launcher starts hidden with `astral-shell`. Use `astral-launcher` or `Super+Space` to toggle it, and `Super+Q` to cancel active authentication, then close wallpaper, bar panels or launcher before the active application. Root settings provide the terminal and launcher provider; user systemd services keep launched applications alive across shell reloads. Favorites and history use private version 1 JSON under `$XDG_STATE_HOME/astral-shell/astral-launcher/`. See [launcher commands and behavior](docs/launcher.md).
 
