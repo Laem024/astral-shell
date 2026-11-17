@@ -40,7 +40,6 @@ Item {
       radius: root.tokens.cardRadius
       color: root.tokens.background
       border.color: root.tokens.border
-      readonly property bool hasBanner: bannerImage.status === Image.Ready
       Components.RoundedClip {
         anchors.fill: parent
         radius: root.tokens.cardRadius
@@ -51,15 +50,6 @@ Item {
           zoom: Data.BannerData.zoom
           focusX: Data.BannerData.focusX
           focusY: Data.BannerData.focusY
-        }
-        Rectangle {
-          anchors.fill: parent
-          visible: header.hasBanner
-          gradient: Gradient {
-            GradientStop { position: 0; color: "transparent" }
-            GradientStop { position: 0.35; color: "transparent" }
-            GradientStop { position: 1; color: Qt.alpha(root.tokens.background, 0.82) }
-          }
         }
       }
       Item {
@@ -84,23 +74,47 @@ Item {
           onClicked: { bannerControl.forceActiveFocus(); root.pickerMode = "banner"; }
         }
       }
+      // A solid ornamental cartouche joins the portrait to both account labels.
+      Rectangle {
+        x: accountRow.x + accountRow.height / 2
+        y: accountRow.y + (accountRow.height - height) / 2
+        width: accountRow.width - accountRow.height / 2 - 36 - accountRow.spacing
+        height: 72
+        radius: height / 2
+        color: root.tokens.background
+        border.color: root.tokens.cyan
+        Rectangle {
+          anchors.fill: parent
+          anchors.margins: 5
+          radius: height / 2
+          color: "transparent"
+          border.color: Qt.alpha(root.tokens.cyan, 0.3)
+        }
+        Rectangle {
+          anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: 13 }
+          width: 7; height: 7
+          rotation: 45
+          color: root.tokens.cyan
+        }
+      }
       RowLayout {
+        id: accountRow
         objectName: "panelAccount"
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
         anchors.margins: root.tokens.inset
-        height: 64
+        height: 88
         spacing: root.compact ? 12 : 16
         PanelButton {
           tokens: root.tokens
-          Layout.preferredWidth: 64; Layout.preferredHeight: 64
+          Layout.preferredWidth: 88; Layout.preferredHeight: 88
           leftPadding: 0; rightPadding: 0; topPadding: 0; bottomPadding: 0
           text: "Change account photo"
           onClicked: root.pickerMode = "avatar"
-          background: Rectangle { radius: 32; color: root.tokens.background }
+          background: Rectangle { radius: 44; color: root.tokens.background }
           contentItem: Item {
             Components.RoundedClip {
               anchors.fill: parent
-              radius: 32
+              radius: 44
               Image {
                 id: avatar
                 anchors.fill: parent
@@ -112,8 +126,8 @@ Item {
             }
             Rectangle {
               anchors.fill: parent
-              radius: 32; color: "transparent"
-              border.width: parent.parent.activeFocus ? 2 : 1
+              radius: 44; color: "transparent"
+              border.width: parent.parent.activeFocus ? 3 : 2
               border.color: root.tokens.cyan
             }
             Text {
@@ -121,13 +135,14 @@ Item {
               visible: avatar.status !== Image.Ready
               text: root.initials
               color: root.tokens.cyan
-              font { family: root.tokens.mono; pixelSize: 22; weight: Font.Medium }
+              font { family: root.tokens.mono; pixelSize: 28; weight: Font.Medium }
             }
           }
         }
         ColumnLayout {
           Layout.fillWidth: true
           Layout.minimumWidth: 0
+          Layout.rightMargin: 26
           spacing: 4
           Text {
             Layout.fillWidth: true
