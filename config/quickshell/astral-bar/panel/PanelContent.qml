@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Shapes
 import "../../common" as Design
 import "../data" as Data
 import "../components" as Components
@@ -53,6 +52,15 @@ Item {
           focusX: Data.BannerData.focusX
           focusY: Data.BannerData.focusY
         }
+        Rectangle {
+          anchors.fill: parent
+          visible: header.hasBanner
+          gradient: Gradient {
+            GradientStop { position: 0; color: "transparent" }
+            GradientStop { position: 0.35; color: "transparent" }
+            GradientStop { position: 1; color: Qt.alpha(root.tokens.background, 0.82) }
+          }
+        }
       }
       Item {
         id: bannerControl
@@ -74,27 +82,6 @@ Item {
           anchors.fill: parent
           cursorShape: Qt.PointingHandCursor
           onClicked: { bannerControl.forceActiveFocus(); root.pickerMode = "banner"; }
-        }
-      }
-      // The identity ribbon grows out of the portrait and fades over the banner.
-      Shape {
-        x: root.tokens.inset + 24
-        y: header.height - root.tokens.inset - 64
-        width: Math.min(360, header.width - root.tokens.inset * 2 - 24)
-        height: 64
-        preferredRendererType: Shape.CurveRenderer
-        ShapePath {
-          strokeColor: "transparent"
-          fillGradient: LinearGradient {
-            x1: 0; y1: 32; x2: Math.min(360, header.width - root.tokens.inset * 2 - 24); y2: 32
-            GradientStop { position: 0; color: Qt.alpha(root.tokens.background, 0.98) }
-            GradientStop { position: 0.6; color: Qt.alpha(root.tokens.background, 0.88) }
-            GradientStop { position: 1; color: "transparent" }
-          }
-          startX: 0; startY: 0
-          PathCubic { x: Math.min(360, header.width - root.tokens.inset * 2 - 24); y: 32; control1X: 150; control1Y: 0; control2X: 180; control2Y: 20 }
-          PathCubic { x: 0; y: 64; control1X: 180; control1Y: 44; control2X: 150; control2Y: 64 }
-          PathLine { x: 0; y: 0 }
         }
       }
       RowLayout {

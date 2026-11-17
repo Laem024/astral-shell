@@ -16,7 +16,7 @@ Rectangle {
   implicitWidth: 300
   implicitHeight: layout.implicitHeight + root.padding * 2
   radius: root.tokens.cardRadius
-  color: root.tokens.raised
+  color: root.tokens.sunken
   border.width: 1
   border.color: root.tokens.hairline
 
@@ -86,7 +86,7 @@ Rectangle {
       Layout.fillWidth: true
       columns: Math.max(1, root.columns)
       columnSpacing: root.compact ? 8 : 16
-      rowSpacing: 0
+      rowSpacing: 4
 
       Repeater {
         model: root.category.entries

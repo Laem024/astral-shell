@@ -13,7 +13,7 @@ Item {
   property var media: Data.MediaData
   readonly property var player: media.player
   readonly property real progress: media.progress
-  readonly property bool largeArtwork: height >= 440
+  readonly property bool largeArtwork: height >= 420 && width >= 260
   readonly property int inset: height < 400 ? 12 : 16
   function duration(seconds: real): string {
     const value = Math.max(0, Math.floor(seconds));
@@ -267,13 +267,20 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             readonly property real aspect: artwork.status === Image.Ready && artwork.implicitHeight > 0
               ? Math.max(0.5, Math.min(1.8, artwork.implicitWidth / artwork.implicitHeight)) : 1
-            Layout.preferredHeight: root.largeArtwork
-              ? Math.floor(Math.min(composition.width - 20, Math.max(64, scroll.height - root.inset * 2
-                  - selector.implicitHeight - trackInfo.implicitHeight - timeline.implicitHeight
+            // Reserve room for metadata and transport before sizing the sleeve.
+            readonly property real size: root.largeArtwork
+              ? Math.max(96, Math.min(260, composition.width * 0.82 / aspect,
+                  scroll.height - root.inset * 2 - selector.implicitHeight
+                  - trackInfo.implicitHeight - timeline.implicitHeight
                   - transportRow.implicitHeight - repeatMode.implicitHeight
-                  - composition.spacing * 4 - hero.rowSpacing - 1)))
-              : Math.min(96, composition.width * 0.4)
-            Layout.preferredWidth: Math.min(composition.width, Layout.preferredHeight * aspect)
+                  - composition.spacing * 4 - hero.rowSpacing))
+              : Math.max(48, Math.min(104, composition.width * 0.32))
+            Layout.preferredHeight: size
+            Layout.preferredWidth: size * aspect
+            Layout.minimumHeight: size
+            Layout.maximumHeight: size
+            Layout.minimumWidth: size * aspect
+            Layout.maximumWidth: size * aspect
             Accessible.role: Accessible.Graphic
             Accessible.name: root.player ? "Artwork for " + root.media.title : "No track artwork"
             Components.RoundedClip {

@@ -8,7 +8,7 @@ Item {
   required property var tokens
   required property var entry
   property bool compact: false
-  implicitHeight: root.compact ? 32 : 36
+  implicitHeight: Math.max(root.compact ? 44 : 48, row.implicitHeight + 16)
 
   HoverHandler { id: hover }
 
@@ -21,6 +21,7 @@ Item {
   }
 
   RowLayout {
+    id: row
     anchors.fill: parent
     anchors.leftMargin: root.compact ? 8 : 10
     anchors.rightMargin: root.compact ? 8 : 10
@@ -31,7 +32,7 @@ Item {
       Layout.minimumWidth: 0
       text: root.entry.label
       textFormat: Text.PlainText
-      elide: Text.ElideRight
+      wrapMode: Text.Wrap
       color: hover.hovered ? root.tokens.text : Qt.alpha(root.tokens.text, 0.88)
       font {
         family: root.tokens.font
@@ -39,8 +40,9 @@ Item {
       }
     }
 
-    Row {
-      Layout.alignment: Qt.AlignVCenter
+    Flow {
+      Layout.preferredWidth: Math.min(implicitWidth, root.width * 0.55)
+      Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
       spacing: root.compact ? 3 : 4
 
       Text {

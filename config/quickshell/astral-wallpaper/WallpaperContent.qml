@@ -590,10 +590,12 @@ Pane {
     Rectangle { anchors.fill: parent; color: Qt.alpha(root.tokens.background, 0.72) }
     MouseArea { anchors.fill: parent; onClicked: confirmation.close() }
     Pane {
+      objectName: "wallpaperPreviewDialog"
       anchors.centerIn: parent
-      width: Math.min(680, parent.width - 32)
-      height: Math.min(740, parent.height - 32)
-      padding: 24
+      width: Math.max(1, Math.min(680, parent.width - 32))
+      height: Math.max(1, Math.min(740, parent.height - 32))
+      padding: parent.height < 500 ? 16 : 24
+      clip: true
       font: root.font
       palette: root.palette
       background: Rectangle {
@@ -603,12 +605,16 @@ Pane {
       contentItem: ColumnLayout {
         spacing: 14
         ScrollView {
+          id: previewScroll
+          objectName: "wallpaperPreviewScroll"
+          clip: true
           // Keep the action row in the popup's viewport when the display is
           // short or the interface scale is large. The preview details scroll.
           Layout.fillWidth: true; Layout.fillHeight: true; Layout.minimumHeight: 0
           contentWidth: availableWidth
+          ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
           ColumnLayout {
-            width: parent.width; spacing: 12
+            width: previewScroll.availableWidth; spacing: 12
             Label { text: "SELECTED WALLPAPER"; font.pixelSize: 10; font.bold: true; font.letterSpacing: 1.4; color: root.tokens.cyan }
             Rectangle {
               Layout.fillWidth: true; Layout.preferredHeight: Math.max(120, Math.min(300, root.height * 0.36))

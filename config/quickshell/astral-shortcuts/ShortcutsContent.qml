@@ -20,7 +20,7 @@ FocusScope {
   readonly property bool narrow: width < 780
   readonly property bool filtering: root.query.trim() !== "" || root.modifiers.length > 0
   readonly property int cardGap: root.compact ? 12 : 16
-  readonly property int entryColumns: (root.compact || root.narrow) ? 1 : 2
+  readonly property int entryColumns: width >= 960 ? 2 : 1
 
   readonly property var rail: Logic.railFor(root.shortcuts.categories, root.shortcuts.total)
   readonly property string selected: root.rail.length > 0
@@ -29,11 +29,9 @@ FocusScope {
   readonly property var display: root.selected === "All"
     ? root.filtered
     : root.filtered.filter(category => category.name === root.selected)
-  readonly property var masonry: Logic.splitColumns(root.display)
   readonly property int visibleTotal: Logic.countEntries(root.filtered)
   readonly property int displayTotal: Logic.countEntries(root.display)
   readonly property bool single: root.selected !== "All" || root.filtering
-  readonly property bool listMode: root.single || root.narrow || root.display.length < 2
   // Flat rows remain available to checks and other consumers; the card view
   // groups the same entries visually.
   readonly property var rows: Logic.rowsFor(root.display, root.selected)
@@ -240,7 +238,7 @@ FocusScope {
             color: root.tokens.border
           }
           Text {
-            text: "SHORTCUT ATLAS"
+            text: "HYPRLAND"
             color: root.tokens.muted
             font {
               family: root.tokens.mono
@@ -253,7 +251,7 @@ FocusScope {
         Text {
           Layout.fillWidth: true
           Layout.minimumWidth: 0
-          text: "Keyboard shortcuts"
+          text: "Your keyboard, at a glance"
           color: root.tokens.text
           elide: Text.ElideRight
           font {
@@ -559,209 +557,44 @@ FocusScope {
       }
     }
 
-    RowLayout {
+    ColumnLayout {
       Layout.fillWidth: true
       Layout.fillHeight: true
       Layout.minimumHeight: 0
-      spacing: root.compact ? 16 : 20
+      spacing: 16
 
-      ColumnLayout {
-        Layout.preferredWidth: root.compact ? 168 : 208
-        Layout.maximumWidth: root.compact ? 168 : 208
-        Layout.fillHeight: true
-        Layout.minimumHeight: 0
-        spacing: 4
-
-        Text {
-          text: "LIBRARY"
-          Layout.bottomMargin: 4
-          color: root.tokens.muted
-          font {
-            family: root.tokens.mono
-            pixelSize: 10
-            letterSpacing: 1.4
-          }
-        }
-
-        Flickable {
-          id: navFlick
-          Layout.fillWidth: true
-          Layout.fillHeight: true
-          clip: true
-          boundsBehavior: Flickable.StopAtBounds
-          contentWidth: width
-          contentHeight: navColumn.implicitHeight
-          ScrollBar.vertical: ScrollBar {
-            policy: navFlick.contentHeight > navFlick.height + 1
-              ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
-            width: 4
-            contentItem: Rectangle {
-              implicitWidth: 4
-              radius: 2
-              color: Qt.alpha(root.tokens.muted, 0.3)
+      Flow {
+        Layout.fillWidth: true
+        Layout.preferredHeight: implicitHeight
+        spacing: 6
+        Repeater {
+          model: root.rail
+          delegate: Button {
+            id: categoryButton
+            required property var modelData
+            required property int index
+            readonly property bool current: root.categoryIndex === index
+            text: modelData.name + "  " + root.displayCount(modelData.name)
+            implicitHeight: 32
+            leftPadding: 14; rightPadding: 14
+            focusPolicy: Qt.NoFocus
+            Accessible.name: modelData.name + " shortcuts"
+            onClicked: { root.select(index); root.forceActiveFocus(); }
+            contentItem: Text {
+              text: categoryButton.text
+              color: categoryButton.current ? root.tokens.background : root.tokens.muted
+              font { family: root.tokens.font; pixelSize: 12; weight: Font.Medium }
+              horizontalAlignment: Text.AlignHCenter
+              verticalAlignment: Text.AlignVCenter
             }
-            background: Item {}
-          }
-
-          Column {
-            id: navColumn
-            width: navFlick.width
-            spacing: 4
-
-            Repeater {
-              model: root.rail
-              delegate: Button {
-                id: categoryButton
-                required property var modelData
-                required property int index
-                readonly property bool current: root.categoryIndex === categoryButton.index
-                readonly property color accent: root.accentFor(categoryButton.modelData.name)
-                readonly property int shownCount: root.displayCount(categoryButton.modelData.name)
-                width: navColumn.width
-                height: root.compact ? 32 : 36
-                padding: 0
-                focusPolicy: Qt.NoFocus
-                Accessible.name: categoryButton.modelData.name + " shortcuts"
-                enabled: !root.filtering || categoryButton.modelData.name === "All"
-                  || categoryButton.shownCount > 0
-                onClicked: {
-                  root.select(categoryButton.index);
-                  root.forceActiveFocus();
-                }
-
-                background: Item {}
-
-                contentItem: Item {
-                  Rectangle {
-                    anchors.fill: parent
-                    radius: root.tokens.rowRadius
-                    color: categoryButton.current
-                      ? root.tokens.raised
-                      : categoryButton.hovered && categoryButton.enabled
-                        ? Qt.alpha(root.tokens.muted, 0.07) : "transparent"
-                    border.width: 1
-                    border.color: categoryButton.current
-                      ? Qt.alpha(categoryButton.accent, 0.4) : "transparent"
-                  }
-                  Rectangle {
-                    visible: categoryButton.current
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 3
-                    height: 16
-                    radius: 1.5
-                    color: categoryButton.accent
-                  }
-                  RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 12
-                    anchors.rightMargin: 10
-                    spacing: 8
-                    Text {
-                      text: categoryButton.modelData.glyph
-                      color: categoryButton.current ? categoryButton.accent
-                        : Qt.alpha(root.tokens.text, 0.62)
-                      Layout.preferredWidth: 20
-                      opacity: categoryButton.enabled ? 1 : 0.4
-                      font {
-                        family: root.tokens.mono
-                        pixelSize: root.compact ? 14 : 16
-                        weight: Font.DemiBold
-                      }
-                    }
-                    Text {
-                      Layout.fillWidth: true
-                      Layout.minimumWidth: 0
-                      text: categoryButton.modelData.name
-                      elide: Text.ElideRight
-                      color: categoryButton.current ? root.tokens.text : root.tokens.muted
-                      opacity: categoryButton.enabled ? 1 : 0.45
-                      font {
-                        family: root.tokens.font
-                        pixelSize: root.compact ? 11 : 12
-                        weight: categoryButton.current ? Font.DemiBold : Font.Normal
-                      }
-                    }
-                    Text {
-                      text: categoryButton.shownCount
-                      color: categoryButton.current
-                        ? categoryButton.accent : root.tokens.muted
-                      opacity: categoryButton.enabled ? 1 : 0.4
-                      font {
-                        family: root.tokens.mono
-                        pixelSize: 10
-                      }
-                    }
-                  }
-                }
-              }
+            background: Rectangle {
+              radius: 8
+              color: categoryButton.current ? root.tokens.cyan
+                : categoryButton.hovered ? root.tokens.raised : root.tokens.sunken
+              border.color: categoryButton.current ? "transparent" : root.tokens.hairline
             }
           }
         }
-
-        Rectangle {
-          Layout.fillWidth: true
-          implicitHeight: sourceColumn.implicitHeight + 24
-          radius: root.tokens.cardRadius
-          color: root.tokens.sunken
-          border.width: 1
-          border.color: root.tokens.hairline
-
-          ColumnLayout {
-            id: sourceColumn
-            anchors.fill: parent
-            anchors.margins: 12
-            spacing: 4
-
-            RowLayout {
-              spacing: 6
-              Rectangle {
-                width: 6
-                height: 6
-                radius: 3
-                color: root.syncColor
-              }
-              Text {
-                text: "LIVE SOURCE"
-                color: root.syncColor
-                font {
-                  family: root.tokens.mono
-                  pixelSize: 10
-                  letterSpacing: 1.1
-                }
-              }
-            }
-            Text {
-              Layout.fillWidth: true
-              Layout.minimumWidth: 0
-              text: "hyprctl -j binds"
-              color: root.tokens.text
-              elide: Text.ElideRight
-              font {
-                family: root.tokens.mono
-                pixelSize: 11
-              }
-            }
-            Text {
-              Layout.fillWidth: true
-              Layout.minimumWidth: 0
-              visible: !root.compact
-              text: "Refreshed every time this panel opens."
-              color: root.tokens.muted
-              wrapMode: Text.Wrap
-              font {
-                family: root.tokens.font
-                pixelSize: 11
-              }
-            }
-          }
-        }
-      }
-
-      Rectangle {
-        Layout.fillHeight: true
-        implicitWidth: 1
-        color: root.tokens.hairline
       }
 
       ColumnLayout {
@@ -782,7 +615,7 @@ FocusScope {
             boundsBehavior: Flickable.StopAtBounds
             flickableDirection: Flickable.VerticalFlick
             contentWidth: width
-            contentHeight: Math.max(root.listMode ? singleColumn.implicitHeight : atlas.implicitHeight, height)
+            contentHeight: Math.max(singleColumn.implicitHeight, height)
             ScrollBar.vertical: ScrollBar {
               policy: flick.contentHeight > flick.height + 1 ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
               width: 6
@@ -797,12 +630,9 @@ FocusScope {
             Column {
               id: singleColumn
               width: flick.width - 12
-              y: root.listMode && singleColumn.implicitHeight < flick.height
-                ? Math.round((flick.height - singleColumn.implicitHeight) / 2) : 0
               spacing: root.cardGap
-              visible: root.listMode
               Repeater {
-                model: root.listMode ? root.display : []
+                model: root.display
                 delegate: ShortcutCard {
                   required property var modelData
                   width: parent.width
@@ -815,47 +645,6 @@ FocusScope {
               }
             }
 
-            Row {
-              id: atlas
-              width: flick.width - 12
-              spacing: root.cardGap
-              visible: !root.listMode
-              readonly property real columnWidth: Math.max(1, (width - spacing) / 2)
-
-              Column {
-                width: atlas.columnWidth
-                spacing: root.cardGap
-                Repeater {
-                  model: root.listMode ? [] : root.masonry.left
-                  delegate: ShortcutCard {
-                    required property var modelData
-                    width: parent.width
-                    tokens: root.tokens
-                    category: modelData
-                    accent: root.accentFor(modelData.name)
-                    columns: 1
-                    compact: root.compact
-                  }
-                }
-              }
-
-              Column {
-                width: atlas.columnWidth
-                spacing: root.cardGap
-                Repeater {
-                  model: root.listMode ? [] : root.masonry.right
-                  delegate: ShortcutCard {
-                    required property var modelData
-                    width: parent.width
-                    tokens: root.tokens
-                    category: modelData
-                    accent: root.accentFor(modelData.name)
-                    columns: 1
-                    compact: root.compact
-                  }
-                }
-              }
-            }
           }
 
           ColumnLayout {
@@ -892,7 +681,7 @@ FocusScope {
             }
             Text {
               Layout.fillWidth: true
-              text: "hyprctl -j binds"
+              text: "Please wait a moment"
               color: root.tokens.muted
               horizontalAlignment: Text.AlignHCenter
               font {
@@ -1070,7 +859,7 @@ FocusScope {
           }
 
           Text {
-            text: "hyprctl · live"
+            text: "Hyprland"
             color: root.tokens.muted
             font {
               family: root.tokens.mono

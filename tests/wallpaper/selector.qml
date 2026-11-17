@@ -90,6 +90,18 @@ Scope {
       } else if (root.stage === 3) {
         const actions = root.findItem(testWindow.contentItem, "wallpaperActions");
         root.check(!!actions, "confirmation actions exist");
+        const dialog = root.findItem(content, "wallpaperPreviewDialog");
+        const previewScroll = root.findItem(content, "wallpaperPreviewScroll");
+        root.check(dialog && dialog.clip && previewScroll && previewScroll.clip,
+          "preview and scrolling details clip inside the dialog");
+        const dialogTop = dialog.mapToItem(testWindow.contentItem, 0, 0);
+        const dialogBottom = dialog.mapToItem(testWindow.contentItem, dialog.width, dialog.height);
+        root.check(dialogTop.y >= 0 && dialogBottom.y <= testWindow.height,
+          "preview dialog stays inside the vertical screen bounds");
+        const scrollTop = previewScroll.mapToItem(dialog, 0, 0);
+        root.check(scrollTop.y >= dialog.topPadding - 0.5
+          && scrollTop.y + previewScroll.height <= dialog.height - dialog.bottomPadding + 0.5,
+          "scrolling preview stays inside dialog padding: " + [scrollTop.y, previewScroll.height, dialog.height, dialog.topPadding, dialog.bottomPadding].join(", "));
         const labels = [];
         for (const child of actions.children) if (typeof child.text === "string") labels.push(child.text);
         root.check(!labels.some(text => text.startsWith("Assign to ")), "no Light/Dark assignment button");
