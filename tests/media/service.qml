@@ -158,7 +158,7 @@ Scope {
           root.check(Math.abs(artwork.paintedWidth - artwork.width) <= 1 && Math.abs(artwork.paintedHeight - artwork.height) <= 1, "portrait artwork fits its frame without side bars");
           root.check(artwork.sourceSize.width >= artwork.width * 2, "artwork resolution");
           const frame = root.find(page, "mediaArtworkFrame");
-          root.check(frame.height >= 150 && Math.abs(frame.width / frame.height - 0.75) < 0.01, "artwork frame follows portrait proportions");
+          root.check(frame.height >= 88 && Math.abs(frame.width / frame.height - 0.75) < 0.01, "artwork frame follows portrait proportions");
           first.trackArtUrl = "file:///nonexistent-astral-test-cover";
           root.stage++;
         } else if (root.stage === 2 && artwork.status === Image.Error) {
@@ -174,7 +174,10 @@ Scope {
         } else if (root.stage === 3 && artwork.status === Image.Ready) {
           for (const view of [page, small, fitted]) {
             const viewport = root.find(view, "mediaViewport");
-            root.check(viewport.contentHeight <= view.height, "player has unnecessary scrolling at " + view.width + "x" + view.height);
+            // The category banner reserves its own space above the player.
+            root.check(viewport.mapToItem(view, 0, 0).y >= 76, "Music category banner has space");
+            if (view !== small) root.check(viewport.contentHeight <= viewport.height + 1, "player has unnecessary scrolling at " + view.width + "x" + view.height);
+            else root.check(viewport.interactive, "short player allows scrolling to all controls");
           }
           const footer = root.find(page, "mediaRepeatMode");
           const footerBottom = footer.mapToItem(page, 0, footer.height).y;

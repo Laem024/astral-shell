@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../../common" as Design
 
-// Each workspace opens with a readable title and a live service summary.
+// Each category opens with a readable title and a live service summary.
 Rectangle {
   id: root
   required property Design.Theme tokens

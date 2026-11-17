@@ -12,10 +12,10 @@ Normal workspace selection is square; the special selector stays circular. Statu
 
 The central popup uses a 760 × 760 logical-pixel canvas, bounded by the available screen and shared scale. `panel/ProfileHeader.qml` combines a cropped banner, a theme-colored orbital fallback, an editable portrait, the account display name and username. “Edit banner” and the portrait open the existing image pickers; the banner crop preview follows the header's current aspect ratio.
 
-Seven English workspaces use native line icons from `panel/CategoryGlyph.qml`. Navigation collapses to icons with tooltips on narrow screens. `panel/PageIntro.qml` provides category titles and live summaries; `PanelCard.qml` provides tinted section surfaces. All colors, corners, typography and animation timing come from the common shell theme, including light mode and disabled animations.
+Seven English categories use native line icons from `panel/CategoryGlyph.qml`. Navigation collapses to icons with tooltips on narrow screens. `panel/PageIntro.qml` provides category titles and live summaries; `PanelCard.qml` provides tinted section surfaces. All colors, corners, typography and animation timing come from the common shell theme, including light mode and disabled animations.
 
 - **Calendar:** month navigation, a gold today marker, weather metrics and the week forecast.
-- **Music:** an immersive album sleeve, player selection, timeline and a rounded transport deck.
+- **Music:** a category banner with live playback status, an immersive album sleeve, player selection, timeline and a rounded transport deck.
 - **Connections:** Wi-Fi, Bluetooth and VPN tiles with live summaries, followed by their existing management controls.
 - **Screen & captures:** a capture studio with source tiles, audio options, saved-file actions and display brightness.
 - **Sound:** output and microphone cards side by side when space permits, followed by the application mixer.

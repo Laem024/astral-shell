@@ -22,10 +22,9 @@ Item {
     {key: "Control Center", title: "Connections", symbol: "connections", accent: tokens.cyan},
     {key: "Display", title: "Screen & captures", symbol: "screen", accent: tokens.lavender},
     {key: "Sound", title: "Sound", symbol: "sound", accent: tokens.cyan},
-    {key: "Power", title: "Power & session", symbol: "power", accent: tokens.gold},
+    {key: "Power", title: "Energy & session", symbol: "bolt", accent: tokens.gold},
     {key: "Notifications", title: "Notifications", symbol: "notifications", accent: tokens.lavender}
   ]
-  readonly property var current: categories.find(category => category.key === tab) || categories[2]
   ColumnLayout {
     anchors.fill: parent
     visible: root.pickerMode === ""
@@ -64,7 +63,7 @@ Item {
             visible: !root.compact && !root.shortPanel
             Layout.fillWidth: true
             Layout.margins: 10
-            text: "WORKSPACE"
+            text: "CATEGORIES"
             color: root.tokens.muted
             font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 1.4 }
           }
@@ -127,24 +126,6 @@ Item {
         Layout.minimumWidth: 0
         Layout.minimumHeight: 0
         spacing: 12
-        RowLayout {
-          Layout.fillWidth: true
-          spacing: 8
-          Rectangle { width: 5; height: 5; radius: 2.5; color: root.current.accent }
-          Text {
-            Layout.fillWidth: true
-            text: root.current.title.toUpperCase()
-            color: root.tokens.muted
-            elide: Text.ElideRight
-            font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1.2 }
-          }
-          Text {
-            text: "ESC TO CLOSE"
-            visible: !root.compact
-            color: root.tokens.muted
-            font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 0.5 }
-          }
-        }
         Loader {
           id: pageLoader
           objectName: "centralPageLoader"

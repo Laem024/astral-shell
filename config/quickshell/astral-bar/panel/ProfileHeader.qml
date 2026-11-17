@@ -64,7 +64,7 @@ Rectangle {
       Layout.fillWidth: true
       text: "ASTRAL / CONTROL CENTER"
       color: root.tokens.text
-      font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1.8 }
+      font { family: root.tokens.font; pixelSize: 11; weight: Font.DemiBold; letterSpacing: 0.6 }
       elide: Text.ElideRight
     }
     PanelButton {
@@ -86,6 +86,10 @@ Rectangle {
       Layout.preferredWidth: root.compact ? 66 : 82
       Layout.preferredHeight: root.compact ? 66 : 82
       padding: 5
+      leftPadding: 5
+      rightPadding: 5
+      topPadding: 5
+      bottomPadding: 5
       onClicked: root.editRequested("avatar")
       ToolTip.visible: hovered
       ToolTip.text: text
@@ -139,7 +143,7 @@ Rectangle {
         text: "YOUR SPACE, IN SYNC"
         color: root.tokens.cyan
         elide: Text.ElideRight
-        font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 1.3 }
+        font { family: root.tokens.font; pixelSize: 10; weight: Font.DemiBold; letterSpacing: 0.6 }
       }
       Text {
         Layout.fillWidth: true
@@ -155,7 +159,7 @@ Rectangle {
         textFormat: Text.PlainText
         color: root.tokens.muted
         elide: Text.ElideRight
-        font { family: root.tokens.mono; pixelSize: 11 }
+        font { family: root.tokens.font; pixelSize: 12; weight: Font.Medium }
       }
     }
   }

@@ -104,7 +104,7 @@ ScrollView {
       tokens: root.tokens
       title: "Energy & session"
       subtitle: root.profileLabel + (Data.SystemData.externalPower ? " · Connected to power" : " · " + (root.batteryAvailable ? "On battery" : "Battery unavailable"))
-      symbol: "power"
+      symbol: "bolt"
       accent: root.tokens.gold
     }
     Section {
@@ -179,7 +179,7 @@ ScrollView {
               PathAngleArc { centerX: 44; centerY: 44; radiusX: 37; radiusY: 37; startAngle: -90; sweepAngle: 360 * root.batteryLevel }
             }
           }
-          CategoryGlyph { anchors.centerIn: parent; kind: "power"; ink: root.batteryAccent; width: 24; height: 24 }
+          CategoryGlyph { anchors.centerIn: parent; kind: "bolt"; ink: root.batteryAccent; width: 24; height: 24 }
         }
       }
       Rectangle {
