@@ -14,6 +14,7 @@ Item {
   readonly property bool hovered: hover.hovered
   property bool vertical: false
   property bool compact: false
+  readonly property int contentPadding: tokens.gap
   property color ink: hover.hovered ? tokens.cyan : tokens.muted
   implicitWidth: vertical ? 52 : 192
   implicitHeight: vertical ? (compact ? 112 : 176) : 40
@@ -39,7 +40,7 @@ Item {
     anchors.centerIn: parent
     rotation: root.vertical ? (root.tokens.settings.value.position === "right" ? 90 : -90) : 0
     Components.BarGlyph {
-      x: 12; y: 5
+      x: root.contentPadding; y: 5
       width: 13; height: 13
       kind: "window"
       ink: root.ink
@@ -47,7 +48,7 @@ Item {
     Text {
       id: focusLabel
       objectName: "windowFocus"
-      x: 31; y: 6
+      x: root.contentPadding + 19; y: 6
       text: "FOCUS"
       color: root.ink
       font.family: root.tokens.mono
@@ -68,7 +69,8 @@ Item {
     }
     Text {
       objectName: "windowTitle"
-      x: 12; y: 20; width: Math.max(0, parent.width - (root.vertical ? 24 : 32))
+      x: root.contentPadding; y: 20
+      width: Math.max(0, parent.width - 2 * root.contentPadding)
       text: root.title
       textFormat: Text.PlainText
       color: root.hovered ? root.tokens.cyan : root.tokens.text

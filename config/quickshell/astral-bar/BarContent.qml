@@ -113,10 +113,9 @@ Item {
       objectName: "composition"
       readonly property real sideMinimum: Math.max(root.minimumGroupWidth(startGroup), root.minimumGroupWidth(endGroup))
       readonly property real sideExtent: Math.max(sideMinimum, (width - (root.shown.workspaces ? centerWorkspaces.implicitWidth + 2 * root.tokens.section : root.tokens.section)) / 2)
-      readonly property real sideHeight: Math.max(startGroup.implicitHeight, endGroup.implicitHeight)
       readonly property int visibleGroups: Number(startGroup.visible) + Number(root.shown.workspaces) + Number(endGroup.visible)
-      readonly property real minimumVerticalHeight: (startGroup.visible ? sideHeight : 0)
-        + (endGroup.visible ? sideHeight : 0)
+      readonly property real minimumVerticalHeight: (startGroup.visible ? startGroup.implicitHeight : 0)
+        + (endGroup.visible ? endGroup.implicitHeight : 0)
         + (root.shown.workspaces ? workspaceContainer.implicitHeight : 0)
         + Math.max(0, visibleGroups - 1) * rowSpacing
       scale: root.vertical ? Math.min(1, viewport.height / Math.max(1, minimumVerticalHeight)) : 1
@@ -135,9 +134,6 @@ Item {
         Layout.fillWidth: !root.vertical
         Layout.fillHeight: false
         Layout.preferredWidth: root.vertical ? 60 : composition.sideMinimum
-        Layout.minimumHeight: root.vertical ? composition.sideHeight : 0
-        Layout.maximumHeight: root.vertical ? composition.sideHeight : Infinity
-        Layout.preferredHeight: root.vertical ? composition.sideHeight : -1
         Layout.alignment: root.vertical ? Qt.AlignHCenter | Qt.AlignTop : Qt.AlignVCenter
         columns: root.vertical ? 1 : 7
         columnSpacing: 12
@@ -191,7 +187,8 @@ Item {
           Layout.minimumWidth: root.vertical ? implicitWidth : 80
           Layout.maximumWidth: root.vertical ? implicitWidth : Infinity
           Layout.fillWidth: !root.vertical
-          Layout.fillHeight: root.vertical
+          Layout.fillHeight: false
+          Layout.rightMargin: root.vertical ? 0 : root.tokens.gap
           visible: root.shown.window && (root.vertical || !root.compact)
           Layout.alignment: Qt.AlignHCenter
           tokens: root.tokens
@@ -240,9 +237,6 @@ Item {
         Layout.fillWidth: !root.vertical
         Layout.fillHeight: false
         Layout.preferredWidth: root.vertical ? 60 : composition.sideMinimum
-        Layout.minimumHeight: root.vertical ? composition.sideHeight : 0
-        Layout.maximumHeight: root.vertical ? composition.sideHeight : Infinity
-        Layout.preferredHeight: root.vertical ? composition.sideHeight : -1
         Layout.alignment: root.vertical ? Qt.AlignHCenter | Qt.AlignBottom : Qt.AlignVCenter
         columns: root.vertical ? 1 : 9
         columnSpacing: root.minimal ? Math.max(3, root.tokens.gap / 2) : root.tokens.gap
