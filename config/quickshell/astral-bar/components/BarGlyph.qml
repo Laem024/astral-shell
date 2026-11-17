@@ -51,29 +51,30 @@ Item {
         capStyle: ShapePath.RoundCap
         joinStyle: ShapePath.RoundJoin
         fillColor: root.kind === "astral" ? root.ink : root.kind === "play" ? Qt.alpha(root.ink, 0.18) : "transparent"
-        PathSvg { path: root.outline }
+        PathSvg { path: root.kind === "astral" ? "" : root.outline }
       }
-      // Alternating facets give the four-point emblem a carved surface.
+      // One light direction and a symmetric inset keep the star legible.
       ShapePath {
-        strokeColor: "transparent"
-        fillColor: Qt.lighter(root.ink, 1.4)
+        strokeColor: Qt.lighter(root.ink, 1.25)
+        strokeWidth: 0.6
+        joinStyle: ShapePath.RoundJoin
+        fillGradient: LinearGradient {
+          x1: 5; y1: 3; x2: 18; y2: 22
+          GradientStop { position: 0; color: Qt.lighter(root.ink, 1.45) }
+          GradientStop { position: 0.45; color: root.ink }
+          GradientStop { position: 1; color: Qt.darker(root.ink, 1.4) }
+        }
+        PathSvg { path: root.kind === "astral" ? root.outline : "" }
+      }
+      ShapePath {
+        strokeColor: Qt.alpha(Qt.lighter(root.ink, 1.6), 0.65)
+        strokeWidth: 0.55
+        joinStyle: ShapePath.RoundJoin
+        fillColor: "transparent"
         PathSvg {
           path: root.kind === "astral"
-            ? "M12 2 L12 12 L9.2 9.2 Z M12 12 L22 12 L14.8 9.2 Z M12 12 L12 22 L14.8 14.8 Z M2 12 L12 12 L9.2 14.8 Z" : ""
+            ? "M12 5.5 L14 10 L18.5 12 L14 14 L12 18.5 L10 14 L5.5 12 L10 10 Z" : ""
         }
-      }
-      ShapePath {
-        strokeColor: "transparent"
-        fillColor: Qt.darker(root.ink, 1.5)
-        PathSvg {
-          path: root.kind === "astral"
-            ? "M12 2 L14.8 9.2 L12 12 Z M12 12 L14.8 14.8 L22 12 Z M12 12 L9.2 14.8 L12 22 Z M2 12 L9.2 9.2 L12 12 Z" : ""
-        }
-      }
-      ShapePath {
-        strokeColor: "transparent"
-        fillColor: Qt.lighter(root.ink, 1.7)
-        PathSvg { path: root.kind === "astral" ? "M12 10.5 L13.5 12 L12 13.5 L10.5 12 Z" : "" }
       }
     }
   }

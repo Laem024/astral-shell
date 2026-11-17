@@ -244,6 +244,12 @@ Item {
 
         Item {
           id: holder
+          // Flatten before perspective, with transparent texels around the
+          // card so filtering can soften its outer silhouette as well.
+          layer.enabled: true
+          layer.smooth: true
+          layer.sourceRect: Qt.rect(-16, -16, width + 32, height + 32)
+          layer.textureSize: Qt.size(Math.ceil((width + 32) * 2), Math.ceil((height + 32) * 2))
           anchors.horizontalCenter: parent.horizontalCenter
           width: root.cardWidth
           height: root.cardHeight
@@ -274,6 +280,7 @@ Item {
 
           Rectangle {
             id: card
+            antialiasing: true
             anchors.fill: parent
             radius: root.tokens.cardRadius + 4
             color: root.tokens.background
@@ -330,6 +337,7 @@ Item {
               anchors.fill: parent
               radius: card.radius
               color: "transparent"
+              antialiasing: true
               border.width: tile.selected ? 2 : 1
               border.color: tile.selected ? root.tokens.cyan : root.tokens.border
             }
