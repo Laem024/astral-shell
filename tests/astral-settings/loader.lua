@@ -1,7 +1,8 @@
 local loader = "config/hyprland/modules/astral-settings.lua"
 local actual_loadfile = loadfile
 local calls = 0
-hl = {config=function() calls=calls+1 end, monitor=function() calls=calls+1 end}
+local applied_input
+hl = {config=function(data) calls=calls+1; applied_input=data.input end, monitor=function() calls=calls+1 end}
 local function base()
   return {version=1,input={kb_layout="us",touchpad={["tap-to-click"]=true}},monitors={},colors={cyan="7FD0BF",lavender="A9B5D9",muted="8D9994",shadow="0E1113"}}
 end
@@ -16,6 +17,8 @@ local function run(data, expected)
   assert(calls==expected, "Unexpected compositor calls: "..calls)
 end
 run(base(),1)
+local defaults=base(); defaults.input.accel_profile=""; run(defaults,1)
+assert(applied_input.accel_profile=="adaptive")
 local value=base(); value.input.exec="untrusted"; run(value,0)
 value=base(); value.colors.cyan="not hex"; run(value,0)
 value=base(); value.version=2; run(value,0)

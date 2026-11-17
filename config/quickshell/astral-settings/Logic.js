@@ -72,7 +72,14 @@ function overrideData(desktop, common) {
   return {version:1, input:desktop.input, monitors:desktop.monitors, cursor:desktop.themes[common.mode].cursor || '', colors:{cyan:hex(p.cyan),lavender:hex(p.lavender),muted:hex(p.muted),shadow:hex(p.background)}};
 }
 function overrideLua(desktop, common) { return '-- Managed by Astral Settings. Confirmed overrides only.\nreturn '+lua(overrideData(desktop,common))+'\n'; }
-function inputLua(input) { validateDesktop({version:1,input:input,themes:{light:{},dark:{}},monitors:[]}); return 'hl.config('+lua({input:input})+')'; }
+// Hyprland's Lua validator rejects the empty acceleration profile. Keep legacy
+// preferences readable and apply Default as the standard adaptive profile.
+function appliedInput(input) {
+  const result=clone(input);
+  if(result.accel_profile==='') result.accel_profile='adaptive';
+  return result;
+}
+function inputLua(input) { validateDesktop({version:1,input:input,themes:{light:{},dark:{}},monitors:[]}); return 'hl.config('+lua({input:appliedInput(input)})+')'; }
 // New Hyprland releases publish hardware capabilities separately from live state.
 // Missing evidence stays unknown; HDR capability never implies 10-bit support.
 function displayCapability(m, kind) {
@@ -117,7 +124,7 @@ function validateMonitors(list, inventory) {
       if (!live) throw new Error('Display disconnected: '+m.output);
       if (m.cm === 'hdr' && displayCapability(live,'hdr') !== true) throw new Error('HDR capability is unavailable');
       if (m.vrr && displayCapability(live,'vrr') !== true && m.vrr !== monitorFromLive(live).vrr) throw new Error('VRR capability is unavailable');
-      if (m.bitdepth === 10 && displayCapability(live,'10bit') !== true) throw new Error('10-bit capability is unavailable');
+      if (m.bitdepth === 10 && displayCapability(live,'10bit') === false) throw new Error('10-bit capability is unavailable');
       if (m.mode !== 'preferred' && live.availableModes && !live.availableModes.some(mode => sameMode(mode,m.mode)) && m.mode !== monitorFromLive(live).mode) throw new Error('Mode is not advertised by the display');
     }
   }

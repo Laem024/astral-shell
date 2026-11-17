@@ -109,15 +109,16 @@ ColumnLayout {
           id:capability
           required property var modelData
           readonly property var supported:Logic.displayCapability(display.live,modelData.key)
+          readonly property bool canTest:supported===true || (modelData.key==='10bit' && supported===null)
           Layout.fillWidth:true; spacing:16
           ColumnLayout {
             Layout.fillWidth:true; spacing:4
             Label { text:capability.modelData.title; color:root.tokens.text; font.pixelSize:12 }
-            Label { text:capability.supported===true ? capability.modelData.subtitle : Logic.capabilityText(display.live,capability.modelData.key); color:root.tokens.muted; font.pixelSize:11; wrapMode:Text.Wrap; Layout.fillWidth:true }
+            Label { text:capability.supported===null && capability.modelData.key==='10bit' ? 'Try 10-bit for 20 seconds; keep only if the display works correctly' : capability.supported===true ? capability.modelData.subtitle : Logic.capabilityText(display.live,capability.modelData.key); color:root.tokens.muted; font.pixelSize:11; wrapMode:Text.Wrap; Layout.fillWidth:true }
           }
           SettingsChoice {
             tokens:root.tokens; Layout.preferredWidth:180
-            visible:capability.modelData.key!=='hdr'; enabled:capability.supported===true
+            visible:capability.modelData.key!=='hdr'; enabled:capability.canTest
             model:capability.modelData.key==='vrr' ? ['Off','On','Fullscreen'] : ['8-bit','10-bit']
             currentIndex:capability.modelData.key==='vrr' ? display.modelData.vrr : display.modelData.bitdepth===10 ? 1:0
             onActivated:root.edit(display.index,capability.modelData.key==='vrr' ? 'vrr':'bitdepth',capability.modelData.key==='vrr' ? currentIndex : currentIndex===1 ? 10:8)

@@ -28,7 +28,7 @@ function all() {
 function hint(f) {
  const hints={
   'input.sensitivity':'Pointer speed · −1 to 1',
-  'input.accel_profile':'Default follows the compositor’s acceleration profile.',
+  'input.accel_profile':'Default uses the adaptive acceleration profile.',
   'input.natural_scroll':'Reverse the mouse wheel direction.',
   'input.scroll_factor':'Mouse wheel multiplier · 1 is the original speed.',
   'input.touchpad.natural_scroll':'Move content in the direction of your fingers.',

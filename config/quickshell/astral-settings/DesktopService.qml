@@ -220,7 +220,7 @@ QtObject {
   function verifyInput(input,keys,index,done) {
     if(preview || index>=keys.length) { done(true); return; }
     if(query.running) { Qt.callLater(()=>verifyInput(input,keys,index,done)); return; }
-    const key=keys[index], expected=Logic.at(input,key);
+    const key=keys[index], expected=Logic.at(Logic.appliedInput(input),key);
     query.run(['hyprctl','-j','getoption','input:'+key.replace('.',':')], (code,out)=> {
       try {
         if(code) throw new Error('Cannot query input');
@@ -311,7 +311,7 @@ QtObject {
       const mode=m.mode.match(/^(\d+)x(\d+)@([\d.]+)$/);
       const xy=m.position.split('x');
       const mirrored=typeof live.mirrorOf==='string' && live.mirrorOf!=='none' ? live.mirrorOf : '';
-      return !live.disabled && live.x===Number(xy[0]) && live.y===Number(xy[1]) && mirrored===m.mirror && (!(live.bitDepth || live.currentFormat) || Logic.displayBitDepth(live)===m.bitdepth) && (m.cm!=='hdr' || Logic.monitorFromLive(live).cm==='hdr') && Math.abs(live.scale-m.scale)<0.01 && live.transform===m.transform && (!mode || (live.width===Number(mode[1]) && live.height===Number(mode[2]) && Math.abs(live.refreshRate-Number(mode[3]))<1));
+      return !live.disabled && live.x===Number(xy[0]) && live.y===Number(xy[1]) && mirrored===m.mirror && Logic.displayBitDepth(live)===m.bitdepth && (m.cm!=='hdr' || Logic.monitorFromLive(live).cm==='hdr') && Math.abs(live.scale-m.scale)<0.01 && live.transform===m.transform && (!mode || (live.width===Number(mode[1]) && live.height===Number(mode[2]) && Math.abs(live.refreshRate-Number(mode[3]))<1));
     });
   }
   function keep() {

@@ -183,12 +183,16 @@ Display edits run as a **20-second test**. Keep them explicitly or the independe
 worker restores the previous layout. Closing, locking, command failure and
 restarting with a pending journal also trigger recovery. Disconnected outputs are
 excluded during recovery and an available output is enabled if necessary. Unknown
-HDR, VRR and 10-bit capabilities remain disabled with **Not reported by Hyprland**;
+HDR and VRR capabilities remain disabled with **Not reported by Hyprland**;
 explicit negative capabilities say **Not supported by this display**. Detection
 reads `hardwareDetails.hdr` / `vrrCapable`, legacy capability fields and active
-10-bit pixel formats. HDR alone does not establish 10-bit support; Astral never
+10-bit pixel formats. When 10-bit support is unknown, its selector allows a
+20-second trial and verifies the active pixel format before confirmation. Explicit
+negative 10-bit capabilities remain disabled. HDR alone does not establish 10-bit support; Astral never
 forces HDR support. Input discovery handles Hyprland's `[[EMPTY]]` default string
-and distinguishes pending inspection from unreadable options. Monitor fields
+and distinguishes pending inspection from unreadable options. The Default
+acceleration profile applies `adaptive`, including legacy empty preferences, because
+the Lua API rejects the empty profile. Monitor fields
 follow the [Hyprland 0.57 monitor API](https://wiki.hypr.land/0.57.0/configuring/core/monitors/).
 
 GTK 3/4 and Qt 5/6 theme settings preserve unrelated INI keys and receive

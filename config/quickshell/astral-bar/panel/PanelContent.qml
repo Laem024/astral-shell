@@ -30,13 +30,6 @@ Item {
     anchors.fill: parent
     visible: root.pickerMode === ""
     spacing: 16
-    PanelButton {
-      objectName: "astralSettingsButton"
-      Layout.fillWidth: true
-      tokens: root.tokens
-      text: "Settings"
-      onClicked: settingsCommand.run(["astral-settings", "open"], () => {})
-    }
     ProfileHeader {
       Layout.fillWidth: true
       Layout.preferredHeight: implicitHeight
@@ -118,13 +111,30 @@ Item {
             }
           }
           Item { Layout.fillHeight: true; Layout.minimumHeight: 0 }
-          Text {
-            visible: !root.compact && !root.shortPanel
+          RowLayout {
             Layout.fillWidth: true
-            Layout.margins: 10
-            text: "ASTRAL SHELL"
-            color: root.tokens.muted
-            font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 1.4 }
+            spacing: 4
+            Text {
+              visible: !root.compact
+              Layout.fillWidth: true
+              Layout.leftMargin: 10
+              text: "ASTRAL SHELL"
+              color: root.tokens.muted
+              font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 1.4 }
+            }
+            PanelButton {
+              objectName: "astralSettingsButton"
+              Layout.preferredWidth: 38
+              Layout.preferredHeight: 38
+              Layout.alignment: Qt.AlignHCenter
+              tokens: root.tokens
+              text: "Settings"
+              padding: 8
+              ToolTip.visible: hovered
+              ToolTip.text: text
+              contentItem: CategoryGlyph { kind: "sliders"; ink: root.tokens.muted }
+              onClicked: settingsCommand.run(["astral-settings", "open"], () => {})
+            }
           }
         }
       }

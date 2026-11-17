@@ -48,6 +48,13 @@ TestCase {
     rejects(()=>Logic.inputValue(key,{int:2}));
     rejects(()=>Logic.inputValue('sensitivity',{}));
   }
+  function test_default_acceleration() {
+    const input={accel_profile:'',natural_scroll:true};
+    compare(Logic.appliedInput(input).accel_profile,'adaptive');
+    compare(input.accel_profile,'');
+    verify(Logic.inputLua(input).includes('["accel_profile"]="adaptive"'));
+    compare(Logic.appliedInput({accel_profile:'flat'}).accel_profile,'flat');
+  }
   function test_lua() {
     compare(Logic.lua('"\\\n'), '"\\"\\\\\\010"');
     const v=state(); v.input.kb_options='literal\"; os.execute(\"touch /bad\")';
@@ -62,7 +69,8 @@ TestCase {
     a.disabled=false; b.disabled=false; a.mirror='DP-2'; b.mirror='DP-1'; rejects(()=>Logic.validateMonitors([a,b]));
     a.mirror=''; b.mirror=''; a.cm='hdr'; rejects(()=>Logic.validateMonitors([a],[{name:'DP-1'}]));
     a.cm='srgb'; a.vrr=1; rejects(()=>Logic.validateMonitors([a],[{name:'DP-1'}]));
-    a.vrr=0; a.bitdepth=10; rejects(()=>Logic.validateMonitors([a],[{name:'DP-1'}]));
+    a.vrr=0; a.bitdepth=10; Logic.validateMonitors([a],[{name:'DP-1'}]);
+    rejects(()=>Logic.validateMonitors([a],[{name:'DP-1',supports10bit:false}]));
     a.bitdepth=8; a.output='bad\nname'; rejects(()=>Logic.validateMonitors([a]));
   }
   function test_hardware_capabilities() {
@@ -81,7 +89,8 @@ TestCase {
     Logic.validateMonitors([a],[internal]);
     a.vrr=0; a.cm='hdr'; rejects(()=>Logic.validateMonitors([a],[internal]));
     a.output='HDMI-A-1'; Logic.validateMonitors([a],[external]);
-    a.bitdepth=10; rejects(()=>Logic.validateMonitors([a],[external]));
+    a.bitdepth=10; Logic.validateMonitors([a],[external]);
+    rejects(()=>Logic.validateMonitors([a],[Object.assign({},external,{supports10bit:false})]));
   }
   function test_display_conflicts() {
     const inventory=[{name:'DP-1',width:1920,height:1080,refreshRate:60,scale:1,x:0,y:0,transform:0}];

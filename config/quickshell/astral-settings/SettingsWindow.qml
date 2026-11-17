@@ -138,7 +138,7 @@ Window {
     'Displays': {symbol:'screen', subtitle:'Connected screens, resolution, layout and color.'},
     'Bar': {symbol:'bar', subtitle:'Position, workspaces and the modules you keep close.'},
     'Appearance': {symbol:'palette', subtitle:'Shell appearance, application themes and desktop scale.'},
-    'Colors': {symbol:'palette', subtitle:'Personalize the light and dark Astral palettes.'},
+    'Colors': {symbol:'brush', subtitle:'Personalize the light and dark Astral palettes.'},
     'Keyboard': {symbol:'keyboard', subtitle:'Keyboard layouts, repeat speed and startup preferences.'},
     'Mouse & Touchpad': {symbol:'mouse', subtitle:'Pointer speed, scrolling and touchpad gestures.'},
     'Power & Lock': {symbol:'power', subtitle:'Idle timers, automatic locking and suspend.'},

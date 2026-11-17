@@ -70,6 +70,7 @@ for _,k in ipairs({"cyan","lavender","muted","shadow"}) do
 end
 local p=data.colors
 -- The complete data has been validated before making any compositor call.
+if data.input.accel_profile=="" then data.input.accel_profile="adaptive" end
 hl.config({input=data.input,general={col={active_border={colors={"rgba("..p.cyan.."ee)","rgba("..p.lavender.."ee)"},angle=45},inactive_border="rgba("..p.muted.."66)"}},decoration={shadow={color="rgba("..p.shadow.."ee)"}}})
 -- Enable outputs before disabling others. Never force supports_hdr/supports_wide_color.
 for _,m in ipairs(data.monitors) do if not m.disabled then hl.monitor(m) end end
