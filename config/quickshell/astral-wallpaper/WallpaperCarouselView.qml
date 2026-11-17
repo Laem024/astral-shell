@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import "../common" as Common
 
 // Cinematic coverflow used by the quick wallpaper selector. It is a plain Item
 // so tests can render it without a Wayland layershell.
@@ -275,51 +276,54 @@ Item {
             id: card
             anchors.fill: parent
             radius: root.tokens.cardRadius + 4
-            clip: true
             color: root.tokens.background
-            Thumbnail {
+            Common.RoundedClip {
               anchors.fill: parent
-              service: root.service
-              path: tile.modelData.path
-              sourceSize.width: 640
-            }
-            Rectangle {
-              anchors.fill: parent
-              gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.alpha(root.tokens.background, 0.12) }
-                GradientStop { position: 0.55; color: "transparent" }
-                GradientStop { position: 1.0; color: Qt.alpha(root.tokens.background, 0.78) }
+              radius: card.radius
+              Thumbnail {
+                anchors.fill: parent
+                service: root.service
+                path: tile.modelData.path
+                sourceSize.width: 640
               }
-            }
-            Rectangle {
-              anchors { left: parent.left; top: parent.top; margins: 10 }
-              width: themeText.implicitWidth + 16; height: 22; radius: 6
-              color: Qt.alpha(root.tokens.background, 0.82)
-              border.width: 1
-              border.color: Qt.alpha(root.tokens.text, 0.10)
-              Text {
-                id: themeText
-                anchors.centerIn: parent
-                text: tile.modelData.theme === "light" ? "LIGHT" : tile.modelData.theme === "dark" ? "DARK" : "SHARED"
-                color: root.tokens.muted
-                font.family: root.tokens.font
-                font.pixelSize: 9; font.bold: true; font.letterSpacing: 1
+              Rectangle {
+                anchors.fill: parent
+                gradient: Gradient {
+                  GradientStop { position: 0.0; color: Qt.alpha(root.tokens.background, 0.12) }
+                  GradientStop { position: 0.55; color: "transparent" }
+                  GradientStop { position: 1.0; color: Qt.alpha(root.tokens.background, 0.78) }
+                }
               }
-            }
-            Rectangle {
-              visible: tile.inUse || tile.kind === "video" || tile.kind === "gif"
-              anchors { right: parent.right; top: parent.top; margins: 10 }
-              width: statusText.implicitWidth + 16; height: 22; radius: 6
-              color: tile.inUse ? Qt.alpha(root.tokens.cyan, 0.16) : Qt.alpha(root.tokens.background, 0.82)
-              border.width: 1
-              border.color: tile.inUse ? Qt.alpha(root.tokens.cyan, 0.45) : Qt.alpha(root.tokens.text, 0.10)
-              Text {
-                id: statusText
-                anchors.centerIn: parent
-                text: tile.inUse ? "● IN USE" : tile.kind === "video" ? "VIDEO" : "GIF"
-                color: tile.inUse ? root.tokens.cyan : root.tokens.muted
-                font.family: root.tokens.font
-                font.pixelSize: 9; font.bold: true; font.letterSpacing: 1
+              Rectangle {
+                anchors { left: parent.left; top: parent.top; margins: 10 }
+                width: themeText.implicitWidth + 16; height: 22; radius: 6
+                color: Qt.alpha(root.tokens.background, 0.82)
+                border.width: 1
+                border.color: Qt.alpha(root.tokens.text, 0.10)
+                Text {
+                  id: themeText
+                  anchors.centerIn: parent
+                  text: tile.modelData.theme === "light" ? "LIGHT" : tile.modelData.theme === "dark" ? "DARK" : "SHARED"
+                  color: root.tokens.muted
+                  font.family: root.tokens.font
+                  font.pixelSize: 9; font.bold: true; font.letterSpacing: 1
+                }
+              }
+              Rectangle {
+                visible: tile.inUse || tile.kind === "video" || tile.kind === "gif"
+                anchors { right: parent.right; top: parent.top; margins: 10 }
+                width: statusText.implicitWidth + 16; height: 22; radius: 6
+                color: tile.inUse ? Qt.alpha(root.tokens.cyan, 0.16) : Qt.alpha(root.tokens.background, 0.82)
+                border.width: 1
+                border.color: tile.inUse ? Qt.alpha(root.tokens.cyan, 0.45) : Qt.alpha(root.tokens.text, 0.10)
+                Text {
+                  id: statusText
+                  anchors.centerIn: parent
+                  text: tile.inUse ? "● IN USE" : tile.kind === "video" ? "VIDEO" : "GIF"
+                  color: tile.inUse ? root.tokens.cyan : root.tokens.muted
+                  font.family: root.tokens.font
+                  font.pixelSize: 9; font.bold: true; font.letterSpacing: 1
+                }
               }
             }
             Rectangle {

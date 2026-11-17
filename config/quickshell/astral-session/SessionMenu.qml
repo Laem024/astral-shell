@@ -80,7 +80,7 @@ Scope {
     color: "transparent"
     WlrLayershell.namespace: "astral-session"
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: root.opened ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: root.opened ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     onVisibleChanged: {
       if (visible) Qt.callLater(() => { if (window.visible && root.opened) grab.active = true; });
       else grab.active = false;
@@ -100,7 +100,7 @@ Scope {
       id: card
       anchors.centerIn: parent
       width: Math.max(1, Math.min(820, (window.width - 48) / root.tokens.scale))
-      height: Math.max(1, Math.min(card.width < 700 ? 530 : 350, (window.height - 48) / root.tokens.scale))
+      height: Math.max(1, Math.min(content.implicitHeight + 2, (window.height - 48) / root.tokens.scale))
       scale: root.tokens.scale * (0.97 + 0.03 * root.reveal)
       transformOrigin: Item.Center
       color: root.tokens.surface

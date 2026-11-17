@@ -303,6 +303,7 @@ Item {
           onActivated: root.navigate("Control Center", networkNode)
           connectionLabel: Data.SystemData.networkLabel
           connectionDetail: Data.SystemData.networkDetail
+          connectionState: Data.SystemData.networkState
           strength: Data.SystemData.networkLevel
           vertical: root.vertical
           compact: root.minimal

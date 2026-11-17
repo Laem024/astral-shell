@@ -10,10 +10,12 @@ Singleton {
   readonly property bool networkAvailable: NetworkData.available
   readonly property var networkDevice: NetworkData.connectedDevice
   readonly property bool ethernet: !!networkDevice && networkDevice.type === "ethernet"
-  readonly property string networkLabel: !networkAvailable ? "N/A" : !networkDevice ? "OFF" : ethernet ? "ETH" : "WiFi"
+  readonly property string networkState: !networkAvailable ? "unavailable" : networkDevice ? (ethernet ? "ethernet" : "wifi")
+    : NetworkData.adapters.length > 0 && (!NetworkData.radio || !NetworkData.hardware) ? "off" : "disconnected"
+  readonly property string networkLabel: ({unavailable: "N/A", off: "Off", disconnected: "Offline", ethernet: "ETH", wifi: "WiFi"})[networkState]
   readonly property real networkLevel: !networkDevice ? 0 : ethernet ? 1 : NetworkData.strength
   readonly property var activeNetwork: NetworkData.networks.find(n => n.active && networkDevice && n.device === networkDevice.name) || null
-  readonly property string networkDetail: !networkAvailable ? "Network unavailable" : !networkDevice ? "Disconnected"
+  readonly property string networkDetail: !networkAvailable ? "Network unavailable" : networkState === "off" ? (!NetworkData.hardware ? "Wi-Fi hardware blocked" : "Wi-Fi off") : !networkDevice ? "Disconnected"
     : (ethernet ? "Ethernet" : "Wi-Fi") + " · " + (!ethernet && activeNetwork ? activeNetwork.ssid : networkDevice.connection) + " · " + networkDevice.name
       + (ethernet ? "" : " · " + Math.round(networkLevel * 100) + "%")
 

@@ -29,6 +29,19 @@ Button {
   onReleased: if (root.holdRequired) root.holdEnded()
   onCanceled: if (root.holdRequired) root.holdEnded()
   onClicked: if (!root.holdRequired) root.activated()
+  Keys.onPressed: event => {
+    if (event.key !== Qt.Key_Return && event.key !== Qt.Key_Enter) return;
+    if (!event.isAutoRepeat) {
+      if (root.holdRequired) root.holdStarted();
+      else root.activated();
+    }
+    event.accepted = true;
+  }
+  Keys.onReleased: event => {
+    if (event.key !== Qt.Key_Return && event.key !== Qt.Key_Enter) return;
+    if (!event.isAutoRepeat && root.holdRequired) root.holdEnded();
+    event.accepted = true;
+  }
 
   contentItem: Item {
     implicitHeight: 150

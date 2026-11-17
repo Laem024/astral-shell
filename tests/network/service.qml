@@ -39,6 +39,7 @@ ShellRoot {
           root.check(n.adapters.length === 2, "adapters");
           root.check(n.selected === "wlan0", "selected connected adapter");
           root.check(n.connectedDevice.name === "en0", "Ethernet priority");
+          root.check(Data.SystemData.networkState === "ethernet" && Data.SystemData.networkLabel === "ETH", "bar shows wired connection");
           root.check(n.networks.length === 3 && n.networks[0].signal === 77, "grouping");
           root.check(n.profiles.length === 2, "profiles");
           root.check(n.compatible(n.networks[0]).length === 2, "duplicate profile choice");
@@ -72,6 +73,7 @@ ShellRoot {
           root.mode("off"); root.stage++;
         } else if (root.stage === 5) {
           root.check(n.state === "Radio off", "radio off");
+          root.check(Data.SystemData.networkState === "ethernet", "Wi-Fi radio off preserves active Ethernet indicator");
           root.mode("blocked"); root.stage++;
         } else if (root.stage === 6) {
           root.check(n.state === "Hardware blocked", "hardware block");
@@ -81,6 +83,17 @@ ShellRoot {
           root.mode("unavailable"); root.stage++;
         } else if (root.stage === 8) {
           root.check(n.state === "Service unavailable", "service unavailable");
+          root.check(Data.SystemData.networkState === "unavailable", "bar shows unavailable service");
+          root.mode("wifi"); root.stage++;
+        } else if (root.stage === 9) {
+          root.check(Data.SystemData.networkState === "wifi" && Data.SystemData.networkLabel === "WiFi", "bar shows Wi-Fi connection");
+          root.check(Data.SystemData.networkLevel === 0.77, "bar shows Wi-Fi strength");
+          root.mode("disconnected"); root.stage++;
+        } else if (root.stage === 10) {
+          root.check(Data.SystemData.networkState === "disconnected" && Data.SystemData.networkLabel === "Offline", "bar distinguishes disconnected network");
+          root.mode("radio-off"); root.stage++;
+        } else if (root.stage === 11) {
+          root.check(Data.SystemData.networkState === "off" && Data.SystemData.networkLabel === "Off", "bar distinguishes disabled radio");
           root.mode("normal"); root.stage++;
         } else {
           if (root.ticks < 65) return; // Wait for monitor restart and grouped event refresh.

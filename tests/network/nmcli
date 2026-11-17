@@ -14,10 +14,12 @@ case $args in
   *' device status '*)
     [[ $mode != unavailable ]] || exit 10
     if [[ $mode == absent ]]; then printf 'en0:ethernet:connected:Cable:eth-id\n'; exit 0; fi
+    if [[ $mode == wifi ]]; then printf 'wlan0:wifi:connected:Home:active-id\n'; exit 0; fi
+    if [[ $mode == disconnected || $mode == radio-off ]]; then printf 'wlan0:wifi:disconnected::\nen0:ethernet:disconnected::\n'; exit 0; fi
     printf 'wlan0:wifi:connected:Home:active-id\nwlan1:wifi:disconnected::\nen0:ethernet:connected:Cable:eth-id\n' ;;
   *' general status '*)
     case $mode in
-      off) printf 'disabled:enabled\n' ;;
+      off|radio-off) printf 'disabled:enabled\n' ;;
       blocked) printf 'disabled:disabled\n' ;;
       *) printf 'enabled:enabled\n' ;;
     esac ;;

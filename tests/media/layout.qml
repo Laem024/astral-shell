@@ -15,6 +15,19 @@ Scope {
   Design.Theme { id: theme; settings: settings }
   Panel.PanelState { id: navigation }
   Window {
+    visible: true
+    width: 600
+    height: 680
+    Panel.PanelContent {
+      id: panel
+      anchors.fill: parent
+      anchors.margins: 16
+      tokens: theme
+      settings: settings
+      onTabSelected: name => tab = name
+    }
+  }
+  Window {
     visible: true; width: 2560; height: 100
     Bar.BarContent {
       id: bar
@@ -53,6 +66,14 @@ Scope {
     id: layoutChecks
     interval: 350; running: true; repeat: true
     onTriggered: {
+      const categories = root.find(panel, "panelCategories");
+      for (const category of panel.categories) {
+        const button = root.find(categories, "panelCategory-" + category.key);
+        const position = button.mapToItem(categories, 0, 0);
+        if (button.height <= 0 || position.y < 0 || position.y + button.height > categories.height + 1) {
+          console.log("MEDIA_LAYOUT_FAIL", "Category clipped", category.key); Qt.quit(); return;
+        }
+      }
       const viewport = root.find(bar, "moduleViewport");
       const music = root.find(bar, "music");
       console.log("MEDIA_LAYOUT", bar.width, viewport.width, viewport.contentWidth, music.width, music.compact);

@@ -14,6 +14,7 @@ pragma Singleton
 import QtQuick
 QtObject {
   readonly property string networkLabel: "WiFi"
+  readonly property string networkState: "wifi"
   readonly property string networkDetail: "Layout fixture"
   readonly property real networkLevel: 0.8
   readonly property int volume: 65

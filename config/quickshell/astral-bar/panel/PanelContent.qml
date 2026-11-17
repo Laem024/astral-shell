@@ -35,14 +35,15 @@ Item {
     Rectangle {
       id: header
       Layout.fillWidth: true
-      implicitHeight: 112
-      Layout.minimumHeight: 112
+      implicitHeight: 192
+      Layout.minimumHeight: 192
       radius: root.tokens.cardRadius
       color: root.tokens.background
       border.color: root.tokens.border
       readonly property bool hasBanner: bannerImage.status === Image.Ready
       Components.RoundedClip {
-        anchors.fill: parent
+        anchors { left: parent.left; right: parent.right; top: parent.top }
+        height: 96
         radius: root.tokens.cardRadius
         Components.CropImage {
           id: bannerImage
@@ -52,15 +53,11 @@ Item {
           focusX: Data.BannerData.focusX
           focusY: Data.BannerData.focusY
         }
-        Rectangle {
-          anchors.fill: parent
-          visible: header.hasBanner
-          color: "#99000000"
-        }
       }
       Item {
         id: bannerControl
-        anchors.fill: parent
+        anchors { left: parent.left; right: parent.right; top: parent.top }
+        height: 96
         activeFocusOnTab: true
         Accessible.role: Accessible.Button
         Accessible.name: Data.BannerData.file ? "Change or remove banner" : "Add banner"
@@ -81,12 +78,14 @@ Item {
         }
       }
       RowLayout {
-        anchors.fill: parent
+        objectName: "panelAccount"
+        anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
         anchors.margins: root.tokens.inset
+        height: 64
         spacing: root.compact ? 12 : 16
         PanelButton {
           tokens: root.tokens
-          Layout.preferredWidth: 72; Layout.preferredHeight: 72
+          Layout.preferredWidth: 64; Layout.preferredHeight: 64
           leftPadding: 0; rightPadding: 0; topPadding: 0; bottomPadding: 0
           text: "Change account photo"
           onClicked: root.pickerMode = "avatar"
@@ -113,7 +112,7 @@ Item {
               anchors.centerIn: parent
               visible: avatar.status !== Image.Ready
               text: root.initials
-              color: header.hasBanner ? "#FFFFFF" : root.tokens.cyan
+              color: root.tokens.cyan
               font { family: root.tokens.mono; pixelSize: 22; weight: Font.Medium }
             }
           }
@@ -126,9 +125,7 @@ Item {
             Layout.fillWidth: true
             text: root.profileName
             textFormat: Text.PlainText
-            color: header.hasBanner ? "#FFFFFF" : root.tokens.text
-            style: header.hasBanner ? Text.Outline : Text.Normal
-            styleColor: "#CC000000"
+            color: root.tokens.text
             elide: Text.ElideRight
             Accessible.name: root.profileName
             font { family: root.tokens.font; pixelSize: 18; weight: Font.Medium }
@@ -137,9 +134,7 @@ Item {
             Layout.fillWidth: true
             text: "@" + Data.UserData.username
             textFormat: Text.PlainText
-            color: header.hasBanner ? "#EEEEEE" : root.tokens.muted
-            style: header.hasBanner ? Text.Outline : Text.Normal
-            styleColor: "#CC000000"
+            color: root.tokens.muted
             elide: Text.ElideRight
             font { family: root.tokens.font; pixelSize: 11 }
           }
@@ -194,33 +189,59 @@ Item {
       Layout.fillHeight: true
       spacing: 16
       Rectangle {
+        objectName: "panelCategories"
         Layout.preferredWidth: root.compact ? 52 : 148
         Layout.fillHeight: true
         radius: root.tokens.cardRadius
-        color: root.tokens.sunken
-        border.color: root.tokens.hairline
-        ScrollView {
+        color: "transparent"
+        Rectangle {
+          anchors { top: parent.top; bottom: parent.bottom; right: parent.right }
+          width: 1
+          color: root.tokens.hairline
+        }
+        ColumnLayout {
           anchors { fill: parent; margins: 6 }
-          contentWidth: availableWidth
-          clip: true
-          ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-          ColumnLayout {
-            width: parent.width
-            spacing: 4
-            Repeater {
-              model: root.categories
-              PanelButton {
-                required property var modelData
-                Layout.fillWidth: true
-                tokens: root.tokens
-                text: root.compact ? modelData.shortName : ({ "Weather & Calendar": "Calendar", "Media": "Music", "Display": "Screen & capture", "Sound": "Sound", "Control Center": "Connections", "Power": "Power & session", "Notifications": "Notifications" })[modelData.key]
-                Accessible.name: modelData.title
-                selected: root.tab === modelData.key
-                leftPadding: root.compact ? 0 : 12
-                rightPadding: root.compact ? 0 : 12
-                implicitHeight: 40
-                onClicked: root.tabSelected(modelData.key)
+          spacing: 2
+          Repeater {
+            model: root.categories
+            PanelButton {
+              id: categoryButton
+              required property var modelData
+              objectName: "panelCategory-" + modelData.key
+              Layout.fillWidth: true
+              Layout.fillHeight: true
+              Layout.minimumHeight: 0
+              Layout.maximumHeight: 44
+              tokens: root.tokens
+              text: root.compact ? modelData.shortName : ({ "Weather & Calendar": "Calendar", "Media": "Music", "Display": "Screen & capture", "Sound": "Sound", "Control Center": "Connections", "Power": "Power & session", "Notifications": "Notifications" })[modelData.key]
+              Accessible.name: modelData.title
+              selected: root.tab === modelData.key
+              leftPadding: root.compact ? 0 : 12
+              rightPadding: root.compact ? 0 : 12
+              implicitHeight: 40
+              contentItem: Text {
+                text: categoryButton.text
+                color: categoryButton.selected ? root.tokens.cyan : categoryButton.hovered ? root.tokens.text : root.tokens.muted
+                font { family: root.tokens.font; pixelSize: root.compact ? 10 : 12; weight: categoryButton.selected ? Font.DemiBold : Font.Normal }
+                horizontalAlignment: root.compact ? Text.AlignHCenter : Text.AlignLeft
+                verticalAlignment: Text.AlignVCenter
+                elide: Text.ElideRight
               }
+              background: Rectangle {
+                color: categoryButton.down ? Qt.alpha(root.tokens.cyan, 0.12) : categoryButton.hovered ? Qt.alpha(root.tokens.cyan, 0.06) : "transparent"
+                radius: root.tokens.rowRadius
+                border.width: categoryButton.visualFocus ? 1 : 0
+                border.color: root.tokens.cyan
+                Rectangle {
+                  anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+                  width: 2
+                  height: parent.height * 0.5
+                  radius: 1
+                  color: root.tokens.cyan
+                  visible: categoryButton.selected
+                }
+              }
+              onClicked: root.tabSelected(modelData.key)
             }
           }
         }
@@ -264,7 +285,7 @@ Item {
     sourceComponent: AvatarPicker {
       tokens: root.tokens
       mode: root.pickerMode
-      bannerAspect: root.width / 112
+      bannerAspect: root.width / 96
       onClosed: root.pickerMode = ""
     }
   }

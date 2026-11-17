@@ -7,8 +7,8 @@ InfoTile {
   required property string logoGlyph
   required property string logoImage
   compact: true
-  glyph: image.status === Image.Ready || image.status === Image.Error ? "" : logoGlyph
-  detail: "Arch · Astral"
+  glyph: ""
+  detail: "Open Astral controls"
   accent: tokens.cyan
   glyphSize: 25
   implicitWidth: 40
@@ -16,21 +16,31 @@ InfoTile {
   Rectangle {
     anchors.centerIn: parent
     width: 36; height: 36
-    radius: root.tokens.rowRadius
-    color: root.tokens.raised
-    border.color: root.activeFocus ? root.tokens.gold : Qt.alpha(root.ink, root.hovered ? 0.5 : 0.25)
+    radius: 11
+    color: Qt.alpha(root.tokens.cyan, root.hovered ? 0.18 : 0.08)
+    border.color: root.activeFocus ? root.tokens.gold : Qt.alpha(root.tokens.cyan, root.hovered ? 0.55 : 0.2)
+    scale: root.hovered ? 1.04 : 1
+    Behavior on scale { NumberAnimation { duration: root.tokens.hoverDuration } }
+    Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
     Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
   }
   Shape {
     anchors.centerIn: parent
-    width: 26; height: 28
+    width: 24; height: 24
     visible: image.status !== Image.Ready && (root.logoGlyph === "" || image.status === Image.Error)
     preferredRendererType: Shape.CurveRenderer
     ShapePath {
       strokeColor: "transparent"
       fillColor: root.ink
-      PathSvg { path: "M13 0 L9 9 L13 11 L8 10 L0 28 L8 24 C8 16 18 16 18 24 L26 28 L18 11 L16 13 L17 9 Z" }
+      PathSvg { path: "M12 1 L7.6 10.2 L11 12 L7 11.5 L2 23 L8.5 19.2 C8.5 13.8 15.5 13.8 15.5 19.2 L22 23 L16.6 11.3 L14.5 12.6 L16 10 Z" }
     }
+  }
+  Text {
+    anchors.centerIn: parent
+    visible: image.status !== Image.Ready && image.status !== Image.Error && root.logoGlyph !== ""
+    text: root.logoGlyph
+    color: root.ink
+    font { family: root.tokens.mono; pixelSize: 24 }
   }
   Image {
     id: image

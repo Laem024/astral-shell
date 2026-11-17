@@ -14,6 +14,7 @@ Item {
   property string label: ""
   property string detail: label
   property real level: 1
+  property string networkState: "wifi"
   property color accent: tokens.cyan
   property bool warningEnabled: true
   property bool externalPower: false
@@ -56,7 +57,7 @@ Item {
       Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
     }
     Shape {
-      visible: root.kind === "network"
+      visible: root.kind === "network" && root.networkState === "wifi"
       anchors.fill: parent
       preferredRendererType: Shape.CurveRenderer
       ShapePath {
@@ -82,10 +83,27 @@ Item {
       }
     }
     Rectangle {
-      visible: root.kind === "network"
+      visible: root.kind === "network" && root.networkState === "wifi"
       x: 10.5; y: 16.5
       width: 3; height: 3; radius: 1.5
       color: root.ink
+    }
+    Shape {
+      visible: root.kind === "network" && root.networkState !== "wifi"
+      anchors.fill: parent
+      preferredRendererType: Shape.CurveRenderer
+      ShapePath {
+        strokeColor: root.ink
+        strokeWidth: 1.6
+        fillColor: "transparent"
+        capStyle: ShapePath.RoundCap
+        joinStyle: ShapePath.RoundJoin
+        PathSvg {
+          path: root.networkState === "ethernet" ? "M5 4 H19 V14 H15 V18 H9 V14 H5 Z M9 7 V10 M12 7 V10 M15 7 V10 M12 18 V21"
+            : root.networkState === "off" ? "M12 3 V11 M7 6 A8 8 0 1 0 17 6"
+            : "M8 8 L16 16 M16 8 L8 16 M12 3 A9 9 0 1 0 12 21 A9 9 0 1 0 12 3"
+        }
+      }
     }
 
     SoundGlyph {
@@ -173,7 +191,7 @@ Item {
     visible: !root.vertical && !root.compact
     x: 42; y: 5
     width: root.width - x - 4
-    text: ({network: "WI-FI", audio: "VOL", battery: "PWR", notifications: "LOG"})[root.kind] || "SYS"
+    text: ({network: root.networkState === "wifi" ? "WI-FI" : root.networkState === "ethernet" ? "WIRED" : "NET", audio: "VOL", battery: "PWR", notifications: "LOG"})[root.kind] || "SYS"
     color: root.ink
     font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 1 }
     elide: Text.ElideRight

@@ -1,4 +1,6 @@
 import QtQuick
+import QtQuick.Window
+import QtTest
 import Quickshell
 import "../../config/quickshell/astral-session" as Session
 import "../../config/quickshell/astral-session/Logic.js" as Logic
@@ -10,6 +12,9 @@ ShellRoot {
   property int stepTicks: 0
   property int ticks: 0
   property var completed: []
+  property bool naturalSize: false
+  property int naturalWidth: 820
+  property int closeRequests: 0
 
   function check(condition, label) {
     if (!condition) { console.error("SESSION_FAIL: " + label); Qt.exit(1); }
@@ -25,12 +30,20 @@ ShellRoot {
   QtObject { id: config; property var value: Common.SettingsData.value }
   Common.Theme { id: theme; settings: config }
   Session.SessionMenu { id: menu; tokens: theme }
-  Session.SessionContent {
-    id: content
-    tokens: theme
-    active: true
-    width: 520
-    height: 430
+  Window {
+    id: testWindow
+    visible: true
+    width: 900
+    height: 700
+    TestCase { id: keyboard; when: false }
+    Session.SessionContent {
+      id: content
+      tokens: theme
+      active: true
+      width: root.naturalSize ? root.naturalWidth : 520
+      height: root.naturalSize ? implicitHeight : 430
+      onCloseRequested: root.closeRequests++
+    }
   }
   Connections {
     target: Common.SessionActions
@@ -63,6 +76,47 @@ ShellRoot {
         root.check(viewport.contentY > 0, "keyboard selection reveals last action");
         content.focusTile(0);
         root.check(viewport.contentY === 0, "keyboard selection reveals first action");
+        root.naturalSize = true;
+        testWindow.requestActivate();
+        root.next(10);
+      } else if (root.step === 10) {
+        const viewport = root.find(content, "sessionActionScroll");
+        root.check(viewport.height >= viewport.contentHeight, "natural height shows complete cards without scrolling");
+        content.reset();
+        root.check(content.activeFocus && content.focusIndex === 0, "reset focuses first action");
+        keyboard.keyClick(Qt.Key_Right);
+        root.check(content.focusIndex === 1, "Right selects next card");
+        keyboard.keyClick(Qt.Key_Left);
+        root.check(content.focusIndex === 0, "Left selects previous card");
+        keyboard.keyClick(Qt.Key_Left);
+        root.check(content.focusIndex === content.actions.length - 1, "Left wraps to last card");
+        keyboard.keyPress(Qt.Key_Return);
+        root.check(content.holding === "poweroff", "Enter starts confirmation on focused card");
+        keyboard.keyRelease(Qt.Key_Return);
+        root.check(content.holding === "", "Enter release cancels confirmation");
+        keyboard.keyPress(Qt.Key_Space);
+        root.check(content.holding === "poweroff", "Space starts confirmation on focused card");
+        keyboard.keyRelease(Qt.Key_Space);
+        root.check(content.holding === "", "Space release cancels confirmation");
+        keyboard.keyClick(Qt.Key_Escape);
+        root.check(root.closeRequests === 1, "Escape closes from a focused card");
+        root.naturalWidth = 520;
+        root.next(11);
+      } else if (root.step === 11) {
+        const viewport = root.find(content, "sessionActionScroll");
+        root.check(viewport.height >= viewport.contentHeight, "three-column layout shows full cards without scrolling");
+        content.reset();
+        keyboard.keyClick(Qt.Key_Down);
+        root.check(content.focusIndex === 3, "Down selects next row");
+        keyboard.keyClick(Qt.Key_Up);
+        root.check(content.focusIndex === 0, "Up selects previous row");
+        keyboard.keyClick(Qt.Key_Tab);
+        root.check(content.focusIndex === 1, "Tab selects next card");
+        root.naturalWidth = 360;
+        root.next(12);
+      } else if (root.step === 12) {
+        const viewport = root.find(content, "sessionActionScroll");
+        root.check(viewport.height >= viewport.contentHeight, "two-column layout shows full cards without scrolling");
         content.pressKey("r");
         root.check(content.holding === "reboot", "hold starts");
         root.check(!Common.SessionActions.pending && !root.done("reboot"), "hold waits for the timer");

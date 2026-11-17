@@ -22,18 +22,19 @@ FocusScope {
   property string holding: ""
   property real holdProgress: 0
   property int focusIndex: 0
+  implicitHeight: contentLayout.implicitHeight + 2 * (root.compact ? 16 : 24)
   signal closeRequested()
 
   onActiveChanged: {
     if (!active) cancelHold();
-    else Qt.callLater(() => { if (root.active) root.forceActiveFocus(); });
+    else Qt.callLater(() => { if (root.active) root.focusTile(0); });
   }
   onActiveFocusChanged: if (!activeFocus) cancelHold()
 
   function reset() {
     cancelHold();
     Common.SessionActions.error = "";
-    if (root.active) root.forceActiveFocus();
+    if (root.active) root.focusTile(0);
   }
   function trigger(id) {
     if (Common.SessionActions.pending || Common.SessionActions.blocked) return;
@@ -136,6 +137,7 @@ FocusScope {
   }
 
   ColumnLayout {
+    id: contentLayout
     anchors.fill: parent
     anchors.margins: root.compact ? 16 : 24
     spacing: root.compact ? 12 : 16
@@ -226,11 +228,13 @@ FocusScope {
       Layout.fillWidth: true
       Layout.fillHeight: true
       Layout.minimumHeight: 0
+      Layout.preferredHeight: actionRow.implicitHeight
       contentWidth: width
       contentHeight: actionRow.implicitHeight
       clip: true
       boundsBehavior: Flickable.StopAtBounds
       flickableDirection: Flickable.VerticalFlick
+      interactive: contentHeight > height
       ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
       GridLayout {
         id: actionRow
@@ -268,7 +272,7 @@ FocusScope {
     }
     Text {
       Layout.fillWidth: true
-      text: root.holding ? "Keep holding to confirm" : "← ↑ ↓ →  Navigate     ·     Hold to confirm     ·     Esc  Close"
+      text: root.holding ? "Keep holding to confirm" : "Press L or S     ·     Hold O, R or P to confirm     ·     Esc  Close"
       color: root.holding ? root.tokens.gold : root.tokens.muted
       font { family: root.tokens.font; pixelSize: 10 }
       horizontalAlignment: Text.AlignHCenter

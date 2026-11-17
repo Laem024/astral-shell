@@ -30,12 +30,15 @@ Item {
     implicitWidth: primary ? 28 : 26
     implicitHeight: 28
     padding: 0
+    hoverEnabled: true
     focusPolicy: Qt.StrongFocus
     Accessible.name: label
     opacity: enabled ? 1 : 0.3
     background: Rectangle {
       radius: height / 2
-      color: "transparent"
+      color: control.down ? Qt.alpha(root.tokens.cyan, 0.22)
+        : control.hovered ? Qt.alpha(root.tokens.cyan, 0.12) : "transparent"
+      Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
       border.color: control.visualFocus ? root.tokens.gold : "transparent"
       border.width: control.visualFocus ? 1 : 0
       scale: control.down ? 0.92 : 1
