@@ -2,8 +2,9 @@
 
 Tema de inicio de sesión para SDDM 0.21 o superior con Qt 6. Usa el sistema de
 diseño de Astral (`docs/design-system.md`) en modo oscuro por defecto o claro, con
-un cielo animado y una tarjeta de acceso centrada que solo aparece en la pantalla
-activa.
+un fondo configurable, acceso a la izquierda y reloj a la derecha. Las pantallas
+pequeñas usan una columna central. El formulario solo existe en la pantalla activa;
+perderla borra la contraseña y destruye el formulario.
 
 La interfaz está en inglés. La configuración vive en `theme.conf`; después de
 instalar el tema, edítala con privilegios:

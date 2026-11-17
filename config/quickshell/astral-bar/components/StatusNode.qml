@@ -27,8 +27,20 @@ Item {
   Accessible.name: detail
   Accessible.role: Accessible.Button
 
-  // One 24 px line instrument per status, drawn with the same 1.5 px stroke as
-  // the sound and capture sigils. Signal and charge are shown by stroke weight.
+  activeFocusOnTab: true
+  Accessible.onPressAction: root.activated()
+  Keys.onSpacePressed: root.activated()
+  Keys.onReturnPressed: root.activated()
+  Keys.onEnterPressed: root.activated()
+  Rectangle {
+    anchors.fill: parent
+    color: "transparent"
+    radius: root.tokens.rowRadius
+    border.width: root.activeFocus ? 1 : 0
+    border.color: root.tokens.gold
+  }
+
+  // A tinted instrument disc and a two-line readout keep status legible.
   Item {
     id: instrument
     width: 24; height: 24
@@ -36,6 +48,13 @@ Item {
     y: root.vertical ? 6 : (root.height - height) / 2
     function strength(index: int): real { return root.level >= (index + 1) / 3 - 0.2 ? 1 : 0.2; }
 
+    Rectangle {
+      anchors.centerIn: parent
+      width: 32; height: 32; radius: 16
+      color: Qt.alpha(root.ink, root.hovered ? 0.15 : 0.08)
+      border.color: Qt.alpha(root.ink, 0.2)
+      Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
+    }
     Shape {
       visible: root.kind === "network"
       anchors.fill: parent
@@ -126,7 +145,7 @@ Item {
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
           strokeColor: root.ink
-          strokeWidth: 1.5
+          strokeWidth: 1.7
           joinStyle: ShapePath.RoundJoin
           capStyle: ShapePath.RoundCap
           fillColor: Qt.alpha(root.ink, 0.14)
@@ -134,7 +153,7 @@ Item {
         }
         ShapePath {
           strokeColor: root.ink
-          strokeWidth: 1.5
+          strokeWidth: 1.7
           fillColor: "transparent"
           capStyle: ShapePath.RoundCap
           PathSvg { path: "M10 19.5 Q12 21.5 14 19.5" }
@@ -152,20 +171,18 @@ Item {
   }
   Text {
     visible: !root.vertical && !root.compact
-    x: 42; y: 8
-    width: root.width - x - 6
-    text: ({network: "NET", audio: "VOL", battery: "PWR", notifications: "LOG"})[root.kind] || "SYS"
+    x: 42; y: 5
+    width: root.width - x - 4
+    text: ({network: "WI-FI", audio: "VOL", battery: "PWR", notifications: "LOG"})[root.kind] || "SYS"
+    color: root.ink
+    font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 1 }
     elide: Text.ElideRight
-    color: root.tokens.muted
-    font.family: root.tokens.mono
-    font.pixelSize: 9
-    font.letterSpacing: 1.2
   }
   Text {
     id: valueLabel
     visible: !root.compact
     x: root.vertical ? 0 : 42
-    y: root.vertical ? 32 : 20
+    y: root.vertical ? 32 : 19
     width: root.vertical ? root.width : root.width - x - 6
     horizontalAlignment: root.vertical ? Text.AlignHCenter : Text.AlignLeft
     text: root.label

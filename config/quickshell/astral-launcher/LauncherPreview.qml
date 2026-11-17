@@ -25,7 +25,7 @@ ShellRoot {
     function launch(entry) { state = Logic.record(state, Logic.identity(entry), Date.now()); error = "Simulated launch: " + entry.name; }
   }
   Window {
-    visible: true; width: 1060; height: 700; color: theme.surface
+    visible: true; width: 620; height: 560; color: theme.surface
     title: "Astral Launcher Preview"
     onClosing: Qt.quit()
     LauncherContent { id: content; anchors.fill: parent; service: demo; tokens: theme; onCloseRequested: Qt.quit(); Component.onCompleted: reset() }

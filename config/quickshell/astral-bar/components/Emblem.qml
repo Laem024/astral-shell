@@ -18,7 +18,7 @@ InfoTile {
     width: 36; height: 36
     radius: root.tokens.rowRadius
     color: root.tokens.raised
-    border.color: Qt.alpha(root.ink, root.hovered ? 0.5 : 0.25)
+    border.color: root.activeFocus ? root.tokens.gold : Qt.alpha(root.ink, root.hovered ? 0.5 : 0.25)
     Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
   }
   Shape {

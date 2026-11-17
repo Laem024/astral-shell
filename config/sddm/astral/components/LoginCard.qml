@@ -68,9 +68,9 @@ Item {
     width: parent.width
     height: content.implicitHeight + 2 * card.tokens.section
     radius: card.tokens.panelRadius
-    color: card.tokens.surface
+    color: Qt.alpha(card.tokens.surface, 0.92)
     border.width: 1
-    border.color: card.tokens.border
+    border.color: Qt.alpha(card.tokens.border, 0.6)
 
     Column {
       id: content
@@ -87,52 +87,39 @@ Item {
       Item {
         id: identity
         width: parent.width
-        height: identityColumn.height
+        height: Math.max(avatar.visible ? avatar.height : 0, identityText.height)
+
+        Avatar {
+          id: avatar
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+          visible: card.tokens.showAvatar
+          tokens: card.tokens
+          size: 48
+          source: card.tokens.customAvatar || (card.user.icon || "")
+          initials: card.initials(card.user.realName || card.user.name)
+        }
 
         Column {
-          id: identityColumn
-          width: parent.width
+          id: identityText
+          x: avatar.visible ? avatar.width + card.tokens.inset : 0
+          width: Math.max(0, parent.width - x)
+          anchors.verticalCenter: parent.verticalCenter
           spacing: card.tokens.gap
-
-          Item {
-            width: parent.width
-            height: avatar.visible ? avatar.height : 0
-
-            Avatar {
-              id: avatar
-              anchors.horizontalCenter: parent.horizontalCenter
-              visible: card.tokens.showAvatar
-              tokens: card.tokens
-              size: 64
-              source: card.tokens.customAvatar || (card.user.icon || "")
-              initials: card.initials(card.user.realName || card.user.name)
-            }
-          }
-
           Text {
             width: parent.width
             text: (card.user.realName || card.user.name || "User") + (card.userCount > 1 ? "  ▾" : "")
             color: card.tokens.text
-            horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
-            font {
-              family: card.tokens.font
-              pixelSize: card.tokens.titleSize
-              weight: Font.Medium
-            }
+            font { family: card.tokens.font; pixelSize: card.tokens.titleSize; weight: Font.Medium }
           }
-
           Text {
             width: parent.width
             visible: (card.user.name || "").length > 0
             text: "@" + (card.user.name || "")
             color: card.tokens.muted
-            horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
-            font {
-              family: card.tokens.mono
-              pixelSize: card.tokens.captionSize + 1
-            }
+            font { family: card.tokens.mono; pixelSize: card.tokens.captionSize + 1 }
           }
         }
 

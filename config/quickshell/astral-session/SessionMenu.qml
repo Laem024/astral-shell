@@ -99,8 +99,8 @@ Scope {
     Rectangle {
       id: card
       anchors.centerIn: parent
-      width: Math.max(1, Math.min(640, (window.width - 48) / root.tokens.scale))
-      height: Math.max(1, Math.min(480, (window.height - 48) / root.tokens.scale))
+      width: Math.max(1, Math.min(820, (window.width - 48) / root.tokens.scale))
+      height: Math.max(1, Math.min(card.width < 700 ? 530 : 350, (window.height - 48) / root.tokens.scale))
       scale: root.tokens.scale * (0.97 + 0.03 * root.reveal)
       transformOrigin: Item.Center
       color: root.tokens.surface

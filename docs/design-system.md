@@ -33,9 +33,33 @@ Derived tones (`raised`, `sunken`, `border`, `hairline`, `scrim`) are computed i
 
 ## Behaviour
 
-- Hover and focus are visible without colour alone (an outline or a tone change).
+- Default bar modules use subtle icon and text tones on hover, with no per-module hover plates or floating tooltips; the workspace hover outline and shared animated edge marker remain. Keyboard focus keeps a visible outline and accessible names.
 - Destructive actions use `alert` and require confirmation.
 - Animations follow `settings.animations`; when disabled, durations are zero.
+
+## Astral depurado composition
+
+- The bar keeps its outer surface, segment plates, logo border and shared expanding edge marker in all four positions. Connection, volume, battery and notification instruments share line icons and short values; compact mode keeps icons and indicators. Normal workspace selection is square, special selection stays circular, and both retain their transitions.
+- Sound starts with compact output and microphone controls, then application streams. Connections uses Wi-Fi/Bluetooth/VPN tabs and one visible section; switching tabs keeps transport controllers alive.
+- Media artwork uses `astral-bar/components/RoundedClip.qml` in the bar and player. Scrollable content and selectors remain available on small panels.
+- The launcher is a compact search window with category tabs and application rows containing icon, name, available description and favorite control.
+- Session actions use five balanced cards on wide screens and wrap into three or two columns on smaller screens. The grid scrolls vertically to reveal the focused action; confirmation keeps its hold timer and progress ring even when decorative animations are disabled.
+- SDDM places the form at the left and clock at the right, with a centered composition on small screens. Background presets, custom images, stars and other theme options remain configurable.
+
+## Visual validation
+
+Run the Quickshell, launcher, session and SDDM suites, including `tests/sddm/greeter.sh`.
+Media layout checks assert square normal and circular special selectors; launcher
+checks exercise list navigation, favorites and Escape; session checks cover focused
+action wrapping, vertical scrolling and hold cancellation. Media checks also open the player selector
+inside its rounded viewport. Audio, NetworkManager, Bluetooth and VPN suites cover
+existing device and failure flows.
+
+Review isolated previews in dark/light modes, with scaling and animations disabled,
+at all four bar positions and on small screens. Qt's RHI renderer is needed to inspect
+rounded shader masks; software-only rendering does not display those effects.
+Real compositor focus, monitor hotplug and hardware behavior still need an interactive
+CachyOS session before installation.
 
 ## Mode switching for non-Quickshell apps
 

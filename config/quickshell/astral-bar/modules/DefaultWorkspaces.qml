@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Shapes
 import "../../common" as Design
+import "../components" as Components
 
 Item {
   id: root
@@ -41,7 +42,7 @@ Item {
     x: root.vertical ? (root.width - width) / 2 : (root.active - 1) * root.step + (root.step - width) / 2
     y: root.vertical ? (root.active - 1) * root.step + (root.step - height) / 2 : (root.height - height) / 2 - 2
     width: 24; height: 24
-    radius: 6
+    radius: 0
     color: Qt.alpha(root.tokens.cyan, 0.14)
     border.color: root.tokens.cyan
     Rectangle {
@@ -78,6 +79,24 @@ Item {
       y: root.vertical ? offset : 0
       width: root.vertical ? root.width : root.step
       height: root.vertical ? root.step : root.height
+      function activateNode() {
+        if (!root.interactive) return;
+        if (node.special) { if (node.current) root.specialSelected(String(node.info.identity || node.info.name)); }
+        else root.activate(node.workspaceId);
+      }
+      activeFocusOnTab: root.interactive && (!special || current)
+      Keys.onSpacePressed: activateNode()
+      Keys.onReturnPressed: activateNode()
+      Keys.onEnterPressed: activateNode()
+      Accessible.onPressAction: activateNode()
+      Rectangle {
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: root.vertical ? 0 : -2
+        width: 24; height: 24
+        radius: node.special ? 12 : 0
+        color: "transparent"
+        border.color: node.activeFocus ? root.tokens.gold : "transparent"
+      }
       Accessible.role: Accessible.Button
       Accessible.name: special && !current ? "Special workspace · closed"
         : (special ? "Special workspace " + info.name : "Workspace " + workspaceId) + " · " + apps + " open apps"
@@ -142,6 +161,15 @@ Item {
         color: Qt.alpha(node.specialInk, 0.12); border.color: node.specialInk
         Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
         Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
+      }
+      Components.NeonOutline {
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: root.vertical ? 0 : -2
+        width: 24; height: 24
+        tokens: root.tokens
+        radius: node.special ? 12 : 0
+        accent: node.special ? node.specialInk : root.tokens.cyan
+        active: node.hovered && (!node.special || node.current)
       }
       HoverHandler { id: hover }
       TapHandler {

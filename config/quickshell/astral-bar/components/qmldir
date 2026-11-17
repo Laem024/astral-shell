@@ -8,3 +8,5 @@ Meter 1.0 Meter.qml
 RoundedClip 1.0 RoundedClip.qml
 SoundGlyph 1.0 SoundGlyph.qml
 StatusNode 1.0 StatusNode.qml
+HoverIndex 1.0 HoverIndex.qml
+NeonOutline 1.0 NeonOutline.qml

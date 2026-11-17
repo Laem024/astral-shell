@@ -27,9 +27,12 @@ Rectangle {
   readonly property string layoutName: root.showLayout
     ? String(keyboard.layouts[Math.max(0, Math.min(keyboard.currentLayout, root.layoutCount - 1))].shortName || "").toUpperCase()
     : ""
+  readonly property bool compact: width < 1000 || height < 650 || width / factor < 1000
   // The layout is authored on a 1280x800 canvas and scaled to the screen.
   readonly property real fit: Math.min(root.width / 1280, root.height / 800)
   readonly property real factor: Math.max(0.5, Math.min(2.0,
+    (root.height - 120) / 520,
+    (root.width - 48) / theme.panelWidth,
     theme.scale * Math.max(0.6, Math.min(1.25, root.fit))))
   readonly property real chrome: Math.max(1, Math.min(root.factor, 1.25))
 
@@ -75,31 +78,31 @@ Rectangle {
       scale: root.factor * (0.985 + 0.015 * root.entrance)
       transform: Translate { y: (1 - root.entrance) * 16 }
 
-      Column {
-        anchors.centerIn: parent
-        width: theme.panelWidth
-        spacing: 32
+      Components.ClockBlock {
+        id: mainClock
+        x: root.compact ? (parent.width - width) / 2 : parent.width - width - 64
+        y: root.compact ? Math.max(64, (parent.height - loginLoader.height - height - 24) / 2) : (parent.height - height) / 2
+        width: Math.min(theme.panelWidth, parent.width - 48)
+        compact: root.compact
+        tokens: theme
+        dateTime: root.now
+      }
 
-        Components.ClockBlock {
-          width: parent.width
-          tokens: theme
-          dateTime: root.now
-        }
-
-        Loader {
-          id: loginLoader
-          width: parent.width
-          active: root.active
-          sourceComponent: loginComponent
-          onLoaded: item.focusPassword()
-        }
+      Loader {
+        id: loginLoader
+        x: root.compact ? (parent.width - width) / 2 : 64
+        y: root.compact ? mainClock.y + mainClock.height + 24 : (parent.height - height) / 2
+        width: Math.min(theme.panelWidth, parent.width - 48)
+        active: root.active
+        sourceComponent: loginComponent
+        onLoaded: item.focusPassword()
       }
     }
 
     Row {
       id: powerRow
+      x: root.compact ? (parent.width - width) / 2 : 64 * root.factor
       anchors {
-        horizontalCenter: parent.horizontalCenter
         bottom: parent.bottom
         bottomMargin: 24 * root.chrome
       }
@@ -362,7 +365,7 @@ Rectangle {
     id: loginComponent
 
     Components.LoginCard {
-      width: root.themeTokens.panelWidth
+      width: loginLoader.width
       tokens: root.themeTokens
       user: root.selectedUser
       userIndex: root.userIndex

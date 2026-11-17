@@ -1,11 +1,12 @@
 # Tema SDDM Astral
 
-Tema de inicio de sesión para SDDM 0.21 o superior con Qt 6. Usa la paleta
-oscura de Astral Shell, un cielo animado con estrellas titilantes y estrellas
-fugaces diagonales, y un panel de cristal centrado que solo aparece en la
-pantalla activa. La composición combina un reloj tipográfico grande, capas
-translúcidas con grano fino y un único campo de contraseña. La interfaz está en
-inglés.
+Tema de inicio de sesión para SDDM 0.21 o superior con Qt 6. Usa los modos
+oscuro y claro de Astral Shell, un fondo configurable y una composición con el
+acceso a la izquierda y el reloj a la derecha. En pantallas pequeñas, reloj y
+formulario se centran en una columna. La cabecera del usuario es compacta y las
+acciones de energía se alinean con el acceso. La interfaz está en inglés.
+El formulario solo existe en la pantalla activa: al perderla se borra la
+contraseña y se destruye su componente.
 
 El tema vive en el repositorio (`config/sddm/astral/`) para poder aplicarlo,
 pero al instalarse se copia completo a `/usr/share/sddm/themes/astral` y deja de

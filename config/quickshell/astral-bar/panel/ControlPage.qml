@@ -5,8 +5,7 @@ import QtQuick.Layouts
 import "../../common" as Design
 import "../data" as Data
 
-// Connections tab: a three-part status rail that jumps to its section, then
-// one card per transport.
+// Keep transport controllers alive while showing one section at a time.
 ScrollView {
   id: root
   required property Design.Theme tokens
@@ -47,123 +46,48 @@ ScrollView {
   clip: true
   ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
-  // Bring a card to the top of the viewport without overscrolling the end.
-  function reveal(item) {
-    const flickable = root.contentItem as Flickable;
-    if (!flickable || !item) return;
-    const offset = item.mapToItem(flickable.contentItem, 0, 0).y;
-    flickable.contentY = Math.max(0, Math.min(offset - 8, Math.max(0, flickable.contentHeight - flickable.height)));
-  }
-
-  component SummaryChip: Button {
-    id: chip
-    required property string name
-    required property string value
-    required property string detail
-    property color accent: root.tokens.cyan
-    property bool live: false
-    Layout.fillWidth: true
-    Layout.minimumWidth: 0
-    implicitHeight: 76
-    leftPadding: 12; rightPadding: 12; topPadding: 10; bottomPadding: 10
-    focusPolicy: Qt.StrongFocus
-    Accessible.name: name + ". " + value + ". " + detail + ". Show section"
-    contentItem: ColumnLayout {
-      spacing: 4
-      RowLayout {
-        spacing: 6
-        Rectangle {
-          Layout.preferredWidth: 6
-          Layout.preferredHeight: 6
-          radius: 3
-          color: chip.live ? chip.accent : Qt.alpha(root.tokens.muted, 0.5)
-        }
-        Text {
-          Layout.fillWidth: true
-          text: chip.name.toUpperCase()
-          textFormat: Text.PlainText
-          elide: Text.ElideRight
-          color: chip.accent
-          font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 0.8 }
-        }
-        Text {
-          text: "›"
-          textFormat: Text.PlainText
-          color: chip.hovered ? chip.accent : root.tokens.muted
-          font { family: root.tokens.mono; pixelSize: 13 }
-        }
-      }
-      Text {
-        Layout.fillWidth: true
-        text: chip.value
-        textFormat: Text.PlainText
-        elide: Text.ElideRight
-        color: root.tokens.text
-        font { family: root.tokens.font; pixelSize: 13; weight: Font.Medium }
-      }
-      Text {
-        Layout.fillWidth: true
-        text: chip.detail
-        textFormat: Text.PlainText
-        elide: Text.ElideRight
-        color: root.tokens.muted
-        font { family: root.tokens.font; pixelSize: 10 }
-      }
-    }
-    background: Rectangle {
-      radius: root.tokens.rowRadius
-      color: chip.hovered || chip.activeFocus ? Qt.alpha(chip.accent, 0.08) : root.tokens.raised
-      border.width: chip.activeFocus ? 2 : 1
-      border.color: chip.activeFocus ? root.tokens.cyan
-        : chip.live ? Qt.alpha(chip.accent, 0.35) : root.tokens.border
-    }
+  property string section: "wifi"
+  onSectionChanged: {
+    const viewport = root.contentItem as Flickable;
+    if (viewport) viewport.contentY = 0;
   }
 
   ColumnLayout {
     width: root.availableWidth
     spacing: 12
-    RowLayout {
+    ConnectionTabs {
+      tokens: root.tokens
+      current: root.section
+      options: [{key: "wifi", label: "Wi-Fi"}, {key: "bluetooth", label: "Bluetooth"}, {key: "vpn", label: "VPN"}]
+      onSelected: key => root.section = key
+    }
+    Text {
       Layout.fillWidth: true
-      spacing: 8
-      SummaryChip {
-        name: "Wi-Fi"
-        value: root.wifiValue
-        detail: root.wifiDetail
-        accent: root.tokens.cyan
-        live: root.wifiLive
-        onClicked: root.reveal(wifiCard)
-      }
-      SummaryChip {
-        name: "Bluetooth"
-        value: root.bluetoothValue
-        detail: root.bluetoothDetail
-        accent: root.tokens.lavender
-        live: !!root.bluetoothDevice
-        onClicked: root.reveal(bluetoothCard)
-      }
-      SummaryChip {
-        name: "VPN"
-        value: root.vpnValue
-        detail: root.vpnDetail
-        accent: root.tokens.gold
-        live: root.vpnActive > 0
-        onClicked: root.reveal(vpnCard)
-      }
+      text: root.section === "wifi" ? root.wifiValue + " · " + root.wifiDetail
+        : root.section === "bluetooth" ? root.bluetoothValue + " · " + root.bluetoothDetail
+        : root.vpnValue + " · " + root.vpnDetail
+      textFormat: Text.PlainText
+      wrapMode: Text.Wrap
+      color: root.tokens.muted
+      font { family: root.tokens.font; pixelSize: 11 }
     }
     WifiCard {
-      id: wifiCard
       objectName: "connectionWifiCard"
+      visible: root.section === "wifi"
       tokens: root.tokens
-      onNavigationRequested: root.reveal(wifiCard)
+      onNavigationRequested: {
+        const viewport = root.contentItem as Flickable;
+        if (viewport) viewport.contentY = 0;
+      }
     }
     BluetoothCard {
-      id: bluetoothCard
       objectName: "connectionBluetoothCard"
+      visible: root.section === "bluetooth"
       tokens: root.tokens
     }
     VpnCard {
-      id: vpnCard
       objectName: "connectionVpnCard"
+      visible: root.section === "vpn"
       tokens: root.tokens
     }
   }

@@ -368,4 +368,63 @@ Item {
         root.navigation.close();
     }
   }
+  // This visual layer has no input handlers; controls retain their own hit areas.
+  readonly property Item hoveredSegment: {
+    var modules = [clock, focus, music, capture, networkNode, audio, battery, notifications, tray];
+    for (const module of modules)
+      if (module.visible && module.hovered) return module;
+    return null;
+  }
+  function syncIndicator(indicator: Components.HoverIndex, segment: Item): void {
+    if (!segment || !segment.visible) { indicator.clear(); return; }
+    var point = segment.mapToItem(root, 0, 0);
+    var start = root.vertical ? point.y : point.x;
+    // Stop the active-window line before the plate's rounded right corner.
+    var rightInset = !root.vertical && segment === focus ? root.tokens.gap : 0;
+    var endPoint = segment.mapToItem(root, Math.max(0, segment.width - rightInset), segment.height);
+    var end = root.vertical ? endPoint.y : endPoint.x;
+    var minimum = root.vertical ? viewport.y : viewport.x;
+    var maximum = minimum + (root.vertical ? viewport.height : viewport.width);
+    start = Math.max(start, minimum);
+    end = Math.min(end, maximum);
+    if (end <= start) { indicator.clear(); return; }
+    indicator.retarget(start, end - start);
+  }
+  Components.HoverIndex {
+    id: sharedIndex
+    objectName: "sharedHoverIndex"
+    anchors.fill: parent
+    tokens: root.tokens
+    vertical: root.vertical
+    rightEdge: root.settings.value.position === "right"
+    ink: root.hoveredSegment === battery && battery.warning ? root.tokens.alert
+      : root.hoveredSegment === clock ? clock.accent
+      : root.hoveredSegment === music ? music.ink
+      : root.hoveredSegment === focus ? focus.ink
+      : root.hoveredSegment === networkNode ? networkNode.ink
+      : root.hoveredSegment === audio ? audio.ink
+      : root.hoveredSegment === battery ? battery.ink
+      : root.hoveredSegment === capture ? capture.ink
+      : root.hoveredSegment === notifications ? notifications.ink
+      : root.hoveredSegment === tray ? tray.ink : root.tokens.cyan
+  }
+  Components.HoverIndex {
+    id: warningIndex
+    objectName: "batteryWarningIndex"
+    anchors.fill: parent
+    tokens: root.tokens
+    vertical: root.vertical
+    rightEdge: root.settings.value.position === "right"
+    ink: root.tokens.alert
+    animate: false
+  }
+  function syncIndicators(): void {
+    syncIndicator(sharedIndex, hoveredSegment);
+    syncIndicator(warningIndex, battery.warning && hoveredSegment !== battery ? battery : null);
+  }
+  onHoveredSegmentChanged: syncIndicators()
+  Connections { target: battery; function onWarningChanged(): void { root.syncIndicators(); } }
+  // Mapping is refreshed during scroll, layout, scale and visibility changes,
+  // without restarting a transition whose destination has not changed.
+  Timer { interval: 16; running: root.hoveredSegment !== null || battery.warning; repeat: true; onTriggered: root.syncIndicators() }
 }

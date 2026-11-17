@@ -19,7 +19,7 @@ Rectangle {
 
   implicitWidth: labelText.implicitWidth + (root.solid ? 48 : 40)
   implicitHeight: 40
-  radius: root.tokens.controlRadius
+  radius: root.tokens.rowRadius
   color: root.solid
     ? (mouse.pressed ? Qt.darker(root.accent, 1.1) : root.hovered ? Qt.lighter(root.accent, 1.06) : root.accent)
     : mouse.pressed || root.armed ? Qt.alpha(root.accent, 0.16)

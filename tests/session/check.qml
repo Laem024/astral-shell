@@ -14,6 +14,11 @@ ShellRoot {
   function check(condition, label) {
     if (!condition) { console.error("SESSION_FAIL: " + label); Qt.exit(1); }
   }
+  function find(item, name) {
+    if (item.objectName === name) return item;
+    for (const child of item.children || []) { const found = find(child, name); if (found) return found; }
+    return null;
+  }
   function next(value) { root.step = value; root.stepTicks = 0; }
   function done(action) { return root.completed.indexOf(action) !== -1; }
 
@@ -52,6 +57,12 @@ ShellRoot {
           && Logic.requiresHold("poweroff"), "hold actions are marked");
         root.check(!Logic.requiresHold("lock") && !Logic.requiresHold("suspend"), "immediate actions are marked");
         root.check(Logic.shortcutAction("r") === "reboot" && Logic.shortcutAction("X") === "", "shortcut mapping");
+        const viewport = root.find(content, "sessionActionScroll");
+        root.check(viewport.contentHeight > viewport.height, "narrow menu wraps and scrolls vertically");
+        content.focusTile(content.actions.length - 1);
+        root.check(viewport.contentY > 0, "keyboard selection reveals last action");
+        content.focusTile(0);
+        root.check(viewport.contentY === 0, "keyboard selection reveals first action");
         content.pressKey("r");
         root.check(content.holding === "reboot", "hold starts");
         root.check(!Common.SessionActions.pending && !root.done("reboot"), "hold waits for the timer");

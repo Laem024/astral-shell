@@ -41,7 +41,7 @@ Rectangle {
     opacity: root.tokens.overlay
   }
 
-  // Edge fade keeps the corners quiet and the card centred.
+  // Edge fade keeps the login and clock legible over the artwork.
   Rectangle {
     anchors.fill: parent
     gradient: Gradient {
@@ -60,24 +60,4 @@ Rectangle {
     smooth: false
   }
 
-  // Faint orbital rings centred behind the card.
-  Item {
-    anchors.centerIn: parent
-    width: Math.max(root.width, root.height) * 1.05
-    height: width
-
-    Repeater {
-      model: [0.94, 0.72, 0.5]
-
-      delegate: Rectangle {
-        anchors.centerIn: parent
-        width: parent.width * modelData
-        height: width
-        radius: width / 2
-        color: "transparent"
-        border.width: 1
-        border.color: Qt.alpha(root.tokens.cyan, 0.04)
-      }
-    }
-  }
 }

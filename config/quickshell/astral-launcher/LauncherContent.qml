@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Shapes
 import Quickshell
 import "Logic.js" as Logic
 
@@ -38,426 +39,244 @@ FocusScope {
   }
   function activate() { if (selected) service.launch(selected); }
   function choose(key) { category = key; grid.currentIndex = 0; grid.positionViewAtBeginning(); search.forceActiveFocus(); }
+  function cycleCategory(step) {
+    const index = root.sections.findIndex(section => section.key === root.category);
+    root.choose(root.sections[(index + step + root.sections.length) % root.sections.length].key);
+  }
   Keys.onEscapePressed: closeRequested()
   Keys.onPressed: event => {
-    if (event.key === Qt.Key_F && (event.modifiers & Qt.ControlModifier)) {
+    if (event.key === Qt.Key_Left || event.key === Qt.Key_Right) {
+      root.cycleCategory(event.key === Qt.Key_Left ? -1 : 1);
+      event.accepted = true;
+    } else if (event.key === Qt.Key_F && (event.modifiers & Qt.ControlModifier)) {
       if (selected) service.pin(selected);
       event.accepted = true;
     }
   }
 
-  RowLayout {
+  ColumnLayout {
     anchors.fill: parent
-    spacing: 0
-
-    Rectangle {
-      visible: !root.compact
-      Layout.preferredWidth: 220
-      Layout.fillHeight: true
-      color: root.tokens.sunken
-      ColumnLayout {
-        anchors.fill: parent
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
-        anchors.topMargin: 24
-        anchors.bottomMargin: 16
-        spacing: 0
-        RowLayout {
+    anchors.margins: 16
+    spacing: 12
+    RowLayout {
+      Layout.fillWidth: true
+      TextField {
+        id: search
+        objectName: "launcherSearch"
+        Layout.fillWidth: true
+        Layout.minimumWidth: 0
+        implicitHeight: 44
+        placeholderText: "Search applications"
+        Accessible.name: "Search applications"
+        selectByMouse: true
+        color: root.tokens.text
+        placeholderTextColor: root.tokens.muted
+        font { family: root.tokens.font; pixelSize: 14 }
+        background: Rectangle {
+          radius: root.tokens.rowRadius
+          color: root.tokens.sunken
+          border.width: search.activeFocus ? 2 : 1
+          border.color: search.activeFocus ? root.tokens.cyan : root.tokens.border
+        }
+        onTextChanged: { grid.currentIndex = 0; grid.positionViewAtBeginning(); }
+        Keys.onDownPressed: if (root.results.length) { grid.forceActiveFocus(); grid.currentIndex = Math.max(0, grid.currentIndex); }
+        Keys.onUpPressed: if (root.results.length) { grid.forceActiveFocus(); grid.currentIndex = root.results.length - 1; }
+        Keys.onLeftPressed: root.cycleCategory(-1)
+        Keys.onRightPressed: root.cycleCategory(1)
+        onAccepted: root.activate()
+      }
+      Button {
+        id: closeButton
+        text: "×"
+        Accessible.name: "Close launcher"
+        onClicked: root.closeRequested()
+        background: Rectangle {
+          color: "transparent"
+          border.color: closeButton.visualFocus ? root.tokens.cyan : "transparent"
+          radius: root.tokens.rowRadius
+        }
+        contentItem: Text {
+          text: closeButton.text
+          color: closeButton.hovered ? root.tokens.cyan : root.tokens.muted
+          font.pixelSize: 22
+          horizontalAlignment: Text.AlignHCenter
+        }
+      }
+    }
+    RowLayout {
+      Layout.fillWidth: true
+      spacing: 4
+      Repeater {
+        model: root.sections
+        Button {
+          id: tab
+          required property var modelData
           Layout.fillWidth: true
-          spacing: 12
-          Rectangle {
-            Layout.preferredWidth: 40; Layout.preferredHeight: 40
-            radius: root.tokens.rowRadius + 2
-            color: root.tokens.cyan
-            Text {
-              anchors.centerIn: parent
-              text: "A"
-              color: root.tokens.background
-              font.family: root.tokens.mono
-              font.pixelSize: 18
-              font.weight: Font.Bold
+          Layout.minimumWidth: 0
+          implicitHeight: 32
+          Accessible.name: modelData.label
+          Accessible.role: Accessible.RadioButton
+          Accessible.checkable: true
+          Accessible.checked: root.category === modelData.key
+          onClicked: root.choose(modelData.key)
+          contentItem: Text {
+            text: tab.modelData.label
+            color: root.category === tab.modelData.key ? root.tokens.cyan : root.tokens.muted
+            font { family: root.tokens.font; pixelSize: 12 }
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+          }
+          background: Rectangle {
+            color: "transparent"
+            border.color: tab.visualFocus ? root.tokens.cyan : "transparent"
+            Rectangle {
+              anchors.bottom: parent.bottom
+              width: parent.width
+              height: 2
+              color: root.category === tab.modelData.key ? root.tokens.cyan : root.tokens.hairline
             }
+          }
+        }
+      }
+    }
+    Text {
+      Layout.fillWidth: true
+      visible: text !== ""
+      text: root.service.error || root.service.warning
+      textFormat: Text.PlainText
+      wrapMode: Text.Wrap
+      color: root.service.error ? root.tokens.alert : root.tokens.gold
+      font { family: root.tokens.font; pixelSize: 11 }
+    }
+    ListView {
+      id: grid
+      objectName: "launcherResults"
+      property real translation: 0
+      transform: Translate { y: grid.translation }
+      Layout.fillWidth: true
+      Layout.fillHeight: true
+      Layout.minimumHeight: 0
+      model: root.results
+      clip: true
+      spacing: 4
+      boundsBehavior: Flickable.StopAtBounds
+      keyNavigationEnabled: true
+      ScrollBar.vertical: ScrollBar {}
+      Keys.onReturnPressed: root.activate()
+      Keys.onEnterPressed: root.activate()
+      Keys.onUpPressed: event => {
+        if (currentIndex <= 0) search.forceActiveFocus();
+        else event.accepted = false;
+      }
+      Keys.onLeftPressed: root.cycleCategory(-1)
+      Keys.onRightPressed: root.cycleCategory(1)
+      delegate: Item {
+        id: row
+        required property var modelData
+        required property int index
+        readonly property bool selected: grid.currentIndex === index
+        readonly property bool pinned: root.service.state.favorites.includes(Logic.identity(modelData))
+        width: grid.width
+        height: 64
+        Rectangle {
+          anchors.fill: parent
+          radius: root.tokens.rowRadius
+          color: row.selected ? Qt.alpha(root.tokens.cyan, 0.09) : "transparent"
+          border.color: row.selected && grid.activeFocus ? root.tokens.cyan : "transparent"
+        }
+        MouseArea {
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+          onClicked: { grid.currentIndex = row.index; grid.forceActiveFocus(); root.service.launch(row.modelData); }
+        }
+        RowLayout {
+          anchors.fill: parent
+          anchors.margins: 10
+          spacing: 12
+          Image {
+            Layout.preferredWidth: 32
+            Layout.preferredHeight: 32
+            source: Quickshell.iconPath(row.modelData.icon || "application-x-executable", "application-x-executable")
+            fillMode: Image.PreserveAspectFit
+            asynchronous: true
           }
           ColumnLayout {
             Layout.fillWidth: true
             Layout.minimumWidth: 0
-            spacing: 2
+            spacing: 3
             Text {
               Layout.fillWidth: true
-              text: "Astral"
-              color: root.tokens.text
-              font.family: root.tokens.font
-              font.pixelSize: 16
-              font.weight: Font.DemiBold
+              text: row.modelData.name
+              textFormat: Text.PlainText
               elide: Text.ElideRight
+              color: row.selected ? root.tokens.cyan : root.tokens.text
+              font { family: root.tokens.font; pixelSize: 14; weight: Font.Medium }
             }
             Text {
               Layout.fillWidth: true
-              text: "App library"
+              text: row.modelData.comment || row.modelData.genericName || ""
+              textFormat: Text.PlainText
+              visible: text !== ""
+              elide: Text.ElideRight
               color: root.tokens.muted
-              font.family: root.tokens.font
-              font.pixelSize: 11
-              elide: Text.ElideRight
+              font { family: root.tokens.font; pixelSize: 11 }
             }
-          }
-        }
-        Item { Layout.preferredHeight: 28 }
-        Text {
-          text: "BROWSE"
-          color: root.tokens.muted
-          font.family: root.tokens.mono
-          font.pixelSize: 10
-          font.letterSpacing: 1.4
-          Layout.bottomMargin: 4
-        }
-        Repeater {
-          model: root.sections
-          delegate: Button {
-            id: section
-            required property var modelData
-            readonly property bool selected: root.category === modelData.key
-            Layout.fillWidth: true
-            Layout.preferredHeight: 40
-            leftPadding: 14; rightPadding: 12
-            topPadding: 0; bottomPadding: 0
-            focusPolicy: Qt.StrongFocus
-            onClicked: root.choose(modelData.key)
-            contentItem: RowLayout {
-              spacing: 8
-              Text {
-                Layout.fillWidth: true
-                Layout.minimumWidth: 0
-                text: section.modelData.label
-                color: section.selected ? root.tokens.text : root.tokens.muted
-                font.family: root.tokens.font
-                font.pixelSize: 13
-                font.weight: section.selected ? Font.DemiBold : Font.Normal
-                elide: Text.ElideRight
-              }
-              Text {
-                visible: text !== ""
-                text: root.countFor(section.modelData.key)
-                color: section.selected ? root.tokens.cyan : root.tokens.muted
-                font.family: root.tokens.mono
-                font.pixelSize: 11
-              }
-            }
-            background: Rectangle {
-              radius: root.tokens.rowRadius
-              color: section.selected ? root.tokens.raised
-                : section.hovered ? Qt.alpha(root.tokens.muted, 0.07) : "transparent"
-              border.width: 1
-              border.color: section.activeFocus ? root.tokens.cyan
-                : section.selected ? root.tokens.border : "transparent"
-              Rectangle {
-                visible: section.selected
-                x: 5
-                anchors.verticalCenter: parent.verticalCenter
-                width: 3; height: 16; radius: 1.5
-                color: root.tokens.cyan
-              }
-              Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
-            }
-            scale: down ? 0.98 : 1
-            Behavior on scale { NumberAnimation { duration: root.tokens.hoverDuration; easing.type: Easing.OutCubic } }
-          }
-        }
-        Item { Layout.fillHeight: true }
-        Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: root.tokens.hairline }
-        Text {
-          Layout.fillWidth: true
-          Layout.topMargin: 12
-          text: root.service.entries.filter(e => !e.noDisplay).length + " apps, one place."
-          color: root.tokens.muted
-          font.family: root.tokens.font
-          font.pixelSize: 11
-          wrapMode: Text.Wrap
-        }
-      }
-    }
-    Rectangle { visible: !root.compact; Layout.fillHeight: true; Layout.preferredWidth: 1; color: root.tokens.hairline }
-    ColumnLayout {
-      Layout.fillWidth: true
-      Layout.fillHeight: true
-      Layout.margins: root.compact ? 16 : 24
-      spacing: root.compact ? 12 : 16
-      RowLayout {
-        Layout.fillWidth: true
-        spacing: 12
-        ColumnLayout {
-          Layout.fillWidth: true
-          Layout.minimumWidth: 0
-          spacing: 4
-          Text {
-            text: root.searching ? "Search results" : root.category === "Home" ? "Your applications" : root.sections.find(s => s.key === root.category).label
-            color: root.tokens.text; font.family: root.tokens.font; font.pixelSize: root.compact ? 20 : 26; font.weight: Font.DemiBold
-            Layout.fillWidth: true; elide: Text.ElideRight
-          }
-          Text {
-            visible: !root.compact
-            Layout.fillWidth: true
-            text: root.searching ? "Find an app and press Enter to open it." : root.category === "Home" ? "Favorites and familiar places, a little closer." : root.sections.find(s => s.key === root.category).detail
-            color: root.tokens.muted; font.family: root.tokens.font; font.pixelSize: 12
-            elide: Text.ElideRight
-          }
-        }
-        Button {
-          id: closeButton
-          Layout.preferredWidth: 32; Layout.preferredHeight: 32
-          Layout.alignment: Qt.AlignTop
-          Accessible.name: "Close launcher"
-          onClicked: root.closeRequested()
-          contentItem: Text { text: "×"; color: closeButton.hovered ? root.tokens.text : root.tokens.muted; font.pixelSize: 20; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-          background: Rectangle {
-            radius: height / 2
-            color: closeButton.hovered ? root.tokens.raised : "transparent"
-            border.width: 1
-            border.color: closeButton.activeFocus ? root.tokens.cyan : closeButton.hovered ? root.tokens.border : "transparent"
-          }
-        }
-      }
-      Rectangle {
-        Layout.fillWidth: true
-        Layout.preferredHeight: root.compact ? 44 : 48
-        radius: root.tokens.rowRadius
-        color: root.tokens.sunken
-        border.width: search.activeFocus ? 2 : 1
-        border.color: search.activeFocus ? Qt.alpha(root.tokens.cyan, 0.7) : root.tokens.border
-        Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
-        RowLayout {
-          anchors.fill: parent
-          anchors.leftMargin: 14; anchors.rightMargin: 8
-          spacing: 10
-          Item {
-            Layout.preferredWidth: 18; Layout.preferredHeight: 18
-            Rectangle {
-              x: 2; y: 2; width: 11; height: 11; radius: 6
-              color: "transparent"; border.width: 1.6
-              border.color: search.activeFocus ? root.tokens.cyan : root.tokens.muted
-            }
-            Rectangle {
-              x: 12; y: 12; width: 6; height: 1.6; rotation: 45
-              transformOrigin: Item.Left; radius: 1
-              color: search.activeFocus ? root.tokens.cyan : root.tokens.muted
-            }
-          }
-          TextField {
-            id: search
-            Layout.fillWidth: true; Layout.fillHeight: true
-            Layout.minimumWidth: 0
-            padding: 0
-            placeholderText: "Search your applications"
-            Accessible.name: "Search applications"
-            color: root.tokens.text; placeholderTextColor: root.tokens.muted
-            font.family: root.tokens.font; font.pixelSize: 14
-            selectByMouse: true
-            background: Item {}
-            onTextChanged: { grid.currentIndex = 0; grid.positionViewAtBeginning(); }
-            Keys.onDownPressed: { if (root.results.length) { grid.forceActiveFocus(); grid.currentIndex = Math.max(0, grid.currentIndex); } }
-            Keys.onPressed: event => {
-              if (event.key === Qt.Key_F && (event.modifiers & Qt.ControlModifier)) {
-                if (root.selected) root.service.pin(root.selected);
-                event.accepted = true;
-              }
-            }
-            onAccepted: root.activate()
           }
           Button {
-            id: clearButton
-            visible: root.searching
-            Layout.preferredWidth: 28; Layout.preferredHeight: 28
-            Accessible.name: "Clear search"
-            onClicked: { search.clear(); search.forceActiveFocus(); }
-            contentItem: Text { text: "×"; color: clearButton.hovered ? root.tokens.text : root.tokens.muted; font.pixelSize: 18; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-            background: Rectangle {
-              radius: height / 2
-              color: clearButton.hovered ? root.tokens.raised : "transparent"
-              border.width: 1
-              border.color: clearButton.activeFocus ? root.tokens.cyan : "transparent"
-            }
-          }
-        }
-      }
-      RowLayout {
-        visible: root.compact
-        Layout.fillWidth: true
-        spacing: 4
-        Repeater {
-          model: root.sections
-          delegate: Button {
-            id: compactSection
-            required property var modelData
-            readonly property bool current: root.category === compactSection.modelData.key
-            Layout.fillWidth: true; Layout.preferredHeight: 30
-            focusPolicy: Qt.StrongFocus
-            onClicked: root.choose(modelData.key)
-            contentItem: Text {
-              text: compactSection.modelData.label
-              color: compactSection.current ? root.tokens.cyan : root.tokens.muted
-              font.family: root.tokens.font
-              font.pixelSize: 11
-              font.weight: compactSection.current ? Font.DemiBold : Font.Normal
-              horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-              elide: Text.ElideRight
+            id: pin
+            Layout.preferredWidth: 32
+            Layout.preferredHeight: 32
+            Accessible.name: (row.pinned ? "Unpin " : "Pin ") + row.modelData.name
+            onClicked: root.service.pin(row.modelData)
+            contentItem: Item {
+              Shape {
+                anchors.centerIn: parent
+                width: 20; height: 20
+                preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                  strokeColor: row.pinned ? root.tokens.gold : pin.hovered ? root.tokens.cyan : root.tokens.muted
+                  strokeWidth: 1.5
+                  joinStyle: ShapePath.RoundJoin
+                  fillColor: row.pinned ? root.tokens.gold : "transparent"
+                  PathSvg { path: "M10 1.5 L12.6 6.8 L18.5 7.6 L14.2 11.8 L15.2 17.7 L10 14.9 L4.8 17.7 L5.8 11.8 L1.5 7.6 L7.4 6.8 Z" }
+                }
+              }
             }
             background: Rectangle {
-              radius: height / 2
-              color: compactSection.current ? root.tokens.raised : "transparent"
-              border.width: 1
-              border.color: compactSection.activeFocus ? root.tokens.cyan
-                : compactSection.current ? Qt.alpha(root.tokens.cyan, 0.35) : "transparent"
+              color: "transparent"
+              radius: root.tokens.rowRadius
+              border.color: pin.visualFocus ? root.tokens.cyan : "transparent"
             }
           }
         }
       }
       Text {
-        Layout.fillWidth: true
-        visible: text !== ""
-        text: root.service.error || root.service.warning
-        color: root.service.error ? root.tokens.alert : root.tokens.gold
-        wrapMode: Text.Wrap; font.family: root.tokens.font; font.pixelSize: 11
-      }
-      RowLayout {
-        Layout.fillWidth: true
-        spacing: 8
-        Text {
-          text: root.searching ? "SEARCH RESULTS" : root.category === "Home" ? (root.homeEntries.length ? "PICK UP WHERE YOU LEFT OFF" : "EXPLORE YOUR APPS") : root.category.toUpperCase()
-          color: root.tokens.muted; font.family: root.tokens.mono; font.pixelSize: 10; font.letterSpacing: 1.2
-          Layout.fillWidth: true; elide: Text.ElideRight
-        }
-        Text { text: root.results.length.toString().padStart(2, "0"); color: root.tokens.cyan; font.family: root.tokens.mono; font.pixelSize: 11 }
-      }
-      GridView {
-        id: grid
-        property real translation: 0
-        transform: Translate { y: grid.translation }
-        Layout.fillWidth: true; Layout.fillHeight: true
-        Layout.minimumHeight: 0
-        clip: true
-        model: root.results
-        cellWidth: width / Math.max(1, Math.floor(width / (root.compact ? 116 : 144)))
-        cellHeight: root.compact ? 112 : 148
-        keyNavigationEnabled: true
-        boundsBehavior: Flickable.StopAtBounds
-        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-        Keys.onReturnPressed: root.activate()
-        Keys.onEnterPressed: root.activate()
-        Keys.onUpPressed: event => {
-          if (currentIndex < Math.round(width / cellWidth)) search.forceActiveFocus();
-          else event.accepted = false;
-        }
-        delegate: Item {
-          id: tile
-          required property var modelData
-          required property int index
-          readonly property bool selected: grid.currentIndex === index
-          readonly property bool pinned: root.service.state.favorites.includes(Logic.identity(modelData))
-          width: grid.cellWidth; height: grid.cellHeight
-          Rectangle {
-            anchors.fill: parent; anchors.margins: 6
-            radius: root.tokens.cardRadius
-            color: tile.selected ? Qt.alpha(root.tokens.cyan, 0.1) : hover.hovered ? root.tokens.raised : "transparent"
-            border.width: 1
-            border.color: tile.selected ? Qt.alpha(root.tokens.cyan, grid.activeFocus ? 0.85 : 0.45) : "transparent"
-            Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
-            Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
-            MouseArea {
-              anchors.fill: parent
-              cursorShape: Qt.PointingHandCursor
-              onClicked: { grid.currentIndex = tile.index; grid.forceActiveFocus(); root.service.launch(tile.modelData); }
-            }
-          }
-          HoverHandler { id: hover }
-          Column {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.topMargin: root.compact ? 12 : 16
-            width: parent.width - 24
-            spacing: root.compact ? 8 : 10
-            Rectangle {
-              id: iconWell
-              anchors.horizontalCenter: parent.horizontalCenter
-              width: root.compact ? 52 : 64; height: width
-              radius: width / 2
-              color: Qt.alpha(root.tokens.cyan, tile.selected || hover.hovered ? 0.1 : 0.05)
-              border.width: 1
-              border.color: Qt.alpha(root.tokens.cyan, tile.selected ? 0.32 : 0.12)
-              Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
-              Image {
-                id: icon
-                anchors.centerIn: parent
-                width: root.compact ? 30 : 38; height: width
-                source: Quickshell.iconPath(tile.modelData.icon || "application-x-executable", "application-x-executable")
-                fillMode: Image.PreserveAspectFit
-                asynchronous: true
-              }
-              Text { anchors.centerIn: parent; visible: icon.status !== Image.Ready; text: "◇"; color: root.tokens.cyan; font.pixelSize: 26 }
-            }
-            Text {
-              width: parent.width
-              text: tile.modelData.name
-              color: tile.selected ? root.tokens.cyan : root.tokens.text
-              font.family: root.tokens.font
-              font.pixelSize: root.compact ? 12 : 13
-              font.weight: Font.Medium
-              horizontalAlignment: Text.AlignHCenter
-              elide: Text.ElideRight
-              Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
-            }
-          }
-          Button {
-            id: pin
-            anchors.right: parent.right; anchors.top: parent.top; anchors.margins: 8
-            width: 28; height: 28
-            opacity: tile.pinned || hover.hovered || tile.selected || activeFocus ? 1 : 0
-            Accessible.name: (tile.pinned ? "Unpin " : "Pin ") + tile.modelData.name
-            ToolTip.visible: hovered
-            ToolTip.text: tile.pinned ? "Remove from favorites" : "Add to favorites"
-            onClicked: root.service.pin(tile.modelData)
-            contentItem: Text { text: tile.pinned ? "★" : "☆"; color: tile.pinned ? root.tokens.gold : root.tokens.muted; font.pixelSize: 16; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-            background: Rectangle {
-              radius: height / 2
-              color: pin.hovered ? root.tokens.raised : "transparent"
-              border.width: 1
-              border.color: pin.activeFocus ? root.tokens.cyan : "transparent"
-            }
-            Behavior on opacity { NumberAnimation { duration: root.tokens.hoverDuration } }
-          }
-        }
-        Column {
-          anchors.centerIn: parent
-          width: Math.max(0, parent.width - 48)
-          spacing: 12
-          visible: root.results.length === 0
-          Text { anchors.horizontalCenter: parent.horizontalCenter; text: root.searching ? "⌕" : "☆"; color: root.tokens.cyan; font.pixelSize: 36 }
-          Text {
-            width: parent.width
-            text: root.searching ? "No apps found" : root.category === "Favorites" ? "Keep your favorites close" : "Your routine starts here"
-            color: root.tokens.text; font.family: root.tokens.font; font.pixelSize: 17; font.weight: Font.DemiBold
-            horizontalAlignment: Text.AlignHCenter; wrapMode: Text.Wrap
-          }
-          Text {
-            width: parent.width
-            text: root.searching ? "Try another name or a shorter search." : root.category === "Favorites" ? "Select ☆ on any app to save it here." : "Apps you launch here will appear in this space."
-            color: root.tokens.muted; font.family: root.tokens.font; font.pixelSize: 12
-            horizontalAlignment: Text.AlignHCenter; wrapMode: Text.Wrap
-          }
-        }
-      }
-      Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 1; color: root.tokens.hairline }
-      RowLayout {
-        Layout.fillWidth: true
-        spacing: root.compact ? 8 : 14
-        Text {
-          text: root.service.pending ? "Opening application…" : root.selected ? root.selected.name : "Ready to explore"
-          color: root.tokens.muted; font.family: root.tokens.font; font.pixelSize: 11
-          Layout.fillWidth: true; Layout.minimumWidth: 0; elide: Text.ElideRight
-        }
-        ShortcutHint { tokens: root.tokens; keys: "↵"; label: "Open"; accent: true }
-        ShortcutHint { tokens: root.tokens; visible: !root.compact; keys: "Ctrl F"; label: "Favorite" }
-        ShortcutHint { tokens: root.tokens; keys: "Esc"; label: "Close" }
+        anchors.centerIn: parent
+        width: Math.max(0, parent.width - 32)
+        visible: root.results.length === 0
+        text: root.searching ? "No apps found. Try another name."
+          : root.category === "Favorites" ? "Select ☆ to add favorites." : "No applications yet."
+        wrapMode: Text.Wrap
+        horizontalAlignment: Text.AlignHCenter
+        color: root.tokens.muted
+        font { family: root.tokens.font; pixelSize: 13 }
       }
     }
+    RowLayout {
+      Layout.fillWidth: true
+      Text {
+        Layout.fillWidth: true
+        Layout.minimumWidth: 0
+        text: root.service.pending ? "Opening application…" : root.results.length + " applications"
+        color: root.tokens.muted
+        elide: Text.ElideRight
+        font { family: root.tokens.font; pixelSize: 11 }
+      }
+      ShortcutHint { tokens: root.tokens; visible: root.width >= 480; keys: "← →"; label: "Categories" }
+      ShortcutHint { tokens: root.tokens; keys: "↵"; label: "Open" }
+      ShortcutHint { tokens: root.tokens; visible: root.width >= 480; keys: "Ctrl F"; label: "Favorite" }
+      ShortcutHint { tokens: root.tokens; keys: "Esc"; label: "Close" }
+    }
   }
-
 }

@@ -17,6 +17,11 @@ their button or shortcut for 900 ms. Releasing early, closing the menu or losing
 focus cancels the hold. Shortcuts are L, S, O, R and P; Escape dismisses the menu,
 and arrow keys select actions.
 
+Actions appear in five balanced cards: Lock, Log out, Suspend, Restart and Shut
+down. Narrow windows wrap into three or two columns and scroll vertically to
+reveal keyboard-focused actions. Each tile keeps its vector icon, name, shortcut
+and hold progress ring.
+
 Root `settings.json` owns appearance and provider argument arrays. Empty arrays
 disable actions. A fresh full installation uses `astral-lock` for lock, suspend,
 logout, reboot and poweroff; existing provider arrays, including empty ones, are
@@ -50,3 +55,5 @@ Install either module with `bash scripts/manage-configs.sh apply quickshell
 --module astral-lock` or `--module astral-session`. External `--source` entries
 need only QML. Partial installation supplies the root common files once, and
 does not enable providers for an absent locker.
+
+The action grid wraps to three or two columns on small screens. Arrow navigation reveals the focused tile vertically. Action symbols use vector paths; hold confirmation keeps its progress ring.

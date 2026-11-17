@@ -7,9 +7,7 @@ import "../../common" as Design
 import "../data" as Data
 import "../components" as Components
 
-// Sound tab: three summary chips, then one card per device direction and one
-// for application streams. Accents follow the Connections tab: cyan for output,
-// lavender for input and gold for applications.
+// Device controls first, followed by per-application streams.
 ScrollView {
   id: root
   required property Design.Theme tokens
@@ -41,7 +39,7 @@ ScrollView {
   }
   component Section: PanelCard {
     tokens: root.tokens
-    contentSpacing: 12
+    contentSpacing: 8
   }
   // Square icon tile shared by every card header and stream row.
   component IconTile: Rectangle {
@@ -50,7 +48,7 @@ ScrollView {
     property string kind: "speaker"
     property bool muted: false
     property real level: 1
-    property int size: 40
+    property int size: 32
     Layout.preferredWidth: size
     Layout.preferredHeight: size
     Layout.alignment: Qt.AlignTop
@@ -64,59 +62,6 @@ ScrollView {
       muted: tile.muted
       level: tile.level
       ink: tile.accent
-    }
-  }
-  // Summary chip with the same anatomy as the Connections tab.
-  component Chip: Rectangle {
-    id: chip
-    required property string title
-    required property string value
-    required property string detail
-    required property color accent
-    property bool live: false
-    Layout.fillWidth: true
-    Layout.minimumWidth: 0
-    implicitHeight: 76
-    radius: root.tokens.rowRadius
-    color: root.tokens.raised
-    border.width: 1
-    border.color: chip.live ? Qt.alpha(chip.accent, 0.35) : root.tokens.border
-    ColumnLayout {
-      anchors { fill: parent; margins: 12 }
-      spacing: 4
-      RowLayout {
-        Layout.fillWidth: true
-        spacing: 6
-        Rectangle {
-          Layout.preferredWidth: 6; Layout.preferredHeight: 6
-          radius: 3
-          color: chip.live ? chip.accent : Qt.alpha(root.tokens.muted, 0.5)
-        }
-        Text {
-          Layout.fillWidth: true
-          text: chip.title
-          textFormat: Text.PlainText
-          elide: Text.ElideRight
-          color: chip.accent
-          font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 0.8 }
-        }
-      }
-      Text {
-        Layout.fillWidth: true
-        text: chip.value
-        textFormat: Text.PlainText
-        elide: Text.ElideRight
-        color: root.tokens.text
-        font { family: root.tokens.font; pixelSize: 13; weight: Font.Medium }
-      }
-      Text {
-        Layout.fillWidth: true
-        text: chip.detail
-        textFormat: Text.PlainText
-        elide: Text.ElideRight
-        color: root.tokens.muted
-        font { family: root.tokens.font; pixelSize: 10 }
-      }
     }
   }
   // Short chevron used by the device selector; flips while the popup is open.
@@ -159,19 +104,10 @@ ScrollView {
         Layout.fillWidth: true
         Layout.minimumWidth: 0
         spacing: 2
-        Eyebrow { text: card.output ? "OUTPUT" : "INPUT"; tone: card.ready ? card.accent : root.tokens.muted }
-        Text {
-          Layout.fillWidth: true
-          text: card.ready ? Data.AudioData.label(card.current) : card.output ? "No output device" : "No input device"
-          textFormat: Text.PlainText
-          elide: Text.ElideRight
-          color: root.tokens.text
-          font { family: root.tokens.font; pixelSize: 14; weight: Font.Medium }
-        }
+        Eyebrow { text: card.output ? "OUTPUT" : "MICROPHONE"; tone: card.ready ? card.accent : root.tokens.muted }
         Caption {
-          text: card.ready ? (card.output ? "Playback · " : "Capture · ")
-            + card.devices.length + (card.devices.length === 1 ? " device available" : " devices available")
-            : "Waiting for PipeWire to expose this device"
+          visible: !card.ready
+          text: "Waiting for PipeWire to expose this device"
           font.pixelSize: 10
         }
       }
@@ -270,8 +206,8 @@ ScrollView {
       }
     }
     Caption {
-      text: card.ready ? "Choose where " + (card.output ? "sound is routed." : "the microphone sends audio.")
-        : "Connect a device to make it available here."
+      visible: !card.ready
+      text: "Connect a device to make it available here."
       font.pixelSize: 10
     }
   }
@@ -306,35 +242,6 @@ ScrollView {
           color: root.tokens.alert
           font { family: root.tokens.font; pixelSize: 11 }
         }
-      }
-    }
-    RowLayout {
-      Layout.fillWidth: true
-      spacing: 8
-      Chip {
-        title: "OUTPUT"
-        accent: root.tokens.cyan
-        value: Data.AudioData.usable(Data.AudioData.sink) ? Data.AudioData.label(Data.AudioData.sink) : "No output"
-        detail: Data.AudioData.usable(Data.AudioData.sink)
-          ? (Data.AudioData.sink.audio.muted ? "Muted" : Data.AudioData.percent(Data.AudioData.sink) + "% volume")
-          : "Waiting for PipeWire"
-        live: Data.AudioData.usable(Data.AudioData.sink) && !Data.AudioData.sink.audio.muted
-      }
-      Chip {
-        title: "INPUT"
-        accent: root.tokens.lavender
-        value: Data.AudioData.usable(Data.AudioData.source) ? Data.AudioData.label(Data.AudioData.source) : "No input"
-        detail: Data.AudioData.usable(Data.AudioData.source)
-          ? (Data.AudioData.source.audio.muted ? "Muted" : Data.AudioData.percent(Data.AudioData.source) + "% volume")
-          : "Waiting for PipeWire"
-        live: Data.AudioData.usable(Data.AudioData.source) && !Data.AudioData.source.audio.muted
-      }
-      Chip {
-        title: "APPLICATIONS"
-        accent: root.tokens.gold
-        value: root.streamCount === 0 ? "Nothing playing" : root.streamCount + (root.streamCount === 1 ? " stream" : " streams")
-        detail: root.streamCount === 0 ? "Idle" : "Per-app volume"
-        live: root.streamCount > 0
       }
     }
     DeviceCard { objectName: "audioOutputCard"; output: true }

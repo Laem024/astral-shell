@@ -16,7 +16,7 @@ Button {
   readonly property color accent: destructive || actionData.accent === "alert" ? tokens.alert
     : actionData.accent === "gold" ? tokens.gold : tokens.cyan
   readonly property string detail: actionData.detail || ""
-  readonly property int orbSize: root.compact ? 36 : 40
+  readonly property int orbSize: root.compact ? 40 : 48
   signal holdStarted()
   signal holdEnded()
   signal activated()
@@ -31,20 +31,19 @@ Button {
   onClicked: if (!root.holdRequired) root.activated()
 
   contentItem: Item {
-    implicitHeight: root.compact ? 52 : 60
+    implicitHeight: 150
     HoverHandler { cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
 
-    RowLayout {
+    ColumnLayout {
       anchors.fill: parent
-      anchors.leftMargin: root.compact ? 12 : 16
-      anchors.rightMargin: root.compact ? 12 : 16
-      spacing: root.compact ? 12 : 16
+      anchors.margins: 12
+      spacing: 12
 
       Item {
         id: orb
         Layout.preferredWidth: root.orbSize
         Layout.preferredHeight: root.orbSize
-        Layout.alignment: Qt.AlignVCenter
+        Layout.alignment: Qt.AlignHCenter
 
         // The hold progress is a ring around the symbol, not a bar.
         Shape {
@@ -91,11 +90,26 @@ Button {
           border.color: Qt.alpha(root.accent, root.holding ? 0.6 : root.hovered ? 0.35 : 0.22)
           Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
           Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
-          Text {
+          Shape {
             anchors.centerIn: parent
-            text: root.actionData.glyph
-            color: root.accent
-            font { family: root.tokens.mono; pixelSize: root.compact ? 17 : 19 }
+            width: 24; height: 24
+            preferredRendererType: Shape.CurveRenderer
+            ShapePath {
+              strokeColor: root.accent
+              strokeWidth: 1.7
+              capStyle: ShapePath.RoundCap
+              joinStyle: ShapePath.RoundJoin
+              fillColor: "transparent"
+              PathSvg {
+                path: ({
+                  lock: "M7 10 V7 A5 5 0 0 1 17 7 V10 M5 10 H19 V21 H5 Z M12 14 V17",
+                  logout: "M10 3 H4 V21 H10 M9 12 H21 M17 8 L21 12 L17 16",
+                  suspend: "M20 15 A9 9 0 1 1 9 3 A7 7 0 0 0 20 15 Z",
+                  reboot: "M20 10 A8 8 0 1 0 20 16 M20 3 V10 H13",
+                  poweroff: "M12 2 V11 M7 5 A9 9 0 1 0 17 5"
+                })[root.actionData.id] || ""
+              }
+            }
           }
         }
       }
@@ -108,6 +122,7 @@ Button {
           Layout.fillWidth: true
           text: root.actionData.label
           textFormat: Text.PlainText
+          horizontalAlignment: Text.AlignHCenter
           elide: Text.ElideRight
           color: root.holding ? root.accent : root.tokens.text
           font { family: root.tokens.font; pixelSize: root.compact ? 13 : 14; weight: Font.DemiBold }
@@ -115,9 +130,12 @@ Button {
         Text {
           Layout.fillWidth: true
           text: root.holding ? "Keep holding…"
-            : root.holdRequired && (root.hovered || root.visualFocus) ? "Press and hold to confirm"
+            : root.holdRequired && (root.hovered || root.visualFocus) ? "Hold to confirm"
             : root.detail
           textFormat: Text.PlainText
+          horizontalAlignment: Text.AlignHCenter
+          wrapMode: Text.Wrap
+          maximumLineCount: 2
           elide: Text.ElideRight
           color: root.holding ? root.accent : root.tokens.muted
           font { family: root.tokens.font; pixelSize: root.compact ? 10 : 11 }
@@ -125,7 +143,7 @@ Button {
       }
 
       Rectangle {
-        Layout.alignment: Qt.AlignVCenter
+        Layout.alignment: Qt.AlignHCenter
         implicitWidth: 26
         implicitHeight: 22
         radius: root.tokens.rowRadius
@@ -154,7 +172,7 @@ Button {
     border.color: root.visualFocus ? Qt.alpha(root.accent, 0.7)
       : root.holding ? Qt.alpha(root.accent, 0.45)
       : root.hovered ? Qt.alpha(root.accent, 0.25)
-      : root.tokens.border
+      : Qt.alpha(root.accent, 0.22)
     Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
     Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
   }

@@ -6,6 +6,11 @@ A personal CachyOS environment built around Hyprland and Quickshell, with config
 
 `config/quickshell/` contains the new orchestrator, `astral-bar`, `astral-launcher`, `astral-wallpaper`, `astral-polkit`, `astral-lock`, `astral-session`, `astral-clipboard`, `astral-overview`, and `astral-shortcuts`. The bar preserves its four positions, multiple monitors, panels, tray, notifications, weather, network, Bluetooth, VPN, media, audio, brightness, and capture controls. Its backend uses QML, Quickshell APIs, and JavaScript executed by Qt. Existing command-line tools receive separate arguments; no new package or language is required.
 
+The visual direction is **Astral depurado**: one bar surface, compact Sound controls,
+Connections tabs, a search-and-list launcher, horizontal session actions and a
+left-aligned SDDM login with a responsive centered layout. See the
+[visual compositions](docs/design-system.md#astral-depurado-composition).
+
 `config/quickshell-old/` is reference material. The new installer does not copy or start it. Clipboard, overview, and shortcuts start through the registry and use shared QML coordination. The lock and session menu use shared argument-array providers; empty providers hide actions. Existing destination-only files and old public commands are retained, so stop any old daemons before switching configurations.
 
 ## Try and validate
@@ -74,12 +79,12 @@ Clipboard preferences (`historySize`, `maxImageBytes`, `enterAction`, and `paste
 | `config/quickshell/common/` | One settings loader/validator, theme, paths, argument runner, privacy, popup dismissal, caffeine worker |
 | `config/quickshell/astral-bar/settings.json` | Position, margins, visibility, replacements, weather and logo |
 | `config/quickshell/astral-bar/modules/` | Visual slots and their stock `Default*.qml` implementations |
-| `config/quickshell/astral-bar/components/` | Reusable visual elements |
+| `config/quickshell/astral-bar/components/` | Reusable visuals, animated edge marker (`HoverIndex.qml`) and workspace hover outline (`NeonOutline.qml`) |
 | `config/quickshell/astral-bar/panel/` | Panels, tray menu, and notification presentation |
 | `config/quickshell/astral-bar/data/` | Native services and Qt JavaScript logic |
 | `config/quickshell/astral-bar/display/` | Native window capture and independent recording entry |
 | `config/quickshell/astral-polkit/` | Native authentication service, private dialog and safe preview |
-| `config/quickshell/astral-launcher/` | Application library, favorites, history and atomic state |
+| `config/quickshell/astral-launcher/` | Compact application list, favorites, history and atomic state |
 | `config/quickshell/astral-wallpaper/` | Selector, carousel and reusable coordinated renderer |
 | `config/quickshell/astral-wallpaper/library/` | FileView state and NUL-delimited library scan |
 | `config/quickshell/astral-wallpaper/thumbnails/` | Bounded metadata-keyed ffmpeg thumbnail queue |

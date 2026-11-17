@@ -64,6 +64,13 @@ Scope {
       for (const strip of [horizontalSpaces, verticalSpaces]) {
         const icon = root.find(strip, "workspaceIcon-" + (strip.active - 1));
         const selection = root.find(strip, "workspaceSelection");
+        if (selection.radius !== 0) {
+          console.log("MEDIA_LAYOUT_FAIL", "Normal workspace selector must be square"); Qt.quit(); return;
+        }
+        const specialSelection = root.find(strip, "specialWorkspaceSelection");
+        if (specialSelection.radius !== specialSelection.width / 2) {
+          console.log("MEDIA_LAYOUT_FAIL", "Special workspace selector must stay circular"); Qt.quit(); return;
+        }
         const iconCenter = icon.mapToItem(strip, icon.width / 2, icon.height / 2);
         const selectionCenter = selection.mapToItem(strip, selection.width / 2, selection.height / 2);
         if (Math.abs(iconCenter.x - selectionCenter.x) > 0.5 || Math.abs(iconCenter.y - selectionCenter.y) > 0.5) {

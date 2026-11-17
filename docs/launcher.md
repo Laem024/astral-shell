@@ -15,7 +15,10 @@ starts a missing module or calls pending modules.
 
 Search ignores case and accents. Arrow keys navigate, Enter launches, Escape
 closes and Ctrl+F toggles the selected favorite. Discover, Favorites, Frequent
-and All preserve the reference layout, compact presentation and animations.
+and All are category tabs above a scrolling results list. Each row shows an icon,
+name, available description and favorite button. Up/Down navigate rows, Left/Right
+move to the previous/next result, and Up from the first row returns to search.
+The window is capped at 620 × 560 logical pixels and shrinks to the screen.
 Disconnecting the selected monitor or locking the session hides the launcher.
 
 ## Settings and storage
@@ -54,3 +57,5 @@ write failures, literal launch arguments, IPC, privacy and startup checks.
 fictional applications and an in-memory service: activation cannot launch real
 programs. `all` includes this preview. Verify real Hyprland focus, monitor removal,
 and animations on CachyOS before installing active dotfiles.
+
+Left/Right switch category tabs (including from search); Up/Down select application rows. Favorites use a vector star with a gold fill when pinned.

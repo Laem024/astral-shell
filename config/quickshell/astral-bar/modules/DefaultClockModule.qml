@@ -10,6 +10,19 @@ Item {
   required property date dateTime
   property int offsetSeconds: 0
   signal activated()
+  Accessible.role: Accessible.Button
+  Accessible.name: "Weather and calendar · " + date + " · " + formattedTime
+  Accessible.onPressAction: root.activated()
+  activeFocusOnTab: true
+  Keys.onSpacePressed: root.activated()
+  Keys.onReturnPressed: root.activated()
+  Keys.onEnterPressed: root.activated()
+  Rectangle {
+    anchors.fill: parent
+    color: "transparent"
+    radius: root.tokens.rowRadius
+    border.color: root.activeFocus ? root.tokens.gold : "transparent"
+  }
   readonly property bool hovered: hover.hovered
   property bool vertical: false
   readonly property bool isTwelveHour: tokens.settings.value.clockFormat === "12h"

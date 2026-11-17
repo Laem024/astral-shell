@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import QtQuick.Shapes
 import "../../common" as Design
 import "../data" as Data
+import "../components" as Components
 
 Item {
   id: root
@@ -110,14 +111,12 @@ Item {
       }
       contentItem: RowLayout {
         spacing: 10
-        Rectangle {
+        Components.RoundedClip {
           id: sleeve
           Layout.preferredWidth: root.vertical || root.compact ? 28 : 32
           Layout.preferredHeight: Layout.preferredWidth
           Layout.alignment: Qt.AlignCenter
           radius: 8
-          color: "transparent"
-          clip: true
           Item {
             anchors.centerIn: parent
             visible: cover.status !== Image.Ready

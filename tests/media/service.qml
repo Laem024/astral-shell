@@ -147,9 +147,13 @@ Scope {
           first.canControl = false; play.clicked();
           root.check(!play.enabled && first.toggleCalls === calls + 1, "disabled Music button");
           first.canControl = true;
+          root.find(page, "mediaPlayerSelector").popup.open();
           first.trackArtUrl = root.testArtwork;
           root.stage++;
         } else if (root.stage === 1 && artwork.status === Image.Ready) {
+          const selector = root.find(page, "mediaPlayerSelector");
+          root.check(selector.popup.visible && selector.popup.contentItem.count > 0, "player selector remains usable inside rounded viewport");
+          selector.popup.close();
           root.check(!fallback.visible && artwork.fillMode === Image.PreserveAspectFit, "artwork replaces fallback without cropping");
           root.check(artwork.paintedWidth < artwork.width && artwork.paintedHeight <= artwork.height + 1, "portrait artwork fully visible");
           root.check(artwork.sourceSize.width >= artwork.width * 2, "artwork resolution");
