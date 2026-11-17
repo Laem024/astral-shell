@@ -28,7 +28,7 @@ Item {
   Behavior on ink { ColorAnimation { duration: root.tokens.hoverDuration } }
   signal activated()
   signal summaryActivated()
-  implicitWidth: vertical ? 44 : hasValue ? 70 : unread && !compact ? 58 : compact ? 32 : 36
+  implicitWidth: vertical ? 44 : hasValue ? 70 : compact ? 32 : 36
   implicitHeight: vertical && hasValue ? 52 : 36
   Accessible.name: detail
   Accessible.role: Accessible.Button
@@ -48,7 +48,6 @@ Item {
   Item {
     id: content
     width: root.vertical ? root.width : glyph.width + (valueLabel.visible ? 7 + valueLabel.width : 0)
-      + (badge.visible ? 5 + badge.width : 0)
     height: root.vertical && root.hasValue ? 42 : 20
     anchors.centerIn: parent
     StatusGlyph {
@@ -74,25 +73,20 @@ Item {
     }
     Rectangle {
       id: badge
-      visible: root.unread && !root.vertical && !root.compact
-      x: glyph.width + 5
-      anchors.verticalCenter: glyph.verticalCenter
-      width: Math.max(18, badgeText.implicitWidth + 8); height: 18; radius: 9
-      color: Qt.alpha(root.tokens.cyan, 0.16)
+      visible: root.unread
+      anchors.right: glyph.right
+      anchors.rightMargin: -6
+      y: glyph.y - 5
+      width: Math.max(14, badgeText.implicitWidth + 4); height: 14; radius: 7
+      color: root.tokens.gold
       Text {
         id: badgeText
         anchors.centerIn: parent
         text: root.level > 99 ? "99+" : String(root.level)
-        color: root.tokens.cyan
-        font { family: root.tokens.font; pixelSize: 10; weight: Font.Bold }
+        color: root.tokens.light ? root.tokens.background : Qt.darker(root.tokens.gold, 6)
+        font { family: root.tokens.font; pixelSize: 9; weight: Font.Bold }
         Accessible.ignored: true
       }
-    }
-    Rectangle {
-      visible: root.unread && !badge.visible
-      x: glyph.x + 16; y: 0
-      width: 5; height: 5; radius: 2.5
-      color: root.tokens.cyan
     }
   }
   HoverHandler { id: hover }
