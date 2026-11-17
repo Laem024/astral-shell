@@ -39,7 +39,7 @@ ScrollView {
   }
   component Section: PanelCard {
     tokens: root.tokens
-    contentSpacing: 8
+    contentSpacing: 14
   }
   // Square icon tile shared by every card header and stream row.
   component IconTile: Rectangle {
@@ -90,7 +90,7 @@ ScrollView {
     readonly property var devices: output ? root.sinkDevices : root.sourceDevices
     readonly property var current: output ? Data.AudioData.sink : Data.AudioData.source
     readonly property bool ready: Data.AudioData.usable(current)
-    readonly property color accent: output ? root.tokens.cyan : root.tokens.lavender
+    accent: output ? root.tokens.cyan : root.tokens.lavender
     RowLayout {
       Layout.fillWidth: true
       spacing: 12
@@ -215,6 +215,13 @@ ScrollView {
   ColumnLayout {
     width: root.availableWidth
     spacing: 12
+    PageIntro {
+      tokens: root.tokens
+      title: "Your sound, fine-tuned"
+      subtitle: root.sinkDevices.length + " outputs · " + root.sourceDevices.length + " inputs · " + root.streamCount + " audio streams"
+      symbol: "sound"
+      accent: root.tokens.cyan
+    }
     Rectangle {
       Layout.fillWidth: true
       visible: !Data.AudioData.available
@@ -244,10 +251,16 @@ ScrollView {
         }
       }
     }
-    DeviceCard { objectName: "audioOutputCard"; output: true }
-    DeviceCard { objectName: "audioInputCard"; output: false }
+    GridLayout {
+      Layout.fillWidth: true
+      columns: root.availableWidth >= 460 ? 2 : 1
+      columnSpacing: 12; rowSpacing: 12
+      DeviceCard { objectName: "audioOutputCard"; output: true; Layout.preferredWidth: 1; Layout.alignment: Qt.AlignTop }
+      DeviceCard { objectName: "audioInputCard"; output: false; Layout.preferredWidth: 1; Layout.alignment: Qt.AlignTop }
+    }
     Section {
       objectName: "audioMixerCard"
+      accent: root.tokens.gold
       RowLayout {
         Layout.fillWidth: true
         spacing: 12

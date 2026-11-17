@@ -21,6 +21,7 @@ if [[ -x /usr/lib/qt6/bin/qmllint ]]; then
 
 fi
 if command -v qs >/dev/null; then
+  bash tests/panels/central.sh
   bash tests/panels/startup.sh
   bash tests/panels/control.sh
   bash tests/quickshell/startup.sh

@@ -14,7 +14,7 @@ Item {
   readonly property var player: media.player
   readonly property real progress: media.progress
   readonly property bool largeArtwork: height >= 360 && width >= 260
-  readonly property int inset: height < 360 ? 12 : 20
+  readonly property int inset: height < 360 ? 16 : 24
   readonly property int artworkPadding: largeArtwork ? 12 : 6
   function duration(seconds: real): string {
     const value = Math.max(0, Math.floor(seconds));
@@ -31,7 +31,7 @@ Item {
     required property string label
     property bool primary: false
     property bool active: false
-    implicitWidth: primary ? 56 : 32
+    implicitWidth: primary ? 60 : 32
     implicitHeight: primary ? 48 : 32
     padding: 0
     focusPolicy: Qt.StrongFocus
@@ -41,7 +41,7 @@ Item {
     ToolTip.text: label
     opacity: enabled ? 1 : 0.3
     background: Rectangle {
-      radius: control.primary ? 16 : width / 2
+      radius: width / 2
       color: control.primary ? root.tokens.cyan
         : control.active || control.hovered ? Qt.alpha(root.tokens.cyan, 0.14) : "transparent"
       border.color: control.visualFocus ? root.tokens.gold : "transparent"
@@ -139,8 +139,12 @@ Item {
   Rectangle {
     anchors.fill: parent
     radius: root.tokens.cardRadius
-    color: root.tokens.background
-    border.color: root.tokens.border
+    gradient: Gradient {
+      GradientStop { position: 0; color: Qt.tint(root.tokens.background, Qt.alpha(root.tokens.lavender, 0.16)) }
+      GradientStop { position: 0.6; color: root.tokens.background }
+      GradientStop { position: 1; color: Qt.tint(root.tokens.background, Qt.alpha(root.tokens.cyan, 0.06)) }
+    }
+    border.color: Qt.alpha(root.tokens.lavender, 0.22)
   }
   Components.RoundedClip {
     anchors.fill: parent
@@ -180,9 +184,9 @@ Item {
               }
             }
             Text {
-              text: root.player ? "Now listening" : "Choose a player"
+              text: root.player ? "Your listening room" : "Find your next favorite"
               color: root.tokens.text
-              font { family: root.tokens.font; pixelSize: 11; weight: Font.Medium }
+              font { family: root.tokens.font; pixelSize: 12; weight: Font.Medium }
             }
           }
           Item { Layout.fillWidth: true; Layout.minimumWidth: 0 }
@@ -315,9 +319,9 @@ Item {
               Rectangle {
                 anchors.fill: parent
                 anchors.margins: -3
-                rotation: 3
+                rotation: -4
                 radius: 14
-                color: Qt.tint(root.tokens.surface, Qt.alpha(root.tokens.cyan, 0.12))
+                color: Qt.tint(root.tokens.surface, Qt.alpha(root.tokens.lavender, 0.18))
                 border.color: Qt.alpha(root.tokens.cyan, 0.16)
               }
               Components.RoundedClip {
@@ -457,8 +461,8 @@ Item {
           implicitHeight: 64
           Rectangle {
             anchors.fill: parent
-            radius: 22
-            color: root.tokens.raised
+            radius: 32
+            color: Qt.tint(root.tokens.surface, Qt.alpha(root.tokens.lavender, 0.06))
             border.color: root.tokens.border
           }
           RowLayout {

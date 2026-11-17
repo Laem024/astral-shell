@@ -7,6 +7,7 @@ Rectangle {
   id: root
   required property Design.Theme tokens
   property string title: ""
+  property color accent: tokens.cyan
   property real contentSpacing: 12
   default property alias contents: body.data
   implicitHeight: body.implicitHeight + tokens.inset * 2
@@ -14,7 +15,10 @@ Rectangle {
   Layout.minimumHeight: implicitHeight
   Layout.fillHeight: false
   radius: tokens.cardRadius
-  color: tokens.raised
+  gradient: Gradient {
+    GradientStop { position: 0; color: Qt.tint(root.tokens.background, Qt.alpha(root.accent, 0.045)) }
+    GradientStop { position: 1; color: root.tokens.background }
+  }
   border.color: tokens.border
   ColumnLayout {
     id: body
@@ -25,8 +29,8 @@ Rectangle {
       text: root.title
       textFormat: Text.PlainText
       visible: text !== ""
-      color: root.tokens.muted
-      font { family: root.tokens.font; pixelSize: 11; weight: Font.Medium; letterSpacing: 0.6 }
+      color: root.accent
+      font { family: root.tokens.mono; pixelSize: 9; weight: Font.Medium; letterSpacing: 1.3 }
       wrapMode: Text.Wrap
     }
   }

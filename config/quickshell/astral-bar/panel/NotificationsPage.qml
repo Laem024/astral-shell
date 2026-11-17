@@ -21,16 +21,29 @@ Item {
   ColumnLayout {
     anchors.fill: parent
     spacing: 12
+    PageIntro {
+      tokens: root.tokens
+      title: "A moment of clarity"
+      subtitle: root.service.entries.length + " notifications in your history"
+      symbol: "notifications"
+      accent: root.tokens.lavender
+    }
     Rectangle {
       Layout.fillWidth: true
       implicitHeight: dndRow.implicitHeight + root.tokens.inset * 2
       radius: root.tokens.cardRadius
-      color: root.service.dnd ? Qt.alpha(root.tokens.cyan, 0.1) : root.tokens.raised
-      border.color: root.service.dnd ? Qt.alpha(root.tokens.cyan, 0.35) : root.tokens.border
+      color: root.service.dnd ? Qt.alpha(root.tokens.lavender, 0.1) : root.tokens.background
+      border.color: root.service.dnd ? Qt.alpha(root.tokens.lavender, 0.35) : root.tokens.border
       RowLayout {
         id: dndRow
         anchors { left: parent.left; right: parent.right; top: parent.top; margins: root.tokens.inset }
         spacing: 12
+        Rectangle {
+          Layout.preferredWidth: 40; Layout.preferredHeight: 40
+          radius: 14
+          color: Qt.alpha(root.tokens.lavender, 0.12)
+          CategoryGlyph { anchors.centerIn: parent; kind: "notifications"; ink: root.tokens.lavender; width: 24; height: 24 }
+        }
         ColumnLayout {
           Layout.fillWidth: true
           Layout.minimumWidth: 0
@@ -43,7 +56,7 @@ Item {
           Text {
             Layout.fillWidth: true; wrapMode: Text.Wrap
             text: root.service.dnd ? "Enabled · Silent notifications" : "Disabled · Alerts allowed"
-            color: root.service.dnd ? root.tokens.cyan : root.tokens.muted
+            color: root.service.dnd ? root.tokens.lavender : root.tokens.muted
             font { family: root.tokens.font; pixelSize: 12 }
           }
           Text {
@@ -57,6 +70,7 @@ Item {
           id: quietToggle
           objectName: "notificationDndToggle"
           tokens: root.tokens
+          accent: root.tokens.lavender
           checked: root.service.dnd
           onToggled: root.service.dnd = checked
           Accessible.name: "Do not disturb"
@@ -96,7 +110,14 @@ Item {
           ColumnLayout {
             anchors.centerIn: parent
             width: Math.max(0, parent.width - 32)
-            spacing: 8
+            spacing: 12
+            Rectangle {
+              Layout.alignment: Qt.AlignHCenter
+              Layout.preferredWidth: 64; Layout.preferredHeight: 64
+              radius: 24
+              color: Qt.alpha(root.tokens.lavender, 0.08)
+              CategoryGlyph { anchors.centerIn: parent; kind: "check"; ink: root.tokens.lavender; width: 24; height: 24 }
+            }
             Text {
               Layout.alignment: Qt.AlignHCenter
               text: "All caught up"; color: root.tokens.text

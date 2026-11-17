@@ -43,6 +43,7 @@ ScrollView {
   }
   component Section: PanelCard {
     tokens: root.tokens
+    accent: root.tokens.lavender
     contentSpacing: 14
   }
   component Choice: PanelButton {
@@ -65,9 +66,16 @@ ScrollView {
   ColumnLayout {
     width: root.availableWidth
     spacing: 12
+    PageIntro {
+      tokens: root.tokens
+      title: "Create & capture"
+      subtitle: root.statusLabel
+      symbol: "screen"
+      accent: root.tokens.lavender
+    }
     Section {
       objectName: "captureSourceCard"
-      title: "CAPTURE"
+      title: "CAPTURE STUDIO"
       RowLayout {
         Layout.fillWidth: true
         spacing: 8
@@ -86,7 +94,7 @@ ScrollView {
             id: sourceChoice
             required property var modelData
             objectName: "captureSource-" + modelData.key
-            implicitHeight: 70
+            implicitHeight: 90
             enabled: !root.busy
             selected: root.mode === modelData.key
             text: modelData.label
@@ -209,7 +217,7 @@ ScrollView {
     }
     Section {
       objectName: "displayBrightnessCard"
-      title: "BRIGHTNESS"
+      title: "DISPLAY BRIGHTNESS"
       Repeater {
         model: Data.BrightnessData.monitorModel
         ColumnLayout {

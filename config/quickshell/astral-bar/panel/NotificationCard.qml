@@ -23,8 +23,8 @@ Rectangle {
   implicitHeight: content.implicitHeight + inset * 2
   Layout.fillWidth: true
   Layout.minimumHeight: implicitHeight
-  radius: popup ? tokens.cardRadius : tokens.rowRadius
-  color: popup ? tokens.surface : tokens.raised
+  radius: tokens.cardRadius
+  color: popup ? tokens.surface : tokens.background
   border.color: entry.urgency === 2 ? Qt.alpha(tokens.alert, 0.5) : tokens.border
   Rectangle {
     x: root.popup ? 16 : 0

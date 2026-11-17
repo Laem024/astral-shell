@@ -55,21 +55,65 @@ ScrollView {
   ColumnLayout {
     width: root.availableWidth
     spacing: 12
-    ConnectionTabs {
+    PageIntro {
       tokens: root.tokens
-      current: root.section
-      options: [{key: "wifi", label: "Wi-Fi"}, {key: "bluetooth", label: "Bluetooth"}, {key: "vpn", label: "VPN"}]
-      onSelected: key => root.section = key
+      title: "Connections"
+      subtitle: root.wifiValue + " · " + root.bluetoothValue
+      symbol: "connections"
+      accent: root.tokens.cyan
     }
-    Text {
+    RowLayout {
       Layout.fillWidth: true
-      text: root.section === "wifi" ? root.wifiValue + " · " + root.wifiDetail
-        : root.section === "bluetooth" ? root.bluetoothValue + " · " + root.bluetoothDetail
-        : root.vpnValue + " · " + root.vpnDetail
-      textFormat: Text.PlainText
-      wrapMode: Text.Wrap
-      color: root.tokens.muted
-      font { family: root.tokens.font; pixelSize: 11 }
+      spacing: 8
+      Repeater {
+        model: [
+          {key: "wifi", label: "Wi-Fi", value: root.wifiValue, symbol: "connections", live: root.wifiLive},
+          {key: "bluetooth", label: "Bluetooth", value: root.bluetoothValue, symbol: "connections", live: !!root.bluetoothDevice},
+          {key: "vpn", label: "VPN", value: root.vpnValue, symbol: "power", live: root.vpnActive > 0}
+        ]
+        PanelButton {
+          id: connection
+          required property var modelData
+          tokens: root.tokens
+          Layout.fillWidth: true
+          Layout.preferredWidth: 1
+          implicitHeight: 94
+          selected: root.section === modelData.key
+          text: modelData.label
+          Accessible.description: modelData.value
+          Accessible.role: Accessible.RadioButton
+          Accessible.checkable: true
+          Accessible.checked: selected
+          onClicked: root.section = modelData.key
+          contentItem: ColumnLayout {
+            spacing: 7
+            RowLayout {
+              Layout.fillWidth: true
+              Text {
+                Layout.fillWidth: true
+                text: connection.text
+                color: connection.selected ? root.tokens.cyan : root.tokens.text
+                font { family: root.tokens.font; pixelSize: 12; weight: Font.DemiBold }
+                elide: Text.ElideRight
+              }
+              Rectangle {
+                width: 5; height: 5; radius: 2.5
+                color: connection.modelData.live ? root.tokens.cyan : root.tokens.muted
+              }
+            }
+            Text {
+              Layout.fillWidth: true
+              text: connection.modelData.value
+              textFormat: Text.PlainText
+              color: root.tokens.muted
+              font { family: root.tokens.font; pixelSize: 10 }
+              maximumLineCount: 2
+              wrapMode: Text.Wrap
+              elide: Text.ElideRight
+            }
+          }
+        }
+      }
     }
     WifiCard {
       objectName: "connectionWifiCard"

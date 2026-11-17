@@ -39,12 +39,12 @@ PanelWindow {
   readonly property real anchorWidth: navigation && navigation.anchor ? navigation.anchor.width * factor : 0
   readonly property real menuWidth: Math.max((vertical ? 300 : 240) * factor, anchorWidth)
   function clamp(value: real, maximum: real): real { return Math.max(0, Math.min(value, Math.max(0, maximum))); }
-  implicitWidth: Math.max(1, Math.min((menu ? menuWidth : (tray ? 248 : 600) * factor), barWindow.screen.width - (vertical ? barWindow.width + settings.value.margin + 6 * factor : 0)))
+  implicitWidth: Math.max(1, Math.min((menu ? menuWidth : (tray ? 248 : 760) * factor), barWindow.screen.width - (vertical ? barWindow.width + settings.value.margin + 6 * factor : 0)))
   // The tray cap fits four complete 72px rows plus its header and margins, so
   // scrolling only appears once a fifth row would be needed.
   implicitHeight: Math.max(1, Math.min((menu
     ? Math.max(120, (contentLoader.item ? (contentLoader.item as Item).implicitHeight : 176) + 32)
-    : tray ? Math.min(364, (contentLoader.item ? (contentLoader.item as Item).implicitHeight : 108) + 32) : 680) * factor, barWindow.screen.height - (!vertical ? barWindow.height + settings.value.margin + 6 * factor : 0)))
+    : tray ? Math.min(364, (contentLoader.item ? (contentLoader.item as Item).implicitHeight : 108) + 32) : 760) * factor, barWindow.screen.height - (!vertical ? barWindow.height + settings.value.margin + 6 * factor : 0)))
   readonly property real popupX: clamp(edge === "left" ? barX + barWindow.width + 6 * factor
     : edge === "right" ? barX - width - 6 * factor
     : menu && navigation && navigation.anchor ? barX + control.x - anchorWidth / 2

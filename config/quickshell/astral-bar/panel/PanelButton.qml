@@ -16,7 +16,7 @@ Button {
   property string symbol: ""
   readonly property color accent: destructive ? tokens.alert : tint
   readonly property color ink: destructive || selected ? accent : tokens.text
-  implicitHeight: 36
+  implicitHeight: 38
   leftPadding: 14
   rightPadding: 14
   focusPolicy: preview ? Qt.NoFocus : Qt.StrongFocus
@@ -51,7 +51,7 @@ Button {
     color: root.quiet
       ? (root.down || root.hovered ? Qt.alpha(root.accent, 0.08) : "transparent")
       : root.selected
-        ? Qt.alpha(root.accent, root.down ? 0.26 : root.hovered ? 0.2 : 0.14)
+        ? Qt.alpha(root.accent, root.down ? 0.28 : root.hovered ? 0.22 : 0.16)
         : root.down || root.hovered ? Qt.alpha(root.tokens.text, 0.08) : Qt.alpha(root.tokens.text, 0.03)
     border.width: root.activeFocus ? 2 : root.quiet ? 0 : 1
     border.color: root.activeFocus ? root.tokens.cyan

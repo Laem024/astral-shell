@@ -177,9 +177,17 @@ ScrollView {
   ColumnLayout {
     width: root.availableWidth
     spacing: 12
+    PageIntro {
+      tokens: root.tokens
+      title: "Make room for today"
+      subtitle: root.fullDateText
+      symbol: "calendar"
+      accent: root.tokens.gold
+    }
     PanelCard {
       tokens: root.tokens
-      contentSpacing: 16
+      accent: root.tokens.gold
+      contentSpacing: 18
       border.color: Qt.alpha(root.tokens.cyan, 0.18)
       gradient: Gradient {
         GradientStop { position: 0; color: Qt.tint(root.tokens.background, Qt.alpha(root.tokens.cyan, 0.06)) }
@@ -219,7 +227,7 @@ ScrollView {
             text: root.monthNames[root.month]
             color: root.tokens.text
             elide: Text.ElideRight
-            font { family: root.tokens.font; pixelSize: 20; weight: Font.Medium }
+            font { family: root.tokens.font; pixelSize: 26; weight: Font.DemiBold }
           }
           Text {
             text: String(root.year)
@@ -278,11 +286,11 @@ ScrollView {
               && root.month === root.zoned.month && root.year === root.zoned.year
             Layout.fillWidth: true
             Layout.minimumWidth: 0
-            implicitHeight: 30
+            implicitHeight: 36
             radius: root.tokens.rowRadius
-            color: currentDay ? root.tokens.cyan
-              : modelData > 0 && hover.hovered ? Qt.alpha(root.tokens.cyan, 0.07) : "transparent"
-            border.color: currentDay ? root.tokens.cyan : "transparent"
+            color: currentDay ? root.tokens.gold
+              : modelData > 0 ? Qt.alpha(root.tokens.text, hover.hovered ? 0.09 : 0.025) : "transparent"
+            border.color: currentDay ? root.tokens.gold : "transparent"
             Text {
               anchors.centerIn: parent
               text: dayCell.modelData || ""
@@ -399,6 +407,7 @@ ScrollView {
     PanelCard {
       tokens: root.tokens
       title: "WEEK AHEAD"
+      accent: root.tokens.gold
       contentSpacing: 12
       Repeater {
         model: root.daily ? root.daily.time : []

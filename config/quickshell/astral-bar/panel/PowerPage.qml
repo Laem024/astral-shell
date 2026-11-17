@@ -46,6 +46,7 @@ ScrollView {
   }
   component Section: PanelCard {
     tokens: root.tokens
+    accent: root.tokens.gold
     contentSpacing: 12
   }
   component ProfileIcon: Shape {
@@ -99,6 +100,13 @@ ScrollView {
   ColumnLayout {
     width: root.availableWidth
     spacing: 12
+    PageIntro {
+      tokens: root.tokens
+      title: "Energy & session"
+      subtitle: root.profileLabel + (Data.SystemData.externalPower ? " · Connected to power" : " · " + (root.batteryAvailable ? "On battery" : "Battery unavailable"))
+      symbol: "power"
+      accent: root.tokens.gold
+    }
     Section {
       objectName: "powerBatteryCard"
       border.color: Qt.alpha(root.batteryAccent, 0.22)
@@ -151,28 +159,27 @@ ScrollView {
           }
         }
         Item {
-          Layout.preferredWidth: 72
-          Layout.preferredHeight: 40
+          Layout.preferredWidth: 88
+          Layout.preferredHeight: 88
           Accessible.ignored: true
-          Rectangle {
-            width: 66; height: 36; y: 2
-            radius: 9
-            color: Qt.alpha(root.batteryAccent, 0.035)
-            border.color: Qt.alpha(root.batteryAccent, 0.45)
-            Row {
-              anchors { fill: parent; margins: 5 }
-              spacing: 3
-              Repeater {
-                model: 5
-                Rectangle {
-                  required property int index
-                  width: 8.8; height: 26; radius: 3
-                  color: Qt.alpha(root.batteryAccent, root.batteryLevel > index / 5 ? 0.85 : 0.1)
-                }
-              }
+          Shape {
+            anchors.fill: parent
+            preferredRendererType: Shape.CurveRenderer
+            ShapePath {
+              fillColor: "transparent"
+              strokeColor: Qt.alpha(root.batteryAccent, 0.1)
+              strokeWidth: 5
+              PathAngleArc { centerX: 44; centerY: 44; radiusX: 37; radiusY: 37; startAngle: -90; sweepAngle: 360 }
+            }
+            ShapePath {
+              fillColor: "transparent"
+              strokeColor: root.batteryAccent
+              strokeWidth: 5
+              capStyle: ShapePath.RoundCap
+              PathAngleArc { centerX: 44; centerY: 44; radiusX: 37; radiusY: 37; startAngle: -90; sweepAngle: 360 * root.batteryLevel }
             }
           }
-          Rectangle { x: 68; y: 13; width: 4; height: 14; radius: 2; color: Qt.alpha(root.batteryAccent, 0.45) }
+          CategoryGlyph { anchors.centerIn: parent; kind: "power"; ink: root.batteryAccent; width: 24; height: 24 }
         }
       }
       Rectangle {
@@ -208,7 +215,7 @@ ScrollView {
             id: profile
             required property var modelData
             Layout.preferredWidth: 1
-            implicitHeight: root.compact ? 40 : 72
+            implicitHeight: root.compact ? 44 : 86
             text: modelData.label
             selected: root.power.profilesAvailable && root.power.profile === modelData.name
             enabled: root.power.profilesAvailable && !root.power.profilePending && (modelData.name !== "performance" || root.power.performanceAvailable)
@@ -355,6 +362,7 @@ ScrollView {
             Layout.preferredWidth: 1
             Layout.columnSpan: modelData.action === "poweroff" && !root.compact ? 2 : 1
             text: modelData.label
+            implicitHeight: 56
             symbol: modelData.symbol
             enabled: Data.SessionData.available(modelData.action) && !Data.SessionData.blocked && !Data.SessionData.pending && Data.SessionData.confirmation === ""
             destructive: modelData.action === "poweroff"
