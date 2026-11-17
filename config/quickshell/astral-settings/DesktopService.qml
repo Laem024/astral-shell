@@ -17,6 +17,8 @@ QtObject {
   property var value: ({version:1,input:{},themes:{light:{gtk:"",qt:"",icons:"",cursor:""},dark:{gtk:"",qt:"",icons:"",cursor:""}},monitors:[]})
   property var inventory: []
   property var liveInput: ({})
+  property var inputErrors: ({})
+  property bool inputInspected: false
   property var installed: ({gtk:[],qt:[],icons:[],cursor:[]})
   property string about: ""
   property string error: ""
@@ -93,10 +95,10 @@ QtObject {
   }
   function initialize() {
     if(preview) {
-      inventory=[{name:'DP-1',width:1920,height:1080,refreshRate:60,x:0,y:0,scale:1,transform:0,bitDepth:8,availableModes:['1920x1080@60.000','1280x720@60.000'],supportsHDR:false,vrrSupported:true}];
+      inventory=[{name:'DP-1',width:1920,height:1080,refreshRate:60,x:0,y:0,scale:1,transform:0,bitDepth:8,availableModes:['1920x1080@60.000','1280x720@60.000'],description:'Astral Studio · Main display',hardwareDetails:{hdr:true,vrrCapable:true},currentFormat:'XRGB8888'}];
       liveInput={kb_layout:'us',kb_variant:'',kb_model:'',kb_options:'',repeat_delay:250,repeat_rate:35,numlock_by_default:true,sensitivity:0,accel_profile:'adaptive',natural_scroll:false,scroll_factor:1,touchpad:{natural_scroll:false,scroll_factor:1,'tap-to-click':true,clickfinger_behavior:true,disable_while_typing:true}};
       installed={gtk:['Adwaita'],qt:['Breeze'],icons:['Adwaita'],cursor:['Adwaita']};
-      apiReason=''; ready=true; about='Astral preview\nLinux sample\nCPU: 8 cores\nMemory: 16 GiB\nGPU: Sample graphics\nSession: Wayland'; return;
+      apiReason=''; inputInspected=true; ready=true; about='Astral preview\nLinux sample\nCPU: 8 cores\nMemory: 16 GiB\nGPU: Sample graphics\nSession: Wayland'; return;
     }
     command.run(['mkdir','-p','-m','700','--',directory,configHome+'/astral-shell/astral-settings'], c => {
       if(c) { error='Cannot create Settings directories'; return; }
@@ -124,14 +126,14 @@ QtObject {
   }
   function startInspection() { if(inspected) return; inspected=true; discoverInput(Object.keys(Logic.inputRules),0); }
   function discoverInput(keys,index) {
-    if(index>=keys.length) { inspectAbout(); return; }
+    if(index>=keys.length) { inputInspected=true; inspectAbout(); return; }
     const k=keys[index];
     query.run(['hyprctl','-j','getoption','input:'+k.replace('.',':')], (c,out) => {
       try {
-        if(!c) { const result=Logic.inputValue(k,JSON.parse(out));
-          const next=Logic.clone(liveInput); Logic.put(next,k,result); liveInput=next;
-        }
-      } catch(e) {}
+        if(c) throw new Error('Hyprland could not read this option');
+        const result=Logic.inputValue(k,JSON.parse(out));
+        const next=Logic.clone(liveInput); Logic.put(next,k,result); liveInput=next;
+      } catch(e) { const errors=Logic.clone(inputErrors); errors[k]='Hyprland returned no valid value for this option'; inputErrors=errors; }
       discoverInput(keys,index+1);
     });
   }
@@ -309,7 +311,7 @@ QtObject {
       const mode=m.mode.match(/^(\d+)x(\d+)@([\d.]+)$/);
       const xy=m.position.split('x');
       const mirrored=typeof live.mirrorOf==='string' && live.mirrorOf!=='none' ? live.mirrorOf : '';
-      return !live.disabled && live.x===Number(xy[0]) && live.y===Number(xy[1]) && mirrored===m.mirror && (!live.bitDepth || live.bitDepth===m.bitdepth) && (m.cm!=='hdr' || Logic.monitorFromLive(live).cm==='hdr') && Math.abs(live.scale-m.scale)<0.01 && live.transform===m.transform && (!mode || (live.width===Number(mode[1]) && live.height===Number(mode[2]) && Math.abs(live.refreshRate-Number(mode[3]))<1));
+      return !live.disabled && live.x===Number(xy[0]) && live.y===Number(xy[1]) && mirrored===m.mirror && (!(live.bitDepth || live.currentFormat) || Logic.displayBitDepth(live)===m.bitdepth) && (m.cm!=='hdr' || Logic.monitorFromLive(live).cm==='hdr') && Math.abs(live.scale-m.scale)<0.01 && live.transform===m.transform && (!mode || (live.width===Number(mode[1]) && live.height===Number(mode[2]) && Math.abs(live.refreshRate-Number(mode[3]))<1));
     });
   }
   function keep() {

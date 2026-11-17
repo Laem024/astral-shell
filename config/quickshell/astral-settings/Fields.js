@@ -24,3 +24,21 @@ function all() {
  for(const k of ['terminal','fileManager','videoPlayer']) add('General','common','applications.'+k,({terminal:'Terminal',fileManager:'File manager',videoPlayer:'Video player'})[k]+' (JSON argument array)','argv');
  return f;
 }
+
+function hint(f) {
+ const hints={
+  'input.sensitivity':'Pointer speed · −1 to 1',
+  'input.accel_profile':'Default follows the compositor’s acceleration profile.',
+  'input.natural_scroll':'Reverse the mouse wheel direction.',
+  'input.scroll_factor':'Mouse wheel multiplier · 1 is the original speed.',
+  'input.touchpad.natural_scroll':'Move content in the direction of your fingers.',
+  'input.touchpad.scroll_factor':'Touchpad scrolling multiplier · 1 is the original speed.',
+  'input.touchpad.tap-to-click':'Tap the touchpad to click without pressing it.',
+  'input.touchpad.clickfinger_behavior':'Use the number of fingers to choose the click action.',
+  'input.touchpad.disable_while_typing':'Avoid accidental pointer input while typing.',
+  'scale':'Scale the bar, panels and Astral windows together.',
+  'animations':'Gentle transitions throughout the shell.',
+  'workspaceCount':'The number of workspaces shown across the shell.'
+ };
+ return hints[f.key] || '';
+}

@@ -37,6 +37,7 @@ case "$*" in
     [[ ! -f $ASTRAL_SETTINGS_FIXTURE/tap ]] || tap=$(cat "$ASTRAL_SETTINGS_FIXTURE/tap")
     printf '{"bool":%s,"set":true}\n' "$tap"
     ;;
+  '-j getoption input:accel_profile') printf '{"str":"[[EMPTY]]","set":false}\n' ;;
   '-j getoption '*) printf '{"bool":true,"int":1,"float":1,"str":"us"}\n' ;;
   *) printf 'ok\n' ;;
 esac
@@ -54,6 +55,11 @@ if ! astral_test_dbus timeout 30 qs -p "$scratch/config/quickshell/check.qml" --
 if rg 'TypeError|ReferenceError|Binding loop|Failed to load configuration|Unable to assign|is not a type|Cannot assign' "$scratch/log"; then cat "$scratch/log"; exit 1; fi
 rg -q ASTRAL_SETTINGS_RUNTIME_PASS "$scratch/log" || { cat "$scratch/log"; exit 1; }
 [[ ! -f $scratch/trial ]]
+# Exercise each page, search and both palettes in the isolated simulated window.
+cp tests/astral-settings/preview.qml "$scratch/config/quickshell/check.qml"
+if ! astral_test_dbus timeout 20 qs -p "$scratch/config/quickshell/check.qml" --no-color > "$scratch/preview-log" 2>&1; then cat "$scratch/preview-log"; exit 1; fi
+if rg 'TypeError|ReferenceError|Binding loop|Failed to load configuration|Unable to assign|is not a type|Cannot assign|QML.*Error' "$scratch/preview-log"; then cat "$scratch/preview-log"; exit 1; fi
+rg -q ASTRAL_SETTINGS_PREVIEW_PASS "$scratch/preview-log" || { cat "$scratch/preview-log"; exit 1; }
 # Missing or unexpected capability replies must keep desktop edits blocked.
 cp tests/astral-settings/capabilities.qml "$scratch/config/quickshell/check.qml"
 for reply in false ok 'error: true is unavailable'; do

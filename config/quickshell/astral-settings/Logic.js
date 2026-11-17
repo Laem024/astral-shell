@@ -30,7 +30,7 @@ function inputValue(key, reply) {
     if(typeof reply.bool==='boolean') value=reply.bool;
     else if(reply.bool===undefined && [0,1].includes(reply.int)) value=reply.int===1;
   } else if(rule[0]==='number') value=reply.float===undefined ? reply.int : reply.float;
-  else value=reply.str;
+  else value=reply.str==='[[EMPTY]]' ? '' : reply.str;
   if(!checkRule(value,rule)) throw new Error('Invalid input value: '+key);
   return value;
 }
@@ -73,8 +73,28 @@ function overrideData(desktop, common) {
 }
 function overrideLua(desktop, common) { return '-- Managed by Astral Settings. Confirmed overrides only.\nreturn '+lua(overrideData(desktop,common))+'\n'; }
 function inputLua(input) { validateDesktop({version:1,input:input,themes:{light:{},dark:{}},monitors:[]}); return 'hl.config('+lua({input:input})+')'; }
+// New Hyprland releases publish hardware capabilities separately from live state.
+// Missing evidence stays unknown; HDR capability never implies 10-bit support.
+function displayCapability(m, kind) {
+  const hw=m.hardwareDetails || {};
+  const live=kind==='hdr' ? (m.cm==='hdr' || m.colorManagementPreset==='hdr' || m.hdr===true)
+    : kind==='vrr' ? m.vrr===true : displayBitDepth(m)===10;
+  if(live) return true;
+  const candidates=kind==='hdr' ? [hw.hdr,m.supportsHDR]
+    : kind==='vrr' ? [hw.vrrCapable,m.vrrSupported] : [hw.supports10bit,m.supports10bit];
+  for(const value of candidates) if(typeof value==='boolean') return value;
+  return null;
+}
+function displayBitDepth(m) {
+  if(m.bitDepth===10 || /^(XRGB|ARGB|XBGR|ABGR)2101010$/.test(m.currentFormat || '')) return 10;
+  return 8;
+}
+function capabilityText(m, kind) {
+  const supported=displayCapability(m,kind);
+  return supported===true ? 'Supported' : supported===false ? 'Not supported by this display' : 'Not reported by Hyprland';
+}
 function monitorFromLive(m) {
-  return {output:m.name,disabled:!!m.disabled,mode:m.width+'x'+m.height+'@'+Number(m.refreshRate || 60).toFixed(3),scale:m.scale || 1,position:(m.x || 0)+'x'+(m.y || 0),transform:m.transform || 0,mirror:typeof m.mirrorOf === 'string' && m.mirrorOf !== 'none' ? m.mirrorOf : '',bitdepth:m.bitDepth || 8,vrr:m.vrr ? 1 : 0,cm:m.cm === 'hdr' || m.colorManagementPreset === 'hdr' || m.hdr === true ? 'hdr' : 'srgb'};
+  return {output:m.name,disabled:!!m.disabled,mode:m.width+'x'+m.height+'@'+Number(m.refreshRate || 60).toFixed(3),scale:m.scale || 1,position:(m.x || 0)+'x'+(m.y || 0),transform:m.transform || 0,mirror:typeof m.mirrorOf === 'string' && m.mirrorOf !== 'none' ? m.mirrorOf : '',bitdepth:displayBitDepth(m),vrr:m.vrr ? 1 : 0,cm:m.cm === 'hdr' || m.colorManagementPreset === 'hdr' || m.hdr === true ? 'hdr' : 'srgb'};
 }
 function validateMonitors(list, inventory) {
   if (!Array.isArray(list) || !list.length || !list.some(m => !m.disabled)) throw new Error('At least one display must remain enabled');
@@ -95,9 +115,9 @@ function validateMonitors(list, inventory) {
     if (inventory) {
       const live = inventory.find(i => i.name === m.output);
       if (!live) throw new Error('Display disconnected: '+m.output);
-      if (m.cm === 'hdr' && live.supportsHDR !== true && monitorFromLive(live).cm !== 'hdr') throw new Error('HDR capability is unavailable');
-      if (m.vrr && live.vrrSupported !== true && m.vrr !== monitorFromLive(live).vrr) throw new Error('VRR capability is unavailable');
-      if (m.bitdepth === 10 && live.supports10bit !== true && live.bitDepth !== 10) throw new Error('10-bit capability is unavailable');
+      if (m.cm === 'hdr' && displayCapability(live,'hdr') !== true) throw new Error('HDR capability is unavailable');
+      if (m.vrr && displayCapability(live,'vrr') !== true && m.vrr !== monitorFromLive(live).vrr) throw new Error('VRR capability is unavailable');
+      if (m.bitdepth === 10 && displayCapability(live,'10bit') !== true) throw new Error('10-bit capability is unavailable');
       if (m.mode !== 'preferred' && live.availableModes && !live.availableModes.some(mode => sameMode(mode,m.mode)) && m.mode !== monitorFromLive(live).mode) throw new Error('Mode is not advertised by the display');
     }
   }

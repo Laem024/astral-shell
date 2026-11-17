@@ -5,6 +5,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 import "../common" as Common
+import "../astral-bar/panel" as Panel
 import "Logic.js" as Logic
 import "Fields.js" as Fields
 
@@ -29,9 +30,15 @@ Window {
   readonly property bool dirty: displaysDirty || Object.keys(changes.common).length+Object.keys(changes.bar).length+Object.keys(changes.desktop).length>0
   readonly property var fields: Fields.all().filter(f=>(!search ? f.page===page : (f.label+' '+f.page).toLowerCase().includes(search.toLowerCase())))
   title: preview ? 'Astral Settings Preview' : 'Astral Settings'
-  width: 1100; height: 780; minimumWidth: 780; minimumHeight: 560
+  width: 1180; height: 820; minimumWidth: 820*tokens.scale; minimumHeight: 660*tokens.scale
   color: tokens.background
   palette { window: tokens.background; windowText: tokens.text; base: tokens.surface; text: tokens.text; button: tokens.raised; buttonText: tokens.text; highlight: tokens.cyan; highlightedText: tokens.background; placeholderText: tokens.muted }
+  component Copy: Label {
+    font.family: root.tokens.font
+    font.pixelSize: 12
+    textFormat: Text.PlainText
+  }
+  Rectangle { anchors.fill:parent; color:root.tokens.background; z:-1 }
   function reload() {
     let reloadError='';
     try {
@@ -56,7 +63,7 @@ Window {
   }
   function unavailable(f) {
     if(f.scope==='bar' && barStore.error) return barStore.error;
-    if(f.key.startsWith('input.')) return service.apiReason || (value(f)===undefined ? 'The installed compositor did not report this option' : '');
+    if(f.key.startsWith('input.')) return service.apiReason || (!service.inputInspected && Logic.at(service.liveInput,f.key.slice(6))===undefined ? 'Reading input preferences…' : service.inputErrors[f.key.slice(6)] || (Logic.at(service.liveInput,f.key.slice(6))===undefined ? 'Not reported by Hyprland' : ''));
     if(f.type==='theme' && !service.installed[f.key.split('.')[2]].length) return 'No installed '+f.key.split('.')[2]+' themes detected';
     return '';
   }
@@ -96,6 +103,7 @@ Window {
     if(desktopChanges || appearanceChanged) service.apply(baseline.desktop,changes.desktop,Common.SettingsData.value);
     else { applying=null; reload(); status='Applied and verified'; if(applyThenNavigate) { applyThenNavigate=false; continueNavigation(); } }
   }
+  onPageChanged: Qt.callLater(() => { if(scroll.contentItem) scroll.contentItem.contentY=0; })
   onClosing: event => { event.accepted=false; navigate('',true); }
   onVisibleChanged: if(visible && !dirty) reload()
   Connections {
@@ -126,151 +134,194 @@ Window {
       root.displayDraft=next; root.displayBaseline=base;
     }
   }
-  ColumnLayout {
-    x:20; y:20; width:(root.width-40)/root.tokens.scale; height:(root.height-40)/root.tokens.scale
-    scale:root.tokens.scale; transformOrigin:Item.TopLeft; spacing:16
-    RowLayout {
-      Layout.fillWidth: true
-      Label { text:'Astral Settings'; font.pixelSize:26; font.bold:true; color:root.tokens.text }
-      Item { Layout.fillWidth:true }
-      TextField { Layout.preferredWidth:280; placeholderText:'Search settings'; text:root.search; onTextEdited:root.search=text }
-    }
-    RowLayout {
-      Layout.fillWidth:true; Layout.fillHeight:true; spacing:24
+  readonly property var pageInfo: ({
+    'Displays': {symbol:'screen', subtitle:'Connected screens, resolution, layout and color.'},
+    'Bar': {symbol:'bar', subtitle:'Position, workspaces and the modules you keep close.'},
+    'Appearance': {symbol:'palette', subtitle:'Shell appearance, application themes and desktop scale.'},
+    'Colors': {symbol:'palette', subtitle:'Personalize the light and dark Astral palettes.'},
+    'Keyboard': {symbol:'keyboard', subtitle:'Keyboard layouts, repeat speed and startup preferences.'},
+    'Mouse & Touchpad': {symbol:'mouse', subtitle:'Pointer speed, scrolling and touchpad gestures.'},
+    'Power & Lock': {symbol:'power', subtitle:'Idle timers, automatic locking and suspend.'},
+    'General': {symbol:'sliders', subtitle:'Default applications, clock format and workspaces.'},
+    'About': {symbol:'info', subtitle:'Hardware, software and session information.'}
+  })
+  RowLayout {
+    x:16; y:16; width:(root.width-32)/root.tokens.scale; height:(root.height-32)/root.tokens.scale
+    scale:root.tokens.scale; transformOrigin:Item.TopLeft; spacing:20
+    Rectangle {
+      Layout.preferredWidth:214; Layout.fillHeight:true
+      radius:root.tokens.panelRadius; color:root.tokens.surface; border.color:root.tokens.border
       ColumnLayout {
-        Layout.preferredWidth:185; Layout.alignment:Qt.AlignTop
+        anchors.fill:parent; anchors.margins:14; spacing:6
+        RowLayout {
+          Layout.topMargin:10; Layout.bottomMargin:18; spacing:10
+          Rectangle {
+            width:36; height:36; radius:12; color:Qt.alpha(root.tokens.cyan,0.12)
+            Panel.CategoryGlyph { anchors.centerIn:parent; width:22; height:22; kind:'sliders'; ink:root.tokens.cyan }
+          }
+          ColumnLayout {
+            spacing:2
+            Copy { text:'ASTRAL'; color:root.tokens.cyan; font.family:root.tokens.mono; font.pixelSize:11; font.letterSpacing:2 }
+            Copy { text:'Settings'; color:root.tokens.text; font.pixelSize:19; font.weight:Font.DemiBold }
+          }
+        }
         Repeater {
           model:Logic.pages
-          Button {
+          Panel.PanelButton {
+            id:nav
             required property string modelData
-            Layout.fillWidth:true; text:modelData; highlighted:root.page===modelData && !root.search
+            tokens:root.tokens; Layout.fillWidth:true; implicitHeight:43
+            selected:root.page===modelData && !root.search; quiet:!selected
+            text:modelData
+            contentItem:RowLayout {
+              spacing:10
+              Panel.CategoryGlyph { width:18; height:18; kind:root.pageInfo[nav.modelData].symbol; ink:nav.selected ? root.tokens.cyan : root.tokens.muted }
+              Text { Layout.fillWidth:true; text:nav.text; color:nav.selected ? root.tokens.cyan : root.tokens.text; font.family:root.tokens.font; font.pixelSize:12 }
+            }
             onClicked:root.navigate(modelData,false)
           }
         }
         Item { Layout.fillHeight:true }
-        Label { text:root.preview ? 'Simulated preview' : 'Astral desktop'; color:root.tokens.muted }
+        Rectangle { Layout.fillWidth:true; height:1; color:root.tokens.hairline }
+        Copy { Layout.topMargin:10; text:root.preview ? 'PREVIEW' : 'YOUR WORKSPACE'; color:root.tokens.muted; font.family:root.tokens.mono; font.pixelSize:9; font.letterSpacing:1 }
+        Copy { text:root.preview ? 'Desktop changes are simulated' : 'Designed to feel like home'; color:root.tokens.muted; font.pixelSize:10; Layout.bottomMargin:6 }
       }
-      ColumnLayout {
-        Layout.fillHeight:true; Layout.fillWidth:true
-        Label { text:root.search ? 'Search results' : root.page; font.pixelSize:22; color:root.tokens.text }
-        ScrollView {
-          id: scroll
-          Layout.fillWidth:true; Layout.fillHeight:true; clip:true; contentWidth:availableWidth
-          ColumnLayout {
-            width:scroll.availableWidth; spacing:12
-            Label {
-              visible:root.page==='Keyboard' || root.page==='Mouse & Touchpad'
-              text:'Input settings apply globally to all devices.'; color:root.tokens.muted
-            }
-            Label {
-              visible:root.page==='Appearance'
-              text:'GTK and Qt use installed themes. Some applications require restarting. Applications with their own theme may ignore these choices.'
-              Layout.fillWidth:true; wrapMode:Text.Wrap; color:root.tokens.muted
-            }
-            Button {
-              visible:!!root.search && 'displays resolution refresh rate scale position rotation mirror vrr hdr color depth'.includes(root.search.toLowerCase())
-              text:'Displays · Resolution, refresh rate, scale and layout'
-              onClicked:root.navigate('Displays',false)
-            }
-            Button {
-              visible:!!root.search && 'about operating system kernel cpu memory gpu storage session versions'.includes(root.search.toLowerCase())
-              text:'About · System information'
-              onClicked:root.navigate('About',false)
-            }
-            DisplaysEditor { visible:root.page==='Displays' && !root.search; Layout.fillWidth:true; window:root; service:root.service; tokens:root.tokens }
-            RowLayout {
-              visible:root.page==='Colors' && !root.search
-              Repeater { model:['light','dark']; Button { required property string modelData; text:'Restore Astral '+modelData; onClicked: { for(const k of Object.keys(Fields.presets[modelData])) root.edit({scope:'common',key:'colors.'+modelData+'.'+k},Fields.presets[modelData][k]); } } }
-            }
-            Repeater {
-              model:root.fields
-              Rectangle {
-                id: row
-                required property var modelData
-                readonly property var f:modelData
-                readonly property var current:root.value(f)
-                readonly property string reason:root.unavailable(f)
-                Layout.fillWidth:true; implicitHeight:Math.max(70,editor.implicitHeight+24); radius:10; color:root.tokens.surface
-                RowLayout {
-                  anchors.fill:parent; anchors.margins:12; spacing:12
-                  ColumnLayout {
-                    Layout.fillWidth:true
-                    Label { text:(root.search ? row.f.page+' · ' : '')+row.f.label; color:root.tokens.text; wrapMode:Text.Wrap; Layout.fillWidth:true }
-                    Label { visible:!!row.reason; text:'Unavailable: '+row.reason; color:root.tokens.muted; wrapMode:Text.Wrap; Layout.fillWidth:true }
-                  }
-                  Loader {
-                    id:editor
-                    Layout.preferredWidth:300; enabled:!row.reason && !root.service.busy
-                    sourceComponent:row.f.type==='boolean' ? booleanField : ['choice','theme'].includes(row.f.type) ? choiceField : textField
-                    property var field:row.f
-                    property var current:row.current
-                  }
-                  Component {
-                    id:booleanField
-                    Switch { checked:!!row.current; onToggled:root.edit(row.f,checked) }
-                  }
-                  Component {
-                    id:choiceField
-                    ComboBox {
-                      model:row.f.type==='theme' ? [''].concat(root.service.installed[row.f.key.split('.')[2]]) : row.f.choices
-                      currentIndex:Math.max(0,model.indexOf(row.current))
-                      displayText:currentText || (row.f.type==='theme' ? 'Keep existing theme' : 'Default')
-                      onActivated:root.edit(row.f,model[currentIndex])
-                    }
-                  }
-                  Component {
-                    id:textField
-                    RowLayout {
-                      TextField {
-                        Layout.fillWidth:true
-                        text:row.f.type==='argv' ? JSON.stringify(row.current) : row.current===undefined ? '' : String(row.current)
-                        selectByMouse:true
-                        onTextEdited: {
-                          try { root.edit(row.f,row.f.type==='argv' ? JSON.parse(text) : row.f.type==='number' ? Number(text) : text); }
-                          catch(e) { root.status='Enter a JSON array of separate command arguments'; }
-                        }
-                      }
-                      Button {
-                        visible:row.f.type==='color'; text:'Pick'; width:44
-                        background:Rectangle { color:row.f.type==='color' && /^#[0-9a-fA-F]{6}$/.test(row.current) ? row.current : root.tokens.surface; radius:8; border.color:root.tokens.muted }
-                        onClicked: { picker.field=row.f; picker.selectedColor=row.current; picker.open(); }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            RowLayout {
-              visible:root.page==='Colors'
-              Repeater {
-                model:['background','surface','text','muted','cyan','lavender','gold','alert']
-                Rectangle {
-                  required property string modelData
-                  Layout.fillWidth:true; height:48; radius:8
-                  color:root.value({scope:'common',key:'colors.'+root.value({scope:'common',key:'mode'})+'.'+modelData}) || root.tokens.surface
-                  ToolTip.visible: swatchHover.hovered; ToolTip.text:modelData
-                  HoverHandler { id:swatchHover }
-                }
-              }
-            }
-            RowLayout {
-              visible:root.page==='General'
-              Repeater {
-                model:[{label:'Connections',target:'control'},{label:'Audio',target:'audio'},{label:'Wallpaper',target:'wallpaper'}]
-                Button { required property var modelData; text:modelData.label; onClicked:root.openExisting(modelData.target) }
-              }
-            }
-            Label { visible:root.page==='About'; text:root.service.about || 'Reading system information…'; Layout.fillWidth:true; wrapMode:Text.Wrap; color:root.tokens.text; textFormat:Text.PlainText }
-            Button { visible:root.page==='About'; text:'Open resource monitor'; onClicked:if(!root.preview) action.run(['astral-monitor'],()=>{}) }
+    }
+    ColumnLayout {
+      Layout.fillHeight:true; Layout.fillWidth:true; Layout.minimumWidth:0; spacing:16
+      RowLayout {
+        Layout.fillWidth:true; Layout.topMargin:6
+        Copy { text:'DESKTOP / '+(root.search ? 'SEARCH' : root.page.toUpperCase()); color:root.tokens.muted; font.family:root.tokens.mono; font.pixelSize:10; font.letterSpacing:1 }
+        Item { Layout.fillWidth:true }
+        SettingsTextField { tokens:root.tokens; Layout.preferredWidth:230; placeholderText:'Search all settings…'; text:root.search; onTextEdited:root.search=text; Accessible.name:'Search settings' }
+      }
+      Panel.PageIntro {
+        tokens:root.tokens; title:root.search ? 'Search results' : root.page
+        subtitle:root.search ? root.fields.length+' matching preferences' : root.pageInfo[root.page].subtitle
+        symbol:root.search ? 'edit' : root.pageInfo[root.page].symbol
+      }
+      ScrollView {
+        id: scroll
+        Layout.fillWidth:true; Layout.fillHeight:true; clip:true; contentWidth:availableWidth
+        ColumnLayout {
+          width:scroll.availableWidth; spacing:10
+          Copy {
+            visible:root.page==='Keyboard' || root.page==='Mouse & Touchpad'
+            text:'Input settings apply globally to all devices.'; color:root.tokens.muted; font.pixelSize:11; Layout.fillWidth:true; wrapMode:Text.Wrap
           }
+          Copy {
+            visible:root.page==='Appearance'
+            text:'GTK and Qt use installed themes. Some applications require restarting. Applications with their own theme may ignore these choices.'
+            Layout.fillWidth:true; wrapMode:Text.Wrap; color:root.tokens.muted
+          }
+          Panel.PanelButton { tokens:root.tokens;
+            visible:!!root.search && 'displays resolution refresh rate scale position rotation mirror vrr hdr color depth'.includes(root.search.toLowerCase())
+            text:'Displays · Resolution, refresh rate, scale and layout'
+            onClicked:root.navigate('Displays',false)
+          }
+          Panel.PanelButton { tokens:root.tokens;
+            visible:!!root.search && 'about operating system kernel cpu memory gpu storage session versions'.includes(root.search.toLowerCase())
+            text:'About · System information'
+            onClicked:root.navigate('About',false)
+          }
+          DisplaysEditor { visible:root.page==='Displays' && !root.search; Layout.fillWidth:true; window:root; service:root.service; tokens:root.tokens }
+          RowLayout {
+            visible:root.page==='Colors' && !root.search
+            Repeater { model:['light','dark']; Panel.PanelButton { tokens:root.tokens; required property string modelData; text:'Restore Astral '+modelData; onClicked: { for(const k of Object.keys(Fields.presets[modelData])) root.edit({scope:'common',key:'colors.'+modelData+'.'+k},Fields.presets[modelData][k]); } } }
+          }
+          Repeater {
+            model:root.fields
+            Rectangle {
+              id: row
+              required property var modelData
+              readonly property var f:modelData
+              readonly property var current:root.value(f)
+              readonly property string reason:root.unavailable(f)
+              readonly property string hint:Fields.hint(f)
+              Layout.fillWidth:true; implicitHeight:Math.max(76,editor.implicitHeight+32,fieldLabels.implicitHeight+32); radius:root.tokens.cardRadius; color:root.tokens.surface; border.color:root.tokens.border
+              RowLayout {
+                anchors.fill:parent; anchors.margins:16; spacing:16
+                ColumnLayout {
+                  id:fieldLabels
+                  Layout.fillWidth:true
+                  Copy { text:(root.search ? row.f.page+' · ' : '')+row.f.label; font.pixelSize:13; color:root.tokens.text; wrapMode:Text.Wrap; Layout.fillWidth:true }
+                  Copy { visible:!!row.reason || !!row.hint; text:row.reason || row.hint; color:root.tokens.muted; wrapMode:Text.Wrap; Layout.fillWidth:true }
+                }
+                Loader {
+                  id:editor
+                  Layout.preferredWidth:Math.min(270,scroll.availableWidth*0.43); enabled:!row.reason && !root.service.busy
+                  sourceComponent:row.f.type==='boolean' ? booleanField : ['choice','theme'].includes(row.f.type) ? choiceField : textField
+                  property var field:row.f
+                  property var current:row.current
+                }
+                Component {
+                  id:booleanField
+                  Item {
+                    implicitHeight:38
+                    Panel.PanelSwitch { anchors.right:parent.right; anchors.verticalCenter:parent.verticalCenter; tokens:root.tokens; checked:!!row.current; Accessible.name:row.f.label; onToggled:root.edit(row.f,checked) }
+                  }
+                }
+                Component {
+                  id:choiceField
+                  SettingsChoice { tokens:root.tokens; Accessible.name:row.f.label;
+                    model:row.f.type==='theme' ? [''].concat(root.service.installed[row.f.key.split('.')[2]]) : row.f.choices
+                    currentIndex:Math.max(0,model.indexOf(row.current))
+                    displayText:currentText || (row.f.type==='theme' ? 'Keep existing theme' : 'Default')
+                    onActivated:root.edit(row.f,model[currentIndex])
+                  }
+                }
+                Component {
+                  id:textField
+                  RowLayout {
+                    SettingsTextField { tokens:root.tokens;
+                      Layout.fillWidth:true; Accessible.name:row.f.label
+                      text:row.f.type==='argv' ? JSON.stringify(row.current) : row.current===undefined ? '' : String(row.current)
+                      selectByMouse:true
+                      onTextEdited: {
+                        try { root.edit(row.f,row.f.type==='argv' ? JSON.parse(text) : row.f.type==='number' ? Number(text) : text); }
+                        catch(e) { root.status='Enter a JSON array of separate command arguments'; }
+                      }
+                    }
+                    Panel.PanelButton { tokens:root.tokens;
+                      visible:row.f.type==='color'; text:'Pick'; width:44
+                      background:Rectangle { color:row.f.type==='color' && /^#[0-9a-fA-F]{6}$/.test(row.current) ? row.current : root.tokens.surface; radius:8; border.color:root.tokens.muted }
+                      onClicked: { picker.field=row.f; picker.selectedColor=row.current; picker.open(); }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          RowLayout {
+            visible:root.page==='Colors'
+            Repeater {
+              model:['background','surface','text','muted','cyan','lavender','gold','alert']
+              Rectangle {
+                required property string modelData
+                Layout.fillWidth:true; height:48; radius:8
+                color:root.value({scope:'common',key:'colors.'+root.value({scope:'common',key:'mode'})+'.'+modelData}) || root.tokens.surface
+                ToolTip.visible: swatchHover.hovered; ToolTip.text:modelData
+                HoverHandler { id:swatchHover }
+              }
+            }
+          }
+          RowLayout {
+            visible:root.page==='General'
+            Repeater {
+              model:[{label:'Connections',target:'control'},{label:'Audio',target:'audio'},{label:'Wallpaper',target:'wallpaper'}]
+              Panel.PanelButton { tokens:root.tokens; required property var modelData; text:modelData.label; onClicked:root.openExisting(modelData.target) }
+            }
+          }
+          Copy { visible:root.page==='About'; text:root.service.about || 'Reading system information…'; Layout.fillWidth:true; wrapMode:Text.Wrap; color:root.tokens.text; textFormat:Text.PlainText }
+          Panel.PanelButton { tokens:root.tokens; visible:root.page==='About'; text:'Open resource monitor'; onClicked:if(!root.preview) action.run(['astral-monitor'],()=>{}) }
         }
-        Label { Layout.fillWidth:true; text:root.status || root.service.error; visible:!!text; wrapMode:Text.Wrap; color:root.tokens.gold; textFormat:Text.PlainText }
-        RowLayout {
-          Layout.fillWidth:true
-          Label { text:root.dirty ? 'Unsaved changes' : ''; color:root.tokens.muted; Layout.fillWidth:true }
-          Button { text:'Reset changes'; enabled:root.dirty && !root.service.testing; onClicked: { root.applyThenNavigate=false; root.destination=''; root.closePending=false; root.reload(); } }
-          Button { text:root.displaysDirty ? 'Test for 20 seconds' : 'Apply'; highlighted:true; enabled:root.dirty && root.service.ready && !root.service.busy && !root.service.testing && (!root.displaysDirty || !root.service.apiReason); onClicked:root.apply() }
-        }
+      }
+      Copy { Layout.fillWidth:true; text:root.status || root.service.error; visible:!!text; wrapMode:Text.Wrap; color:root.tokens.gold; textFormat:Text.PlainText }
+      RowLayout {
+        Layout.fillWidth:true; Layout.topMargin:4
+        Copy { text:root.service.busy ? 'Applying preferences…' : root.dirty ? 'Unsaved changes' : 'Everything is up to date'; color:root.tokens.muted; Layout.fillWidth:true }
+        Panel.PanelButton { tokens:root.tokens; text:'Reset changes'; enabled:root.dirty && !root.service.testing; onClicked: { root.applyThenNavigate=false; root.destination=''; root.closePending=false; root.reload(); } }
+        Panel.PanelButton { tokens:root.tokens; text:root.displaysDirty ? 'Test for 20 seconds' : 'Apply'; selected:true; enabled:root.dirty && root.service.ready && !root.service.busy && !root.service.testing && (!root.displaysDirty || !root.service.apiReason); onClicked:root.apply() }
       }
     }
   }
@@ -282,24 +333,28 @@ Window {
   }
   ColorDialog { id:picker; property var field; title:'Choose palette color'; onAccepted:root.edit(field,selectedColor.toString()) }
   Dialog {
-    id:pending; width:390; title:'Unsaved changes'; modal:true; anchors.centerIn:parent
+    id:pending; width:420;
+    background:Rectangle { radius:root.tokens.panelRadius; color:root.tokens.surface; border.color:root.tokens.border }
+    title:'Unsaved changes'; modal:true; anchors.centerIn:parent
     contentItem:ColumnLayout {
-      Label { text:'Apply changes before continuing?'; color:root.tokens.text }
+      Copy { text:'Apply changes before continuing?'; color:root.tokens.text }
       RowLayout {
-        Button { text:'Apply'; onClicked: { pending.close(); root.applyThenNavigate=true; root.apply(); } }
-        Button { text:'Discard'; onClicked: { pending.close(); root.continueNavigation(); } }
-        Button { text:'Cancel'; onClicked: { pending.close(); root.applyThenNavigate=false; root.closePending=false; root.destination=''; } }
+        Panel.PanelButton { tokens:root.tokens; text:'Apply'; onClicked: { pending.close(); root.applyThenNavigate=true; root.apply(); } }
+        Panel.PanelButton { tokens:root.tokens; text:'Discard'; onClicked: { pending.close(); root.continueNavigation(); } }
+        Panel.PanelButton { tokens:root.tokens; text:'Cancel'; onClicked: { pending.close(); root.applyThenNavigate=false; root.closePending=false; root.destination=''; } }
       }
     }
   }
   Dialog {
-    id:confirm; width:390; title:'Keep display changes?'; modal:true; anchors.centerIn:parent; closePolicy:Popup.NoAutoClose
+    id:confirm; width:420;
+    background:Rectangle { radius:root.tokens.panelRadius; color:root.tokens.surface; border.color:root.tokens.border }
+    title:'Keep display changes?'; modal:true; anchors.centerIn:parent; closePolicy:Popup.NoAutoClose
     visible:root.service.testing && root.visible
     contentItem:ColumnLayout {
-      Label { text:'Reverting in '+root.service.seconds+' seconds'; color:root.tokens.text }
+      Copy { text:'Reverting in '+root.service.seconds+' seconds'; color:root.tokens.text }
       RowLayout {
-        Button { text:'Keep changes'; enabled:!root.service.busy && !root.service.recovering; onClicked:root.service.keep() }
-        Button { text:'Revert'; onClicked:root.service.revert() }
+        Panel.PanelButton { tokens:root.tokens; text:'Keep changes'; enabled:!root.service.busy && !root.service.recovering; onClicked:root.service.keep() }
+        Panel.PanelButton { tokens:root.tokens; text:'Revert'; onClicked:root.service.revert() }
       }
     }
   }

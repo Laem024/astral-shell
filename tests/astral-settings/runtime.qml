@@ -19,7 +19,7 @@ Settings.SettingsRoot {
       if(root.step===0) {
         root.assert(s.apiReason==='','Lua API detected from repl result');
         root.open(); root.open(); root.assert(w.visible,'repeated open');
-        for(const key of ['input.kb_layout','input.sensitivity','input.touchpad.natural_scroll'])
+        for(const key of ['input.kb_layout','input.sensitivity','input.accel_profile','input.touchpad.natural_scroll'])
           root.assert(w.unavailable({scope:'desktop',key:key})==='','input control available: '+key);
         const before=Logic.clone(Common.SettingsData.value);
         root.assert(Common.SettingsData.updateFields(before,{workspaceCount:12}),'atomic preference update');

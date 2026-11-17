@@ -39,6 +39,8 @@ TestCase {
     compare(Logic.inputValue(key,{int:1}),true);
     compare(Logic.inputValue(key,{int:0}),false);
     compare(Logic.inputValue('kb_layout',{str:'us'}),'us');
+    compare(Logic.inputValue('accel_profile',{str:'[[EMPTY]]',set:false}),'');
+    compare(Logic.inputValue('kb_variant',{str:'[[EMPTY]]',set:false}),'');
     compare(Logic.inputValue('repeat_rate',{int:35}),35);
     compare(Logic.inputValue('sensitivity',{float:0.5}),0.5);
     rejects(()=>Logic.inputValue(key,{}));
@@ -62,6 +64,24 @@ TestCase {
     a.cm='srgb'; a.vrr=1; rejects(()=>Logic.validateMonitors([a],[{name:'DP-1'}]));
     a.vrr=0; a.bitdepth=10; rejects(()=>Logic.validateMonitors([a],[{name:'DP-1'}]));
     a.bitdepth=8; a.output='bad\nname'; rejects(()=>Logic.validateMonitors([a]));
+  }
+  function test_hardware_capabilities() {
+    const internal={name:'eDP-1',hardwareDetails:{hdr:false,vrrCapable:true},currentFormat:'XRGB8888'};
+    const external={name:'HDMI-A-1',hardwareDetails:{hdr:true,vrrCapable:false},currentFormat:'XRGB8888'};
+    compare(Logic.displayCapability(internal,'vrr'),true);
+    compare(Logic.displayCapability(internal,'hdr'),false);
+    compare(Logic.displayCapability(external,'hdr'),true);
+    compare(Logic.displayCapability(external,'vrr'),false);
+    compare(Logic.displayCapability(external,'10bit'),null);
+    compare(Logic.displayCapability({},'hdr'),null);
+    compare(Logic.displayCapability({supports10bit:true},'10bit'),true);
+    compare(Logic.displayCapability({currentFormat:'XRGB2101010'},'10bit'),true);
+    compare(Logic.monitorFromLive({name:'DP-1',currentFormat:'ABGR2101010'}).bitdepth,10);
+    const a=monitor('eDP-1'); a.vrr=1;
+    Logic.validateMonitors([a],[internal]);
+    a.vrr=0; a.cm='hdr'; rejects(()=>Logic.validateMonitors([a],[internal]));
+    a.output='HDMI-A-1'; Logic.validateMonitors([a],[external]);
+    a.bitdepth=10; rejects(()=>Logic.validateMonitors([a],[external]));
   }
   function test_display_conflicts() {
     const inventory=[{name:'DP-1',width:1920,height:1080,refreshRate:60,scale:1,x:0,y:0,transform:0}];

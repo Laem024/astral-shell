@@ -159,7 +159,11 @@ hides when logind reports a locked or unknown session. Opening it dismisses peer
 panels without cancelling Polkit authentication.
 
 The sidebar covers Displays, Bar, Appearance, Colors, Keyboard, Mouse & Touchpad,
-Power & Lock, General, and About. Search finds individual options across pages.
+Power & Lock, General, and About. The window reuses the control center's cards,
+line icons, buttons, switches and shared theme tokens; `SettingsChoice.qml` and
+`SettingsTextField.qml` style its editors. Displays use a scaled layout canvas
+that includes negative positions and rotated screens. Search finds individual
+options across pages.
 Use **Apply** or **Reset changes**; navigation and closing prompt for unsaved edits.
 Edits merge against freshly read files. A conflicting external edit requires
 resetting/reloading; unrelated keys are preserved. Application providers accept
@@ -179,8 +183,13 @@ Display edits run as a **20-second test**. Keep them explicitly or the independe
 worker restores the previous layout. Closing, locking, command failure and
 restarting with a pending journal also trigger recovery. Disconnected outputs are
 excluded during recovery and an available output is enabled if necessary. Unknown
-HDR, VRR and 10-bit capabilities show **Unavailable**; Astral never forces HDR
-support. Monitor fields follow the [Hyprland 0.57 monitor API](https://wiki.hypr.land/0.57.0/configuring/core/monitors/).
+HDR, VRR and 10-bit capabilities remain disabled with **Not reported by Hyprland**;
+explicit negative capabilities say **Not supported by this display**. Detection
+reads `hardwareDetails.hdr` / `vrrCapable`, legacy capability fields and active
+10-bit pixel formats. HDR alone does not establish 10-bit support; Astral never
+forces HDR support. Input discovery handles Hyprland's `[[EMPTY]]` default string
+and distinguishes pending inspection from unreadable options. Monitor fields
+follow the [Hyprland 0.57 monitor API](https://wiki.hypr.land/0.57.0/configuring/core/monitors/).
 
 GTK 3/4 and Qt 5/6 theme settings preserve unrelated INI keys and receive
 `.astral-backup` copies before modification. Themes, icons and cursors must already
