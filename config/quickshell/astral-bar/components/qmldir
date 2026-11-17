@@ -10,3 +10,6 @@ SoundGlyph 1.0 SoundGlyph.qml
 StatusNode 1.0 StatusNode.qml
 HoverIndex 1.0 HoverIndex.qml
 NeonOutline 1.0 NeonOutline.qml
+BarGlyph 1.0 BarGlyph.qml
+BarTile 1.0 BarTile.qml
+StatusGlyph 1.0 StatusGlyph.qml

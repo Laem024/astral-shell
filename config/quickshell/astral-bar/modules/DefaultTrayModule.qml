@@ -1,5 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Controls
+import "../components" as Components
 import "../../common" as Design
 
 Item {
@@ -15,10 +17,10 @@ Item {
   }
   readonly property bool expanded: navigation.tray && navigation.owner === panel
   readonly property bool hovered: hover.hovered
-  readonly property color ink: hovered ? tokens.cyan : tokens.muted
+  readonly property color ink: hovered || expanded ? tokens.cyan : tokens.text
 
-  implicitWidth: 40
-  implicitHeight: 40
+  implicitWidth: 36
+  implicitHeight: 36
   Accessible.role: Accessible.Button
   Accessible.name: "Background applications"
   Accessible.onPressAction: root.toggle()
@@ -28,25 +30,22 @@ Item {
   Keys.onSpacePressed: root.toggle()
   Keys.onReturnPressed: root.toggle()
   Keys.onEnterPressed: root.toggle()
-  Rectangle {
-    anchors.centerIn: parent
-    width: 32; height: 32
-    radius: root.tokens.rowRadius
-    color: root.expanded ? Qt.alpha(root.tokens.cyan, 0.1) : "transparent"
-    border.color: root.activeFocus ? root.tokens.gold : "transparent"
-    Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
-    Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
+  ToolTip.visible: hovered
+  ToolTip.text: "Background applications"
+  ToolTip.delay: 650
+  Components.BarTile {
+    anchors.fill: parent
+    tokens: root.tokens
+    hovered: root.hovered
+    selected: root.expanded
+    focused: root.activeFocus
   }
-  Item {
+  Components.StatusGlyph {
     objectName: "trayArrow"
-    width: 16; height: 16
     anchors.centerIn: parent
-    rotation: (root.tokens.settings.value.position === "bottom" ? 180
-      : root.tokens.settings.value.position === "left" ? -90
-      : root.tokens.settings.value.position === "right" ? 90 : 0) + (root.expanded ? 180 : 0)
-    Behavior on rotation { NumberAnimation { duration: root.tokens.hoverDuration } }
-    Rectangle { x: 1; y: 7; width: 9; height: 2; radius: 1; rotation: 45; color: root.ink }
-    Rectangle { x: 7; y: 7; width: 9; height: 2; radius: 1; rotation: -45; color: root.ink }
+    width: 19; height: 19
+    kind: "tray"
+    ink: root.ink
   }
   HoverHandler { id: hover }
   TapHandler { onTapped: root.toggle() }

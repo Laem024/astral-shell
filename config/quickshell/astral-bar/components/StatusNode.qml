@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Shapes
+import QtQuick.Controls
 import "../../common" as Design
 
 Item {
@@ -19,201 +19,91 @@ Item {
   property bool warningEnabled: true
   property bool externalPower: false
   readonly property bool warning: warningEnabled && kind === "battery" && level >= 0 && level < 0.2
-  property color ink: warning ? tokens.alert : hover.hovered ? tokens.lavender : accent
+  readonly property bool hasValue: !compact && (kind === "audio" || kind === "battery")
+  readonly property bool unread: kind === "notifications" && level > 0
+  // Reserve accent color for actionable states rather than tinting every control.
+  property color ink: warning ? tokens.alert
+    : kind === "network" && ["off", "disconnected", "unavailable"].includes(networkState) ? tokens.muted
+    : hovered ? tokens.cyan : tokens.text
   Behavior on ink { ColorAnimation { duration: root.tokens.hoverDuration } }
   signal activated()
   signal summaryActivated()
-  implicitWidth: vertical ? 48 : (compact ? 34 : 84)
-  implicitHeight: vertical ? (compact ? 38 : 54) : 40
+  implicitWidth: vertical ? 44 : hasValue ? 70 : unread && !compact ? 58 : 36
+  implicitHeight: vertical && hasValue ? 52 : 36
   Accessible.name: detail
   Accessible.role: Accessible.Button
-
   activeFocusOnTab: true
   Accessible.onPressAction: root.activated()
   Keys.onSpacePressed: root.activated()
   Keys.onReturnPressed: root.activated()
   Keys.onEnterPressed: root.activated()
-  Rectangle {
+  ToolTip.visible: hovered
+  ToolTip.text: detail
+  ToolTip.delay: 650
+
+  BarTile {
     anchors.fill: parent
-    color: "transparent"
-    radius: root.tokens.rowRadius
-    border.width: root.activeFocus ? 1 : 0
-    border.color: root.tokens.gold
+    tokens: root.tokens
+    accent: root.warning ? root.tokens.alert : root.tokens.cyan
+    hovered: root.hovered
+    focused: root.activeFocus
   }
-
-  // A tinted instrument disc and a two-line readout keep status legible.
   Item {
-    id: instrument
-    width: 24; height: 24
-    x: root.vertical || root.compact ? (root.width - width) / 2 : 10
-    y: root.vertical ? 6 : (root.height - height) / 2
-    function strength(index: int): real { return root.level >= (index + 1) / 3 - 0.2 ? 1 : 0.2; }
-
-    Rectangle {
-      anchors.centerIn: parent
-      width: 32; height: 32; radius: 16
-      color: Qt.alpha(root.ink, root.hovered ? 0.15 : 0.08)
-      border.color: Qt.alpha(root.ink, 0.2)
-      Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
-    }
-    Shape {
-      visible: root.kind === "network" && root.networkState === "wifi"
-      anchors.fill: parent
-      preferredRendererType: Shape.CurveRenderer
-      ShapePath {
-        strokeColor: Qt.alpha(root.ink, instrument.strength(0))
-        strokeWidth: 1.7
-        fillColor: "transparent"
-        capStyle: ShapePath.RoundCap
-        PathAngleArc { centerX: 12; centerY: 18; radiusX: 4; radiusY: 4; startAngle: -135; sweepAngle: 90 }
-      }
-      ShapePath {
-        strokeColor: Qt.alpha(root.ink, instrument.strength(1))
-        strokeWidth: 1.7
-        fillColor: "transparent"
-        capStyle: ShapePath.RoundCap
-        PathAngleArc { centerX: 12; centerY: 18; radiusX: 8; radiusY: 8; startAngle: -135; sweepAngle: 90 }
-      }
-      ShapePath {
-        strokeColor: Qt.alpha(root.ink, instrument.strength(2))
-        strokeWidth: 1.7
-        fillColor: "transparent"
-        capStyle: ShapePath.RoundCap
-        PathAngleArc { centerX: 12; centerY: 18; radiusX: 12; radiusY: 12; startAngle: -135; sweepAngle: 90 }
-      }
-    }
-    Rectangle {
-      visible: root.kind === "network" && root.networkState === "wifi"
-      x: 10.5; y: 16.5
-      width: 3; height: 3; radius: 1.5
-      color: root.ink
-    }
-    Shape {
-      visible: root.kind === "network" && root.networkState !== "wifi"
-      anchors.fill: parent
-      preferredRendererType: Shape.CurveRenderer
-      ShapePath {
-        strokeColor: root.ink
-        strokeWidth: 1.6
-        fillColor: "transparent"
-        capStyle: ShapePath.RoundCap
-        joinStyle: ShapePath.RoundJoin
-        PathSvg {
-          path: root.networkState === "ethernet" ? "M5 4 H19 V14 H15 V18 H9 V14 H5 Z M9 7 V10 M12 7 V10 M15 7 V10 M12 18 V21"
-            : root.networkState === "off" ? "M12 3 V11 M7 6 A8 8 0 1 0 17 6"
-            : "M8 8 L16 16 M16 8 L8 16 M12 3 A9 9 0 1 0 12 21 A9 9 0 1 0 12 3"
-        }
-      }
-    }
-
-    SoundGlyph {
-      visible: root.kind === "audio"
-      anchors.fill: parent
-      kind: "speaker"
-      muted: root.level <= 0
-      level: root.level
+    id: content
+    width: root.vertical ? root.width : glyph.width + (valueLabel.visible ? 7 + valueLabel.width : 0)
+      + (badge.visible ? 5 + badge.width : 0)
+    height: root.vertical && root.hasValue ? 42 : 20
+    anchors.centerIn: parent
+    StatusGlyph {
+      id: glyph
+      width: 20; height: 20
+      x: root.vertical ? (parent.width - width) / 2 : 0
+      y: 0
       ink: root.ink
+      kind: root.kind === "network" ? root.networkState : root.kind
+      muted: root.kind === "audio" && root.level <= 0
+      level: root.level
+      charging: root.externalPower
     }
-
-    Item {
-      visible: root.kind === "battery"
-      anchors.fill: parent
-      Rectangle {
-        x: 1; y: 6
-        width: 20; height: 12; radius: 3.5
-        color: "transparent"
-        border.color: root.ink
-        border.width: 1.5
-      }
-      Rectangle {
-        x: 22; y: 9.5
-        width: 2; height: 5; radius: 1
-        color: root.ink
-      }
-      Rectangle {
-        x: 4; y: 9
-        width: 14 * Math.max(0, Math.min(1, root.level)); height: 6; radius: 1.5
-        color: root.ink
-        opacity: root.externalPower ? 0.25 : 1
-      }
-      Shape {
-        visible: root.externalPower
-        x: 8; y: 7
-        width: 7; height: 10
-        preferredRendererType: Shape.CurveRenderer
-        ShapePath {
-          strokeColor: "transparent"
-          fillColor: root.ink
-          startX: 4.5; startY: 0
-          PathLine { x: 0; y: 5.5 }
-          PathLine { x: 3; y: 5.5 }
-          PathLine { x: 2; y: 10 }
-          PathLine { x: 7; y: 4 }
-          PathLine { x: 4; y: 4 }
-          PathLine { x: 4.5; y: 0 }
-        }
+    Text {
+      id: valueLabel
+      visible: root.hasValue
+      x: root.vertical ? (parent.width - width) / 2 : glyph.width + 7
+      y: root.vertical ? 25 : (20 - height) / 2
+      text: root.label
+      color: root.ink
+      font { family: root.tokens.font; pixelSize: 12; weight: Font.DemiBold }
+      Accessible.ignored: true
+    }
+    Rectangle {
+      id: badge
+      visible: root.unread && !root.vertical && !root.compact
+      x: glyph.width + 5
+      anchors.verticalCenter: glyph.verticalCenter
+      width: Math.max(18, badgeText.implicitWidth + 8); height: 18; radius: 9
+      color: Qt.alpha(root.tokens.cyan, 0.16)
+      Text {
+        id: badgeText
+        anchors.centerIn: parent
+        text: root.level > 99 ? "99+" : String(root.level)
+        color: root.tokens.cyan
+        font { family: root.tokens.font; pixelSize: 10; weight: Font.Bold }
+        Accessible.ignored: true
       }
     }
-
-    Item {
-      visible: root.kind === "notifications"
-      anchors.fill: parent
-      Shape {
-        anchors.fill: parent
-        preferredRendererType: Shape.CurveRenderer
-        ShapePath {
-          strokeColor: root.ink
-          strokeWidth: 1.7
-          joinStyle: ShapePath.RoundJoin
-          capStyle: ShapePath.RoundCap
-          fillColor: Qt.alpha(root.ink, 0.14)
-          PathSvg { path: "M12 3.5 C8.4 3.5 6.5 6.2 6.5 9.8 V13.5 L4.5 16.5 H19.5 L17.5 13.5 V9.8 C17.5 6.2 15.6 3.5 12 3.5 Z" }
-        }
-        ShapePath {
-          strokeColor: root.ink
-          strokeWidth: 1.7
-          fillColor: "transparent"
-          capStyle: ShapePath.RoundCap
-          PathSvg { path: "M10 19.5 Q12 21.5 14 19.5" }
-        }
-      }
-      Rectangle {
-        visible: root.level > 0
-        x: 15.5; y: 0
-        width: 8; height: 8; radius: 4
-        color: root.tokens.alert
-        border.width: 1.5
-        border.color: root.tokens.surface
-      }
+    Rectangle {
+      visible: root.unread && !badge.visible
+      x: glyph.x + 16; y: 0
+      width: 5; height: 5; radius: 2.5
+      color: root.tokens.cyan
     }
-  }
-  Text {
-    visible: !root.vertical && !root.compact
-    x: 42; y: 5
-    width: root.width - x - 4
-    text: ({network: root.networkState === "wifi" ? "WI-FI" : root.networkState === "ethernet" ? "WIRED" : "NET", audio: "VOL", battery: "PWR", notifications: "LOG"})[root.kind] || "SYS"
-    color: root.ink
-    font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 1 }
-    elide: Text.ElideRight
-  }
-  Text {
-    id: valueLabel
-    visible: !root.compact
-    x: root.vertical ? 0 : 42
-    y: root.vertical ? 32 : 19
-    width: root.vertical ? root.width : root.width - x - 6
-    horizontalAlignment: root.vertical ? Text.AlignHCenter : Text.AlignLeft
-    text: root.label
-    color: root.warning ? root.tokens.alert : root.tokens.text
-    font.family: root.tokens.mono
-    font.pixelSize: root.vertical ? 11 : root.tokens.textSize
-    font.weight: Font.Medium
-    elide: Text.ElideRight
   }
   HoverHandler { id: hover }
   TapHandler {
     onTapped: event => {
-      if (root.kind === "notifications" && valueLabel.visible && event.position.x >= valueLabel.x && event.position.y >= valueLabel.y) root.summaryActivated();
+      const point = root.mapToItem(badge, event.position.x, event.position.y);
+      if (badge.visible && point.x >= 0 && point.x <= badge.width && point.y >= 0 && point.y <= badge.height)
+        root.summaryActivated();
       else root.activated();
     }
   }

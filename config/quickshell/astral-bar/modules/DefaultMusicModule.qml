@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Shapes
 import "../../common" as Design
 import "../data" as Data
 import "../components" as Components
@@ -34,13 +33,13 @@ Item {
     focusPolicy: Qt.StrongFocus
     Accessible.name: label
     opacity: enabled ? 1 : 0.3
-    background: Rectangle {
-      radius: height / 2
-      color: control.down ? Qt.alpha(root.tokens.cyan, 0.22)
-        : control.hovered ? Qt.alpha(root.tokens.cyan, 0.12) : "transparent"
-      Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
-      border.color: control.visualFocus ? root.tokens.gold : "transparent"
-      border.width: control.visualFocus ? 1 : 0
+    background: Components.BarTile {
+      tokens: root.tokens
+      radius: 9
+      hovered: control.hovered
+      selected: control.down
+      tinted: control.primary
+      focused: control.visualFocus
       scale: control.down ? 0.92 : 1
       Behavior on scale { NumberAnimation { duration: root.tokens.hoverDuration } }
     }
@@ -48,49 +47,19 @@ Item {
       id: iconContent
       property color ink: control.primary || control.hovered ? root.tokens.cyan : root.tokens.muted
       Behavior on ink { ColorAnimation { duration: root.tokens.hoverDuration } }
-      Item {
+      Components.BarGlyph {
         anchors.centerIn: parent
-        width: 16; height: 16
-        rotation: control.kind === "previous" ? 180 : 0
-        Shape {
-          anchors.fill: parent
-          visible: control.kind !== "pause"
-          preferredRendererType: Shape.CurveRenderer
-          ShapePath {
-            strokeColor: "transparent"
-            fillColor: iconContent.ink
-            startX: 4; startY: 3
-            PathLine { x: 12; y: 8 }
-            PathLine { x: 4; y: 13 }
-            PathLine { x: 4; y: 3 }
-          }
-        }
-        Rectangle {
-          visible: control.kind === "previous" || control.kind === "next"
-          x: 12; y: 3; width: 2; height: 10; radius: 0.5
-          color: iconContent.ink
-        }
-        Rectangle {
-          visible: control.kind === "pause"
-          x: 3; y: 3; width: 3; height: 10; radius: 0.7
-          color: iconContent.ink
-        }
-        Rectangle {
-          visible: control.kind === "pause"
-          x: 10; y: 3; width: 3; height: 10; radius: 0.7
-          color: iconContent.ink
-        }
+        width: 17; height: 17
+        kind: control.kind
+        ink: iconContent.ink
       }
     }
-
-
-
   }
 
   GridLayout {
     anchors.fill: parent
     anchors.leftMargin: root.vertical ? 7 : 8
-    anchors.rightMargin: root.vertical ? 7 : 0
+    anchors.rightMargin: root.vertical ? 7 : 4
     anchors.topMargin: 2
     anchors.bottomMargin: 2
     columns: root.vertical ? 1 : 4
@@ -107,10 +76,10 @@ Item {
       focusPolicy: Qt.StrongFocus
       Accessible.name: root.media.title + " · " + root.media.artist + ". Open Music"
       onClicked: root.activated()
-      background: Rectangle {
-        radius: root.tokens.rowRadius
-        color: "transparent"
-        border.color: information.visualFocus ? root.tokens.gold : "transparent"
+      background: Components.BarTile {
+        tokens: root.tokens
+        hovered: information.hovered
+        focused: information.visualFocus
       }
       contentItem: RowLayout {
         spacing: 10
@@ -120,28 +89,17 @@ Item {
           Layout.preferredHeight: Layout.preferredWidth
           Layout.alignment: Qt.AlignCenter
           radius: 8
-          Item {
-            anchors.centerIn: parent
+          Rectangle {
+            anchors.fill: parent
             visible: cover.status !== Image.Ready
-            width: 25; height: 25
-            Rectangle {
-              anchors.fill: parent
-              radius: width / 2
-              color: Qt.alpha(root.tokens.cyan, 0.06)
-              border.color: Qt.alpha(root.tokens.cyan, 0.3)
-            }
-            Rectangle {
+            radius: 8
+            color: Qt.alpha(root.tokens.lavender, 0.1)
+            Components.BarGlyph {
               anchors.centerIn: parent
-              width: 15; height: 15; radius: 7.5
-              color: "transparent"
-              border.color: Qt.alpha(root.tokens.cyan, 0.18)
+              width: 20; height: 20
+              kind: "music"
+              ink: root.media.playing ? root.tokens.cyan : root.tokens.lavender
             }
-            Rectangle {
-              anchors.centerIn: parent
-              width: 5; height: 5; radius: 2.5
-              color: root.media.playing ? root.tokens.cyan : root.tokens.gold
-            }
-            Rectangle { x: 18; y: 3; width: 1; height: 14; rotation: 24; color: root.tokens.lavender }
           }
           Image {
             id: cover
@@ -176,7 +134,7 @@ Item {
             text: root.media.artist
             textFormat: Text.PlainText
             elide: Text.ElideRight
-            color: root.tokens.lavender
+            color: root.tokens.muted
             font { family: root.tokens.font; pixelSize: 11 }
           }
           Rectangle {
@@ -188,9 +146,6 @@ Item {
           }
         }
       }
-
-
-
     }
     Transport {
       Layout.alignment: Qt.AlignCenter

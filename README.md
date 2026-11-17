@@ -6,6 +6,8 @@ A personal CachyOS environment built around Hyprland and Quickshell, with config
 
 `config/quickshell/` contains the new orchestrator, `astral-bar`, `astral-launcher`, `astral-wallpaper`, `astral-polkit`, `astral-lock`, `astral-session`, `astral-clipboard`, `astral-overview`, and `astral-shortcuts`. The bar preserves its four positions, multiple monitors, panels, tray, notifications, weather, network, Bluetooth, VPN, media, audio, brightness, and capture controls. The redesigned control center has seven English categories, an editable panoramic banner, and a framed account portrait. `astral-bar/panel/ProfileHeader.qml`, `CategoryGlyph.qml`, and `PageIntro.qml` provide its shared presentation. Its backend uses QML, Quickshell APIs, and JavaScript executed by Qt. Existing command-line tools receive separate arguments; no new package or language is required.
 
+The bar's logo and media icons live in `config/quickshell/astral-bar/components/BarGlyph.qml`. Its right-hand system dock uses solid symbols from `StatusGlyph.qml`, single-line volume and battery values, and notification badges. `StatusNode.qml` provides the shared interaction and accessible descriptions. The clock, window, media and system controls share rounded group surfaces and cyan hover feedback through `components/BarTile.qml`, with gold keyboard focus and alert-colored recording states in every orientation. Workspace and special workspace icons retain their original design. Custom logo images/glyphs, numeric workspace display and module replacements remain configurable in `astral-bar/settings.json`.
+
 The visual direction is **Astral depurado**: one bar surface, compact Sound controls,
 Connections tabs, a search-and-list launcher, horizontal session actions and a
 left-aligned SDDM login with a responsive centered layout. See the
@@ -79,7 +81,7 @@ Clipboard preferences (`historySize`, `maxImageBytes`, `enterAction`, and `paste
 | `config/quickshell/common/` | One settings loader/validator, theme, paths, argument runner, privacy, popup dismissal, caffeine worker |
 | `config/quickshell/astral-bar/settings.json` | Position, margins, visibility, replacements, weather and logo |
 | `config/quickshell/astral-bar/modules/` | Visual slots and their stock `Default*.qml` implementations |
-| `config/quickshell/astral-bar/components/` | Reusable visuals, animated edge marker (`HoverIndex.qml`) and workspace hover outline (`NeonOutline.qml`) |
+| `config/quickshell/astral-bar/components/` | Reusable visuals, vector icons (`BarGlyph.qml`, `StatusGlyph.qml`), animated edge marker (`HoverIndex.qml`) and workspace hover outline (`NeonOutline.qml`) |
 | `config/quickshell/astral-bar/panel/` | Panels, tray menu, and notification presentation |
 | `config/quickshell/astral-bar/data/` | Native services and Qt JavaScript logic |
 | `config/quickshell/astral-bar/display/` | Native window capture and independent recording entry |

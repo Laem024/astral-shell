@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import "../../common" as Design
+import "../components" as Components
 import "../data/TimeFormat.js" as TimeFormat
 
 Item {
@@ -17,11 +18,11 @@ Item {
   Keys.onSpacePressed: root.activated()
   Keys.onReturnPressed: root.activated()
   Keys.onEnterPressed: root.activated()
-  Rectangle {
+  Components.BarTile {
     anchors.fill: parent
-    color: "transparent"
-    radius: root.tokens.rowRadius
-    border.color: root.activeFocus ? root.tokens.gold : "transparent"
+    tokens: root.tokens
+    hovered: root.hovered
+    focused: root.activeFocus
   }
   readonly property bool hovered: hover.hovered
   property bool vertical: false
@@ -59,7 +60,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: root.accent
         font.family: root.tokens.mono
-        font.pixelSize: root.vertical ? 23 : root.tokens.clockSize
+        font.pixelSize: root.vertical ? 23 : root.tokens.clockSize - 4
         font.weight: Font.DemiBold
         lineHeight: 0.9
       }
@@ -79,11 +80,11 @@ Item {
       objectName: "clockDate"
       width: parent.width
       horizontalAlignment: Text.AlignHCenter
-      text: root.vertical ? root.date.split("·")[1].trim() : root.date.replace(" · ", "   /   ")
+      text: root.vertical ? root.date.split("·")[1].trim() : root.date
       color: root.tokens.muted
       font.family: root.tokens.mono
       font.pixelSize: 10
-      font.letterSpacing: 0.8
+      font.letterSpacing: 0.4
     }
   }
   TapHandler { onTapped: root.activated() }

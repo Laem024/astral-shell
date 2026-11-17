@@ -11,7 +11,11 @@ Item {
   Rectangle {
     anchors.fill: parent
     radius: Math.min(root.tokens.panelRadius, Math.min(width, height) / 2)
-    color: root.tokens.surface
+    gradient: Gradient {
+      orientation: root.vertical ? Gradient.Horizontal : Gradient.Vertical
+      GradientStop { position: 0; color: Qt.tint(root.tokens.surface, Qt.alpha(root.tokens.text, 0.025)) }
+      GradientStop { position: 1; color: root.tokens.surface }
+    }
     border.color: root.tokens.border
     border.width: 1
   }
