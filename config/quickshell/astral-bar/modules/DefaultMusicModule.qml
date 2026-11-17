@@ -87,7 +87,8 @@ Item {
         Components.RoundedClip {
           id: sleeve
           objectName: "barMediaArtwork"
-          anchors.left: parent.left
+          anchors.left: root.vertical ? undefined : parent.left
+          anchors.horizontalCenter: root.vertical ? parent.horizontalCenter : undefined
           anchors.verticalCenter: parent.verticalCenter
           width: 30
           height: 30

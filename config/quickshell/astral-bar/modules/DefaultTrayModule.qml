@@ -11,6 +11,7 @@ Item {
   required property Item panel
   required property var navigation
   property var nativeWindow: null
+  property bool vertical: false
   property bool compact: false
   function toggle(): void {
     if (navigation.tray && navigation.owner === panel) navigation.close();
@@ -44,7 +45,9 @@ Item {
     width: 20; height: 20
     kind: "tray"
     ink: root.ink
-    rotation: root.expanded ? 180 : 0
+    rotation: (root.vertical ? (root.tokens.settings.value.position === "right" ? 90 : -90)
+      : root.tokens.settings.value.position === "bottom" ? 180 : 0)
+      + (root.expanded ? 180 : 0)
     Behavior on rotation { NumberAnimation { duration: root.tokens.hoverDuration } }
   }
   HoverHandler { id: hover }

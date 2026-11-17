@@ -242,7 +242,7 @@ Item {
         Layout.alignment: root.vertical ? Qt.AlignHCenter | Qt.AlignBottom : Qt.AlignVCenter
         columns: root.vertical ? 1 : 9
         columnSpacing: root.minimal ? root.tokens.unit / 2 : root.tokens.gap
-        rowSpacing: root.vertical ? 6 : root.tokens.gap
+        rowSpacing: root.vertical ? 2 : root.tokens.gap
         Item { visible: !root.vertical; Layout.fillWidth: true }
         Modules.MusicModule {
           id: music
@@ -251,7 +251,7 @@ Item {
           Layout.preferredWidth: root.vertical || root.compact ? music.implicitWidth
             : Math.max(340, Math.min(420, root.width * 0.2))
           Layout.maximumWidth: root.vertical || root.compact ? music.implicitWidth : 420
-          Layout.topMargin: root.vertical ? 12 : 0
+          Layout.topMargin: root.vertical ? 8 : 0
           Layout.bottomMargin: 0
           visible: root.shown.music
           Layout.alignment: Qt.AlignCenter
@@ -263,7 +263,7 @@ Item {
         }
         Components.Constellation {
           objectName: "musicTrayDivider"
-          visible: root.shown.music && root.shown.tray
+          visible: !root.vertical && root.shown.music && root.shown.tray
           Layout.alignment: Qt.AlignCenter
           tokens: root.tokens
           vertical: root.vertical
@@ -286,6 +286,7 @@ Item {
             rowSpacing: 4
             Modules.TrayModule {
               id: tray
+              vertical: root.vertical
               compact: !root.vertical && root.minimal
               Layout.topMargin: 0
               Layout.bottomMargin: 0
