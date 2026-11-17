@@ -13,8 +13,9 @@ Item {
   property var media: Data.MediaData
   readonly property var player: media.player
   readonly property real progress: media.progress
-  readonly property bool largeArtwork: height >= 420 && width >= 260
-  readonly property int inset: height < 400 ? 12 : 16
+  readonly property bool largeArtwork: height >= 360 && width >= 260
+  readonly property int inset: height < 360 ? 12 : 20
+  readonly property int artworkPadding: largeArtwork ? 12 : 6
   function duration(seconds: real): string {
     const value = Math.max(0, Math.floor(seconds));
     return Math.floor(value / 60) + ":" + String(value % 60).padStart(2, "0");
@@ -159,7 +160,7 @@ Item {
         x: root.inset; y: root.inset
         width: Math.max(0, root.width - root.inset * 2)
         height: Math.max(implicitHeight, scroll.height - root.inset * 2)
-        spacing: root.height >= 460 ? 16 : root.largeArtwork ? 12 : 8
+        spacing: root.height >= 460 ? 16 : root.height >= 420 ? 12 : 10
         RowLayout {
           id: sourceRow
           Layout.fillWidth: true
@@ -286,90 +287,93 @@ Item {
           Layout.minimumHeight: implicitHeight
           columns: root.largeArtwork ? 1 : 2
           columnSpacing: 16
-          rowSpacing: 16
+          rowSpacing: root.height >= 420 ? 16 : 6
           Item {
-            id: sleeve
-            objectName: "mediaArtworkFrame"
-            Layout.alignment: Qt.AlignHCenter
-            readonly property real aspect: artwork.status === Image.Ready && artwork.implicitHeight > 0
-              ? Math.max(0.5, Math.min(1.8, artwork.implicitWidth / artwork.implicitHeight)) : 1
-            // Reserve room for metadata and transport before sizing the sleeve.
-            readonly property real size: root.largeArtwork
-              ? Math.max(96, Math.min(260, composition.width * 0.82 / aspect,
-                  scroll.height - root.inset * 2 - sourceRow.implicitHeight
-                  - trackInfo.implicitHeight - timeline.implicitHeight
-                  - transportDeck.implicitHeight - repeatMode.implicitHeight
-                  - composition.spacing * 4 - hero.rowSpacing))
-              : Math.max(48, Math.min(104, composition.width * 0.32))
-            Layout.preferredHeight: size
-            Layout.preferredWidth: size * aspect
-            Layout.minimumHeight: size
-            Layout.maximumHeight: size
-            Layout.minimumWidth: size * aspect
-            Layout.maximumWidth: size * aspect
-            Accessible.role: Accessible.Graphic
-            Accessible.name: root.player ? "Artwork for " + root.media.title : "No track artwork"
-            Rectangle {
-              anchors.fill: parent
-              anchors.margins: -3
-              rotation: 3
-              radius: 14
-              color: Qt.tint(root.tokens.surface, Qt.alpha(root.tokens.cyan, 0.12))
-              border.color: Qt.alpha(root.tokens.cyan, 0.16)
-            }
-            Components.RoundedClip {
-              anchors.fill: parent
-              radius: 10
+            Layout.fillWidth: root.largeArtwork
+            Layout.preferredWidth: sleeve.width + root.artworkPadding * 2
+            Layout.minimumWidth: sleeve.width + root.artworkPadding * 2
+            Layout.preferredHeight: sleeve.height + root.artworkPadding * 2
+            Layout.minimumHeight: sleeve.height + root.artworkPadding * 2
+            Item {
+              id: sleeve
+              objectName: "mediaArtworkFrame"
+              anchors.centerIn: parent
+              readonly property real aspect: artwork.status === Image.Ready && artwork.implicitHeight > 0
+                ? Math.max(0.5, Math.min(1.8, artwork.implicitWidth / artwork.implicitHeight)) : 1
+              // Include the rotated backing's clearance in the artwork budget.
+              readonly property real size: root.largeArtwork
+                ? Math.max(48, Math.min(260, composition.width * 0.82 / aspect,
+                    scroll.height - root.inset * 2 - sourceRow.implicitHeight
+                    - trackInfo.implicitHeight - timeline.implicitHeight
+                    - transportDeck.implicitHeight - repeatMode.implicitHeight
+                    - composition.spacing * 4 - hero.rowSpacing - root.artworkPadding * 2))
+                : Math.max(48, Math.min(104, composition.width * 0.32))
+              height: size
+              width: size * aspect
+              Accessible.role: Accessible.Graphic
+              Accessible.name: root.player ? "Artwork for " + root.media.title : "No track artwork"
               Rectangle {
                 anchors.fill: parent
-                color: root.tokens.surface
+                anchors.margins: -3
+                rotation: 3
+                radius: 14
+                color: Qt.tint(root.tokens.surface, Qt.alpha(root.tokens.cyan, 0.12))
+                border.color: Qt.alpha(root.tokens.cyan, 0.16)
               }
-              Item {
-                id: fallback
-                objectName: "mediaArtworkFallback"
-                anchors.centerIn: parent
-                width: parent.width * 0.78; height: width
-                visible: artwork.status !== Image.Ready
-                Repeater {
-                  model: 5
+              Components.RoundedClip {
+                anchors.fill: parent
+                radius: 10
+                Rectangle {
+                  anchors.fill: parent
+                  color: root.tokens.surface
+                }
+                Item {
+                  id: fallback
+                  objectName: "mediaArtworkFallback"
+                  anchors.centerIn: parent
+                  width: parent.width * 0.78; height: width
+                  visible: artwork.status !== Image.Ready
+                  Repeater {
+                    model: 5
+                    Rectangle {
+                      required property int index
+                      anchors.centerIn: parent
+                      width: parent.width * (1 - index * 0.15); height: width
+                      radius: width / 2
+                      color: index === 4 ? Qt.alpha(root.tokens.cyan, 0.12) : "transparent"
+                      border.color: Qt.alpha(root.tokens.cyan, 0.14 + index * 0.025)
+                    }
+                  }
                   Rectangle {
-                    required property int index
                     anchors.centerIn: parent
-                    width: parent.width * (1 - index * 0.15); height: width
-                    radius: width / 2
-                    color: index === 4 ? Qt.alpha(root.tokens.cyan, 0.12) : "transparent"
-                    border.color: Qt.alpha(root.tokens.cyan, 0.14 + index * 0.025)
+                    width: Math.max(5, parent.width * 0.065); height: width; radius: width / 2
+                    color: root.tokens.gold
+                  }
+                  Rectangle {
+                    x: parent.width * 0.8; y: parent.height * 0.08
+                    width: 2; height: parent.height * 0.53
+                    rotation: 23; radius: 1
+                    color: root.tokens.lavender
                   }
                 }
-                Rectangle {
-                  anchors.centerIn: parent
-                  width: Math.max(5, parent.width * 0.065); height: width; radius: width / 2
-                  color: root.tokens.gold
-                }
-                Rectangle {
-                  x: parent.width * 0.8; y: parent.height * 0.08
-                  width: 2; height: parent.height * 0.53
-                  rotation: 23; radius: 1
-                  color: root.tokens.lavender
+                Image {
+                  id: artwork
+                  objectName: "mediaArtwork"
+                  anchors.fill: parent
+                  source: root.media.artwork
+                  sourceSize.width: Math.ceil(1024 * root.tokens.scale)
+                  fillMode: Image.PreserveAspectFit
+                  asynchronous: true
+                  smooth: true
+                  mipmap: true
                 }
               }
-              Image {
-                id: artwork
-                objectName: "mediaArtwork"
+              Rectangle {
                 anchors.fill: parent
-                source: root.media.artwork
-                sourceSize.width: Math.ceil(1024 * root.tokens.scale)
-                fillMode: Image.PreserveAspectFit
-                asynchronous: true
-                smooth: true
-                mipmap: true
+                radius: 10
+                color: "transparent"
+                border.color: Qt.alpha(root.tokens.cyan, 0.18)
               }
-            }
-            Rectangle {
-              anchors.fill: parent
-              radius: 10
-              color: "transparent"
-              border.color: Qt.alpha(root.tokens.cyan, 0.18)
             }
           }
           ColumnLayout {
@@ -384,9 +388,9 @@ Item {
               wrapMode: Text.Wrap
               maximumLineCount: 2
               elide: Text.ElideRight
-              horizontalAlignment: Text.AlignLeft
+              horizontalAlignment: root.largeArtwork ? Text.AlignHCenter : Text.AlignLeft
               color: root.tokens.text
-              font { family: root.tokens.font; pixelSize: root.largeArtwork ? 25 : 18; weight: Font.DemiBold }
+              font { family: root.tokens.font; pixelSize: root.height >= 420 ? 25 : 18; weight: Font.DemiBold }
             }
             Text {
               Layout.fillWidth: true
@@ -395,7 +399,7 @@ Item {
               wrapMode: Text.Wrap
               maximumLineCount: 2
               elide: Text.ElideRight
-              horizontalAlignment: Text.AlignLeft
+              horizontalAlignment: root.largeArtwork ? Text.AlignHCenter : Text.AlignLeft
               color: root.tokens.cyan
               font { family: root.tokens.font; pixelSize: 12 }
             }
@@ -405,7 +409,7 @@ Item {
               text: root.media.album
               textFormat: Text.PlainText
               elide: Text.ElideRight
-              horizontalAlignment: Text.AlignLeft
+              horizontalAlignment: root.largeArtwork ? Text.AlignHCenter : Text.AlignLeft
               color: root.tokens.muted
               font { family: root.tokens.font; pixelSize: 10 }
             }

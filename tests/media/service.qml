@@ -192,7 +192,16 @@ Scope {
           root.stage++;
         } else if (root.stage === 5) {
           const viewport = root.find(fitted, "mediaViewport");
-          root.check(viewport.contentHeight <= fitted.height, "wrapped metadata fits without scrolling");
+          // Long metadata may scroll in short panels instead of squeezing the artwork.
+          const footer = root.find(fitted, "mediaRepeatMode");
+          root.check(footer.mapToItem(viewport.contentItem, 0, footer.height).y <= viewport.contentHeight - fitted.inset + 1, "short panel reserves space below the footer");
+          const frame = root.find(fitted, "mediaArtworkFrame");
+          const center = frame.mapToItem(fitted, frame.width / 2, frame.height / 2);
+          root.check(Math.abs(center.x - fitted.width / 2) <= 1, "artwork stays centered in a 400px-high Music panel");
+          const selector = root.find(fitted, "mediaPlayerSelector");
+          root.check(frame.mapToItem(fitted, 0, 0).y - selector.mapToItem(fitted, 0, selector.height).y >= 20, "artwork clears the player selector");
+          const slider = root.find(fitted, "mediaSeek");
+          root.check(slider.mapToItem(fitted, 0, 0).y - frame.mapToItem(fitted, 0, frame.height).y >= 20, "artwork clears the timeline");
           console.log("MEDIA_PASS"); Qt.quit();
         }
       } catch (error) { console.log("MEDIA_FAIL", error); Qt.quit(); }

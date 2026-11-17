@@ -74,18 +74,23 @@ Item {
           onClicked: { bannerControl.forceActiveFocus(); root.pickerMode = "banner"; }
         }
       }
-      // A translucent cartouche follows the portrait's lower curve.
+      // Extend the ornament from behind the portrait across the banner.
       Rectangle {
         id: profileOrnament
+        objectName: "panelProfileOrnament"
         anchors.left: accountRow.left
         anchors.leftMargin: accountRow.height / 2
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 4
         anchors.right: parent.right
         anchors.rightMargin: 10
-        height: 32
+        height: 40
         radius: height / 2
-        color: Qt.alpha(root.tokens.background, 0.76)
+        gradient: Gradient {
+          orientation: Gradient.Horizontal
+          GradientStop { position: 0; color: Qt.alpha(root.tokens.background, 0.96) }
+          GradientStop { position: 1; color: Qt.alpha(root.tokens.background, 0.84) }
+        }
         border.color: Qt.alpha(root.tokens.cyan, 0.65)
         Rectangle {
           anchors.fill: parent
@@ -95,10 +100,10 @@ Item {
           border.color: Qt.alpha(root.tokens.cyan, 0.3)
         }
         Rectangle {
-          anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: 11 }
-          width: 5; height: 5
+          anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: 14 }
+          width: 6; height: 6
           rotation: 45
-          color: root.tokens.cyan
+          color: root.tokens.gold
         }
       }
       RowLayout {
@@ -153,7 +158,7 @@ Item {
           id: accountLabels
           Layout.preferredWidth: Math.min(accountName.implicitWidth + accountUsername.implicitWidth + spacing, Math.max(0, accountRow.width - 96 - 2 * accountRow.spacing - Layout.rightMargin))
           Layout.minimumWidth: 0
-          Layout.rightMargin: 26
+          Layout.rightMargin: 42
           // Follow the ornament along the portrait's lower curve.
           Layout.topMargin: 2 * (profileOrnament.y + profileOrnament.height / 2 - accountRow.y) - accountRow.height
           spacing: 10
