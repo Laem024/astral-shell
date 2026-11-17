@@ -15,7 +15,7 @@ Item {
     switch (kind) {
     case "astral": return "M12 2 L14.8 9.2 L22 12 L14.8 14.8 L12 22 L9.2 14.8 L2 12 L9.2 9.2 Z";
     case "wifi": return (level > 0.6 ? "M3 8.5 Q12 1.5 21 8.5 " : "") + (level > 0.25 ? "M6.5 12 Q12 7.5 17.5 12 " : "") + "M10 15.5 Q12 14 14 15.5 M12 19 H12.01";
-    case "ethernet": return "M7 3 H17 V11 H7 Z M10 6 V8 M14 6 V8 M12 11 V16 M4 20 V16 H20 V20 M12 16 V20";
+    case "ethernet": return "M4 4 H20 V17 H16 V21 H8 V17 H4 Z M8 8 V12 M12 8 V12 M16 8 V12";
     case "off": return "M12 3 V11 M6.3 5.8 A9 9 0 1 0 17.7 5.8";
     case "disconnected":
     case "unavailable": return "M9 8 L15 14 M15 8 L9 14 M5 3 H19 Q21 3 21 5 V17 Q21 19 19 19 H5 Q3 19 3 17 V5 Q3 3 5 3 Z M9 22 H15";
