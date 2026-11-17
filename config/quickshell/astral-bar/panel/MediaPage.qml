@@ -31,24 +31,28 @@ Item {
     property bool primary: false
     property bool active: false
     implicitWidth: primary ? 56 : 32
-    implicitHeight: primary ? 56 : 32
+    implicitHeight: primary ? 48 : 32
     padding: 0
     focusPolicy: Qt.StrongFocus
     Accessible.name: label
+    ToolTip.visible: hovered
+    ToolTip.delay: 600
+    ToolTip.text: label
     opacity: enabled ? 1 : 0.3
     background: Rectangle {
-      radius: width / 2
+      radius: control.primary ? 16 : width / 2
       color: control.primary ? root.tokens.cyan
-        : control.active || control.hovered ? Qt.alpha(root.tokens.cyan, 0.1) : "transparent"
+        : control.active || control.hovered ? Qt.alpha(root.tokens.cyan, 0.14) : "transparent"
       border.color: control.visualFocus ? root.tokens.gold : "transparent"
       border.width: control.visualFocus ? 2 : 0
       scale: control.down ? 0.94 : 1
       Behavior on scale { NumberAnimation { duration: root.tokens.hoverDuration } }
+      Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
     }
     Item {
       anchors.centerIn: parent
       width: 20; height: 20
-      readonly property color ink: control.primary ? root.tokens.background : control.active ? root.tokens.cyan : root.tokens.muted
+      readonly property color ink: control.primary ? root.tokens.background : control.active ? root.tokens.cyan : root.tokens.text
       Rectangle {
         visible: control.kind === "pause"
         x: 4; y: 3; width: 4; height: 14; radius: 1
@@ -134,7 +138,7 @@ Item {
   Rectangle {
     anchors.fill: parent
     radius: root.tokens.cardRadius
-    color: root.tokens.raised
+    color: root.tokens.background
     border.color: root.tokens.border
   }
   Components.RoundedClip {
@@ -156,100 +160,122 @@ Item {
         width: Math.max(0, root.width - root.inset * 2)
         height: Math.max(implicitHeight, scroll.height - root.inset * 2)
         spacing: root.height >= 460 ? 16 : root.largeArtwork ? 12 : 8
-        ComboBox {
-          id: selector
-          objectName: "mediaPlayerSelector"
+        RowLayout {
+          id: sourceRow
           Layout.fillWidth: true
-          implicitHeight: 36
-          leftPadding: 12; rightPadding: 34
-          Accessible.name: "Media player"
-          model: [{name: "Automatic", key: ""}].concat(root.media.playerOptions)
-          textRole: "name"
-          currentIndex: Math.max(0, model.findIndex(row => row.key === root.media.manualName))
-          onActivated: index => root.media.select(model[index].key)
-          background: Rectangle {
-            radius: root.tokens.rowRadius
-            color: selector.hovered || selector.popup.visible ? Qt.alpha(root.tokens.text, 0.08) : root.tokens.background
-            border.width: selector.visualFocus ? 2 : 1
-            border.color: selector.visualFocus ? root.tokens.cyan
-              : Qt.alpha(root.tokens.cyan, selector.popup.visible ? 0.4 : 0.2)
-          }
-          contentItem: RowLayout {
-            spacing: 12
-            Text {
-              text: "PLAYER"
-              color: root.tokens.muted
-              font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1 }
+          spacing: 12
+          ColumnLayout {
+            spacing: 4
+            RowLayout {
+              spacing: 5
+              Rectangle {
+                width: 5; height: 5; radius: 2.5
+                color: root.media.playing ? root.tokens.cyan : root.tokens.muted
+              }
+              Text {
+                text: root.media.playing ? "PLAYING" : root.player ? "PAUSED" : "MUSIC"
+                color: root.media.playing ? root.tokens.cyan : root.tokens.muted
+                font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1 }
+              }
             }
             Text {
-              Layout.fillWidth: true
-              text: root.media.automatic && root.player ? "Auto · " + root.media.application : selector.displayText
-              textFormat: Text.PlainText
-              color: root.tokens.cyan
-              horizontalAlignment: Text.AlignRight
-              verticalAlignment: Text.AlignVCenter
-              elide: Text.ElideRight
+              text: root.player ? "Now listening" : "Choose a player"
+              color: root.tokens.text
               font { family: root.tokens.font; pixelSize: 11; weight: Font.Medium }
             }
           }
-          indicator: Item {
-            x: selector.width - width - 12
-            y: (selector.height - height) / 2
-            width: 10; height: 10
-            rotation: selector.popup.visible ? 180 : 0
-            Rectangle { x: 1; y: 4; width: 6; height: 1.5; radius: 0.75; rotation: 45; color: root.tokens.cyan }
-            Rectangle { x: 5; y: 4; width: 6; height: 1.5; radius: 0.75; rotation: -45; color: root.tokens.cyan }
-          }
-          delegate: ItemDelegate {
-            id: playerOption
-            required property var modelData
-            required property int index
-            readonly property bool selected: modelData.key === root.media.manualName
-            width: selector.width - 12
-            height: 38
-            leftPadding: 10; rightPadding: 10
-            highlighted: selector.highlightedIndex === index
-            Accessible.name: modelData.name
+          Item { Layout.fillWidth: true; Layout.minimumWidth: 0 }
+          ComboBox {
+            id: selector
+            objectName: "mediaPlayerSelector"
+            Layout.preferredWidth: Math.max(80, composition.width * 0.56)
+            Layout.minimumWidth: 0
+            implicitHeight: 32
+            leftPadding: 10; rightPadding: 28
+            Accessible.name: "Media player"
+            model: [{name: "Automatic", key: ""}].concat(root.media.playerOptions)
+            textRole: "name"
+            currentIndex: Math.max(0, model.findIndex(row => row.key === root.media.manualName))
+            onActivated: index => root.media.select(model[index].key)
             background: Rectangle {
-              radius: 6
-              color: Qt.alpha(root.tokens.cyan, playerOption.highlighted ? 0.12 : playerOption.selected ? 0.065 : 0)
-              border.color: playerOption.visualFocus ? root.tokens.gold : "transparent"
+              radius: root.tokens.rowRadius
+              color: selector.hovered || selector.popup.visible ? Qt.alpha(root.tokens.text, 0.08) : root.tokens.raised
+              border.width: selector.visualFocus ? 2 : 1
+              border.color: selector.visualFocus ? root.tokens.cyan
+                : Qt.alpha(root.tokens.cyan, selector.popup.visible ? 0.4 : 0.2)
             }
             contentItem: RowLayout {
-              spacing: 10
+              spacing: 12
               Text {
                 Layout.fillWidth: true
-                text: playerOption.modelData.name
+                text: root.media.automatic && root.player ? root.media.application : selector.displayText
                 textFormat: Text.PlainText
+                color: root.tokens.cyan
+                horizontalAlignment: Text.AlignLeft
+                verticalAlignment: Text.AlignVCenter
                 elide: Text.ElideRight
-                color: playerOption.selected ? root.tokens.cyan : root.tokens.text
-                font { family: root.tokens.font; pixelSize: 11 }
-              }
-              Rectangle {
-                Layout.preferredWidth: 5; Layout.preferredHeight: 5
-                radius: 2.5
-                color: playerOption.selected ? root.tokens.cyan : "transparent"
+                font { family: root.tokens.font; pixelSize: 11; weight: Font.Medium }
               }
             }
-          }
-          popup: Popup {
-            y: selector.height + 6
-            width: selector.width
-            padding: 6
-            implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
-            background: Rectangle {
-              radius: 10
-              color: root.tokens.surface
-              border.color: Qt.alpha(root.tokens.cyan, 0.2)
+            indicator: Item {
+              x: selector.width - width - 12
+              y: (selector.height - height) / 2
+              width: 10; height: 10
+              rotation: selector.popup.visible ? 180 : 0
+              Rectangle { x: 1; y: 4; width: 6; height: 1.5; radius: 0.75; rotation: 45; color: root.tokens.cyan }
+              Rectangle { x: 5; y: 4; width: 6; height: 1.5; radius: 0.75; rotation: -45; color: root.tokens.cyan }
             }
-            contentItem: ListView {
-              implicitHeight: Math.min(contentHeight, 210)
-              model: selector.popup.visible ? selector.delegateModel : null
-              currentIndex: selector.highlightedIndex
-              clip: true
-              spacing: 3
-              boundsBehavior: Flickable.StopAtBounds
-              ScrollBar.vertical: ScrollBar {}
+            delegate: ItemDelegate {
+              id: playerOption
+              required property var modelData
+              required property int index
+              readonly property bool selected: modelData.key === root.media.manualName
+              width: selector.width - 12
+              height: 38
+              leftPadding: 10; rightPadding: 10
+              highlighted: selector.highlightedIndex === index
+              Accessible.name: modelData.name
+              background: Rectangle {
+                radius: 6
+                color: Qt.alpha(root.tokens.cyan, playerOption.highlighted ? 0.12 : playerOption.selected ? 0.065 : 0)
+                border.color: playerOption.visualFocus ? root.tokens.gold : "transparent"
+              }
+              contentItem: RowLayout {
+                spacing: 10
+                Text {
+                  Layout.fillWidth: true
+                  text: playerOption.modelData.name
+                  textFormat: Text.PlainText
+                  elide: Text.ElideRight
+                  color: playerOption.selected ? root.tokens.cyan : root.tokens.text
+                  font { family: root.tokens.font; pixelSize: 11 }
+                }
+                Rectangle {
+                  Layout.preferredWidth: 5; Layout.preferredHeight: 5
+                  radius: 2.5
+                  color: playerOption.selected ? root.tokens.cyan : "transparent"
+                }
+              }
+            }
+            popup: Popup {
+              y: selector.height + 6
+              width: selector.width
+              padding: 6
+              implicitHeight: contentItem.implicitHeight + topPadding + bottomPadding
+              background: Rectangle {
+                radius: 10
+                color: root.tokens.surface
+                border.color: Qt.alpha(root.tokens.cyan, 0.2)
+              }
+              contentItem: ListView {
+                implicitHeight: Math.min(contentHeight, 210)
+                model: selector.popup.visible ? selector.delegateModel : null
+                currentIndex: selector.highlightedIndex
+                clip: true
+                spacing: 3
+                boundsBehavior: Flickable.StopAtBounds
+                ScrollBar.vertical: ScrollBar {}
+              }
             }
           }
         }
@@ -270,9 +296,9 @@ Item {
             // Reserve room for metadata and transport before sizing the sleeve.
             readonly property real size: root.largeArtwork
               ? Math.max(96, Math.min(260, composition.width * 0.82 / aspect,
-                  scroll.height - root.inset * 2 - selector.implicitHeight
+                  scroll.height - root.inset * 2 - sourceRow.implicitHeight
                   - trackInfo.implicitHeight - timeline.implicitHeight
-                  - transportRow.implicitHeight - repeatMode.implicitHeight
+                  - transportDeck.implicitHeight - repeatMode.implicitHeight
                   - composition.spacing * 4 - hero.rowSpacing))
               : Math.max(48, Math.min(104, composition.width * 0.32))
             Layout.preferredHeight: size
@@ -283,15 +309,20 @@ Item {
             Layout.maximumWidth: size * aspect
             Accessible.role: Accessible.Graphic
             Accessible.name: root.player ? "Artwork for " + root.media.title : "No track artwork"
+            Rectangle {
+              anchors.fill: parent
+              anchors.margins: -3
+              rotation: 3
+              radius: 14
+              color: Qt.tint(root.tokens.surface, Qt.alpha(root.tokens.cyan, 0.12))
+              border.color: Qt.alpha(root.tokens.cyan, 0.16)
+            }
             Components.RoundedClip {
               anchors.fill: parent
-              radius: 16
+              radius: 10
               Rectangle {
                 anchors.fill: parent
-                gradient: Gradient {
-                  GradientStop { position: 0; color: Qt.tint(root.tokens.surface, Qt.alpha(root.tokens.cyan, 0.09)) }
-                  GradientStop { position: 1; color: root.tokens.background }
-                }
+                color: root.tokens.surface
               }
               Item {
                 id: fallback
@@ -336,7 +367,7 @@ Item {
             }
             Rectangle {
               anchors.fill: parent
-              radius: 16
+              radius: 10
               color: "transparent"
               border.color: Qt.alpha(root.tokens.cyan, 0.18)
             }
@@ -353,9 +384,9 @@ Item {
               wrapMode: Text.Wrap
               maximumLineCount: 2
               elide: Text.ElideRight
-              horizontalAlignment: root.largeArtwork ? Text.AlignHCenter : Text.AlignLeft
+              horizontalAlignment: Text.AlignLeft
               color: root.tokens.text
-              font { family: root.tokens.font; pixelSize: root.largeArtwork ? 24 : 20; weight: Font.DemiBold }
+              font { family: root.tokens.font; pixelSize: root.largeArtwork ? 25 : 18; weight: Font.DemiBold }
             }
             Text {
               Layout.fillWidth: true
@@ -364,7 +395,7 @@ Item {
               wrapMode: Text.Wrap
               maximumLineCount: 2
               elide: Text.ElideRight
-              horizontalAlignment: root.largeArtwork ? Text.AlignHCenter : Text.AlignLeft
+              horizontalAlignment: Text.AlignLeft
               color: root.tokens.cyan
               font { family: root.tokens.font; pixelSize: 12 }
             }
@@ -374,7 +405,7 @@ Item {
               text: root.media.album
               textFormat: Text.PlainText
               elide: Text.ElideRight
-              horizontalAlignment: root.largeArtwork ? Text.AlignHCenter : Text.AlignLeft
+              horizontalAlignment: Text.AlignLeft
               color: root.tokens.muted
               font { family: root.tokens.font; pixelSize: 10 }
             }
@@ -397,7 +428,7 @@ Item {
             onMoved: root.media.seek(value)
             background: Rectangle {
               x: seek.leftPadding; y: (seek.height - height) / 2
-              width: seek.availableWidth; height: seek.hovered || seek.pressed ? 5 : 3; radius: height / 2
+              width: seek.availableWidth; height: seek.hovered || seek.pressed ? 6 : 4; radius: height / 2
               color: Qt.alpha(root.tokens.muted, 0.13)
               Rectangle { width: parent.width * root.progress; height: parent.height; radius: height / 2; color: root.tokens.cyan }
             }
@@ -416,19 +447,31 @@ Item {
             Text { text: root.media.length > 0 ? root.duration(root.media.length) : "—"; color: root.tokens.muted; font { family: root.tokens.mono; pixelSize: 9 } }
           }
         }
-        RowLayout {
-          id: transportRow
+        Item {
+          id: transportDeck
           Layout.fillWidth: true
-          spacing: 0
-          Transport { kind: "shuffle"; label: "Shuffle"; active: root.media.shuffle; enabled: root.media.canShuffle; onClicked: root.media.toggleShuffle() }
-          Item { Layout.fillWidth: true }
-          Transport { kind: "previous"; label: "Previous track"; enabled: root.media.canPrevious; onClicked: root.media.previous() }
-          Item { implicitWidth: 8 }
-          Transport { kind: root.media.playing ? "pause" : "play"; label: root.media.playing ? "Pause" : "Play"; primary: true; enabled: root.media.canToggle; onClicked: root.media.toggle() }
-          Item { implicitWidth: 8 }
-          Transport { kind: "next"; label: "Next track"; enabled: root.media.canNext; onClicked: root.media.next() }
-          Item { Layout.fillWidth: true }
-          Transport { kind: "repeat"; label: "Repeat: " + root.media.repeatMode; active: root.media.repeatMode !== "Off"; enabled: root.media.canRepeat; onClicked: root.media.cycleRepeat() }
+          implicitHeight: 64
+          Rectangle {
+            anchors.fill: parent
+            radius: 22
+            color: root.tokens.raised
+            border.color: root.tokens.border
+          }
+          RowLayout {
+            id: transportRow
+            anchors.fill: parent
+            anchors.margins: 8
+            spacing: 0
+            Transport { kind: "shuffle"; label: "Shuffle"; active: root.media.shuffle; enabled: root.media.canShuffle; onClicked: root.media.toggleShuffle() }
+            Item { Layout.fillWidth: true }
+            Transport { kind: "previous"; label: "Previous track"; enabled: root.media.canPrevious; onClicked: root.media.previous() }
+            Item { implicitWidth: 8 }
+            Transport { kind: root.media.playing ? "pause" : "play"; label: root.media.playing ? "Pause" : "Play"; primary: true; enabled: root.media.canToggle; onClicked: root.media.toggle() }
+            Item { implicitWidth: 8 }
+            Transport { kind: "next"; label: "Next track"; enabled: root.media.canNext; onClicked: root.media.next() }
+            Item { Layout.fillWidth: true }
+            Transport { kind: "repeat"; label: "Repeat: " + root.media.repeatMode; active: root.media.repeatMode !== "Off"; enabled: root.media.canRepeat; onClicked: root.media.cycleRepeat() }
+          }
         }
         Text {
           id: repeatMode

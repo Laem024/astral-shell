@@ -74,25 +74,29 @@ Item {
           onClicked: { bannerControl.forceActiveFocus(); root.pickerMode = "banner"; }
         }
       }
-      // A solid ornamental cartouche joins the portrait to both account labels.
+      // A translucent cartouche follows the portrait's lower curve.
       Rectangle {
-        x: accountRow.x + accountRow.height / 2
-        y: accountRow.y + (accountRow.height - height) / 2
-        width: accountRow.width - accountRow.height / 2 - 36 - accountRow.spacing
-        height: 72
+        id: profileOrnament
+        anchors.left: accountRow.left
+        anchors.leftMargin: accountRow.height / 2
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 4
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        height: 32
         radius: height / 2
-        color: root.tokens.background
-        border.color: root.tokens.cyan
+        color: Qt.alpha(root.tokens.background, 0.76)
+        border.color: Qt.alpha(root.tokens.cyan, 0.65)
         Rectangle {
           anchors.fill: parent
-          anchors.margins: 5
+          anchors.margins: 4
           radius: height / 2
           color: "transparent"
           border.color: Qt.alpha(root.tokens.cyan, 0.3)
         }
         Rectangle {
-          anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: 13 }
-          width: 7; height: 7
+          anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: 11 }
+          width: 5; height: 5
           rotation: 45
           color: root.tokens.cyan
         }
@@ -102,19 +106,25 @@ Item {
         objectName: "panelAccount"
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
         anchors.margins: root.tokens.inset
-        height: 88
-        spacing: root.compact ? 12 : 16
+        anchors.bottomMargin: -12
+        height: 96
+        spacing: root.compact ? 8 : 12
         PanelButton {
           tokens: root.tokens
-          Layout.preferredWidth: 88; Layout.preferredHeight: 88
+          Layout.preferredWidth: 96; Layout.preferredHeight: 96
           leftPadding: 0; rightPadding: 0; topPadding: 0; bottomPadding: 0
           text: "Change account photo"
           onClicked: root.pickerMode = "avatar"
-          background: Rectangle { radius: 44; color: root.tokens.background }
+          background: Rectangle {
+            anchors.fill: parent
+            anchors.margins: -4
+            radius: 52
+            color: root.tokens.background
+          }
           contentItem: Item {
             Components.RoundedClip {
               anchors.fill: parent
-              radius: 44
+              radius: 48
               Image {
                 id: avatar
                 anchors.fill: parent
@@ -126,7 +136,7 @@ Item {
             }
             Rectangle {
               anchors.fill: parent
-              radius: 44; color: "transparent"
+              radius: 48; color: "transparent"
               border.width: parent.parent.activeFocus ? 3 : 2
               border.color: root.tokens.cyan
             }
@@ -139,60 +149,68 @@ Item {
             }
           }
         }
-        ColumnLayout {
-          Layout.fillWidth: true
+        RowLayout {
+          id: accountLabels
+          Layout.preferredWidth: Math.min(accountName.implicitWidth + accountUsername.implicitWidth + spacing, Math.max(0, accountRow.width - 96 - 2 * accountRow.spacing - Layout.rightMargin))
           Layout.minimumWidth: 0
           Layout.rightMargin: 26
-          spacing: 4
+          // Follow the ornament along the portrait's lower curve.
+          Layout.topMargin: 2 * (profileOrnament.y + profileOrnament.height / 2 - accountRow.y) - accountRow.height
+          spacing: 10
           Text {
+            id: accountName
             Layout.fillWidth: true
             text: root.profileName
             textFormat: Text.PlainText
             color: root.tokens.text
             elide: Text.ElideRight
             Accessible.name: root.profileName
-            font { family: root.tokens.font; pixelSize: 18; weight: Font.Medium }
+            font { family: root.tokens.font; pixelSize: 16; weight: Font.Medium }
           }
           Text {
-            Layout.fillWidth: true
+            id: accountUsername
+            Layout.preferredWidth: Math.min(implicitWidth, accountLabels.Layout.preferredWidth * 0.45)
+            Layout.minimumWidth: 0
             text: "@" + Data.UserData.username
             textFormat: Text.PlainText
-            color: root.tokens.muted
+            color: root.tokens.cyan
             elide: Text.ElideRight
-            font { family: root.tokens.font; pixelSize: 11 }
+            font { family: root.tokens.font; pixelSize: 12 }
           }
         }
-        Item {
-          Layout.preferredWidth: 36
-          Layout.preferredHeight: 36
-          // Keep the inactive settings control from opening the banner beneath it.
-          MouseArea { anchors.fill: parent }
-          PanelButton {
-            anchors.fill: parent
-            tokens: root.tokens
-            text: "Settings"
-            Accessible.name: "Settings (coming soon)"
-            preview: true
-            leftPadding: 0; rightPadding: 0
-            contentItem: Item {
-              Item {
+        Item { Layout.fillWidth: true; Layout.minimumWidth: 0 }
+      }
+      Item {
+        anchors { top: parent.top; right: parent.right; margins: 10 }
+        width: 36
+        height: 36
+        // Keep the inactive settings control from opening the banner beneath it.
+        MouseArea { anchors.fill: parent }
+        PanelButton {
+          anchors.fill: parent
+          tokens: root.tokens
+          text: "Settings"
+          Accessible.name: "Settings (coming soon)"
+          preview: true
+          leftPadding: 0; rightPadding: 0
+          contentItem: Item {
+            Item {
+              anchors.centerIn: parent
+              width: 20; height: 20
+              Repeater {
+                model: 8
+                Item {
+                  required property int index
+                  anchors.fill: parent
+                  rotation: index * 45
+                  Rectangle { x: 8; y: 0; width: 4; height: 5; radius: 1; color: root.tokens.muted }
+                }
+              }
+              Rectangle {
                 anchors.centerIn: parent
-                width: 20; height: 20
-                Repeater {
-                  model: 8
-                  Item {
-                    required property int index
-                    anchors.fill: parent
-                    rotation: index * 45
-                    Rectangle { x: 8; y: 0; width: 4; height: 5; radius: 1; color: root.tokens.muted }
-                  }
-                }
-                Rectangle {
-                  anchors.centerIn: parent
-                  width: 14; height: 14; radius: 7
-                  color: root.tokens.muted
-                  Rectangle { anchors.centerIn: parent; width: 6; height: 6; radius: 3; color: root.tokens.background }
-                }
+                width: 14; height: 14; radius: 7
+                color: root.tokens.muted
+                Rectangle { anchors.centerIn: parent; width: 6; height: 6; radius: 3; color: root.tokens.background }
               }
             }
           }
