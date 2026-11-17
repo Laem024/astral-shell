@@ -4,6 +4,7 @@ import Quickshell
 import "astral-bar/panel" as Panel
 import "astral-bar/settings" as Settings
 import "common" as Design
+import "astral-bar/data" as Data
 
 Scope {
   id: root
@@ -30,6 +31,7 @@ Scope {
         anchors.margins: 16
         tokens: theme
         settings: settings
+        monitorName: "DP-2"
         tab: categories[root.stage % 7].key
         onTabSelected: name => tab = name
       }
@@ -69,6 +71,22 @@ Scope {
       const loader = root.find(panel, "centralPageLoader");
       root.check(!!loader.item, "category loads");
       root.check(loader.width > 200 && loader.height > 150, "usable content area");
+      if (panel.tab === "Display") {
+        Data.BrightnessData.outputNames = ["DP-1", "DP-2"];
+        Data.CapturePreferences.selectMonitor("DP-1");
+        const selector = root.find(loader.item, "captureMonitorSelector");
+        root.check(selector.currentText === "DP-2", "capture defaults to the panel monitor over saved preferences");
+        selector.activated(0);
+        root.check(selector.currentText === "DP-1", "capture allows a different monitor");
+        Data.CapturePreferences.selectTask("record");
+        root.check(selector.currentText === "DP-1", "video retains the explicit monitor choice");
+        loader.item.selectedMonitor = "";
+        root.check(selector.currentText === "DP-2", "video defaults to the panel monitor");
+        Data.CapturePreferences.selectTask("shot");
+        root.check(selector.currentText === "DP-2", "screenshot defaults to the panel monitor");
+        Data.BrightnessData.outputNames = ["DP-1"];
+        root.check(selector.currentText === "DP-1", "disconnected panel monitor falls back to a connected display");
+      }
       const account = root.find(panel, "panelAccount");
       root.check(account.height > 0, "profile is visible");
       const output = Quickshell.env("ASTRAL_PANEL_SNAPSHOTS");

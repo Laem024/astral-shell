@@ -11,6 +11,7 @@ Item {
   required property Design.Theme tokens
   required property var settings
   property string tab: "Control Center"
+  property string monitorName: ""
   signal tabSelected(string name)
   signal captureRequested()
   readonly property bool compact: width < 620
@@ -173,7 +174,7 @@ Item {
   Component { id: weatherPage; WeatherPage { tokens: root.tokens; settings: root.settings } }
   Component { id: mediaPage; MediaPage { tokens: root.tokens } }
   Component { id: noticesPage; NotificationsPage { tokens: root.tokens } }
-  Component { id: displayPage; DisplayPage { tokens: root.tokens; onCaptureRequested: root.captureRequested() } }
+  Component { id: displayPage; DisplayPage { tokens: root.tokens; monitorName: root.monitorName; onCaptureRequested: root.captureRequested() } }
   Component { id: soundPage; SoundPage { tokens: root.tokens } }
   Component { id: controlPage; ControlPage { tokens: root.tokens } }
   Component { id: powerPage; PowerPage { tokens: root.tokens } }

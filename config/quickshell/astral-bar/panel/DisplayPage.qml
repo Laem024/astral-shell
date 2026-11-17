@@ -9,6 +9,8 @@ import "../components" as Components
 ScrollView {
   id: root
   required property Design.Theme tokens
+  property string monitorName: ""
+  property string selectedMonitor: ""
   signal captureRequested()
   readonly property string task: Data.CapturePreferences.task
   readonly property string mode: Data.CapturePreferences.source
@@ -116,8 +118,17 @@ ScrollView {
         visible: root.mode === "monitor"
         enabled: !root.busy && count > 0
         model: Data.BrightnessData.outputNames
-        currentIndex: Math.max(0, model.indexOf(Data.CapturePreferences.monitor))
-        onActivated: index => Data.CapturePreferences.selectMonitor(model[index])
+        currentIndex: {
+          for (const name of [root.selectedMonitor, root.monitorName, Data.CapturePreferences.monitor]) {
+            const index = model.indexOf(name);
+            if (index >= 0) return index;
+          }
+          return count > 0 ? 0 : -1;
+        }
+        onActivated: index => {
+          root.selectedMonitor = model[index];
+          Data.CapturePreferences.selectMonitor(model[index]);
+        }
         displayText: count > 0 ? currentText : "No displays connected"
         Accessible.name: "Capture display"
         leftPadding: 12; rightPadding: 30

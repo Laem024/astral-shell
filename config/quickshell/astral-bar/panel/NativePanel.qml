@@ -102,6 +102,7 @@ PanelWindow {
     id: panelContent
     PanelContent {
       tokens: root.tokens; settings: root.settings
+      monitorName: root.screen ? root.screen.name : ""
       tab: root.navigation ? root.navigation.destination : "Control Center"
       onTabSelected: name => root.navigation.destination = name
       onCaptureRequested: root.navigation.close()
