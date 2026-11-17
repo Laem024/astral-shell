@@ -4,7 +4,7 @@ A personal CachyOS environment built around Hyprland and Quickshell, with config
 
 ## Current migration stage
 
-`config/quickshell/` contains the new orchestrator, `astral-bar`, `astral-launcher`, `astral-wallpaper`, `astral-polkit`, `astral-lock`, `astral-session`, `astral-clipboard`, `astral-overview`, and `astral-shortcuts`. The bar preserves its four positions, multiple monitors, panels, tray, notifications, weather, network, Bluetooth, VPN, media, audio, brightness, and capture controls. The redesigned control center has seven English categories, an editable panoramic banner, and a framed account portrait. `astral-bar/panel/ProfileHeader.qml`, `CategoryGlyph.qml`, and `PageIntro.qml` provide its shared presentation. Its backend uses QML, Quickshell APIs, and JavaScript executed by Qt. Existing command-line tools receive separate arguments; no new package or language is required.
+`config/quickshell/` contains the new orchestrator, `astral-bar`, `astral-launcher`, `astral-wallpaper`, `astral-polkit`, `astral-lock`, `astral-session`, `astral-clipboard`, `astral-overview`, `astral-shortcuts`, and `astral-settings`. The bar preserves its four positions, multiple monitors, panels, tray, notifications, weather, network, Bluetooth, VPN, media, audio, brightness, and capture controls. The redesigned control center has seven English categories, an editable panoramic banner, and a framed account portrait. `astral-bar/panel/ProfileHeader.qml`, `CategoryGlyph.qml`, and `PageIntro.qml` provide its shared presentation. Its backend uses QML, Quickshell APIs, and JavaScript executed by Qt. Existing command-line tools receive separate arguments; no new package or language is required.
 
 The bar's SVG launcher star lives in `config/quickshell/astral-bar/components/Emblem.qml`; media icons live in `components/BarGlyph.qml`. Its right-hand system dock uses solid symbols from `StatusGlyph.qml`, single-line volume and battery values, and notification badges. `StatusNode.qml` provides the shared interaction and accessible descriptions. The clock, window, media and system controls share rounded group surfaces and cyan hover feedback through `components/BarTile.qml`, with gold keyboard focus and alert-colored recording states in every orientation. The bar player in `astral-bar/modules/DefaultMusicModule.qml` keeps artwork and elided track details inside the information button, with transport controls aligned beside it or below it in vertical layouts. Workspace and special workspace icons retain their original design. Custom logo images/glyphs, numeric workspace display and module replacements remain configurable in `astral-bar/settings.json`.
 
@@ -60,7 +60,7 @@ An external source can be a directory with `shell.qml`, or a QML file. It does n
 
 The installer backs up the existing destination in `.backups/` before changes. It preserves preferences and separates old common preferences from bar preferences. `--no-backup` explicitly skips backups. Review the dry run first. To roll back, stop the new instances, restore the selected backup, and restore command backups in `~/.local/bin/` when applicable.
 
-The ten public commands are `astral-shell`, `astral-bar`, `astral-launcher`, `astral-wallpaper`, `astral-polkit`, `astral-lock`, `astral-session`, `astral-clipboard`, `astral-overview`, and `astral-shortcuts`. The bar supports `start`, `daemon`, and `close-panels`. `astral-shell workspace-count` reads the installed root settings without starting Quickshell; `astral-bar workspace-count` aliases that query. Commands remember the chosen destination.
+The eleven public commands are `astral-shell`, `astral-bar`, `astral-launcher`, `astral-wallpaper`, `astral-polkit`, `astral-lock`, `astral-session`, `astral-clipboard`, `astral-overview`, `astral-shortcuts`, and `astral-settings`. The bar supports `start`, `daemon`, and `close-panels`. `astral-shell workspace-count` reads the installed root settings without starting Quickshell; `astral-bar workspace-count` aliases that query. Commands remember the chosen destination.
 
 For the complete machine setup, `./install.sh` and `./install.sh update` run the existing package, configuration, SDDM, and power installers. They request system privileges where required. This migration does not automatically install dependencies during validation or preview. See [installation](docs/instalacion.md).
 
@@ -75,6 +75,7 @@ Clipboard preferences (`historySize`, `maxImageBytes`, `enterAction`, and `paste
 | `config/quickshell/shell.qml` | Registry-driven module orchestration |
 | `config/quickshell/bar.qml`, `recorder.qml`, `wallpaper.qml` | Root entries that keep module/worker shared imports inside Quickshell’s configuration boundary |
 | `config/quickshell/astral-lock/` | PAM lock, native idle notifications, logind sleep guard and safe preview |
+| `config/quickshell/astral-settings/` | Desktop settings, display confirmation worker and simulated preview |
 | `config/quickshell/astral-session/` | Session menu and action confirmation |
 | `config/quickshell/lock.qml`, `idle.qml`, `session.qml` | Root entries for lock, idle and session modules |
 | `config/quickshell/settings.json` | Shared workspace count, idle, colors, mode, scale, animation, clock, apps, providers, registry |
@@ -147,3 +148,52 @@ Hyprland shortcut registration checks live in `tests/keybindings.lua`; see [Hypr
 Astral Polkit starts automatically with the shell. Use `astral-polkit [daemon|status|cancel|restart]` to manage it, and `bash scripts/test-quickshell.sh polkit` for a demonstration that registers no agent. See [Polkit behavior and validation](docs/polkit.md).
 
 Astral Idle owns automatic locking, display power and suspend; preferences live in `config/quickshell/settings.json`. Hypridle is no longer a project dependency. Applying Hyprland removes only exact copies of the retired project helper/config after the usual backup; customized copies require manual review. Dry runs and `--no-backup` are respected. External idle processes and installed packages are left to the user.
+
+## Astral Settings
+
+Open the resizable English settings window with **Super+Z**, the permanent
+**Settings** button in the control center, or `astral-settings [open|toggle|close|daemon]`
+(default: `open`). Repeated opens focus the existing window. The registry starts
+its daemon with the window hidden; commands also start it on demand. Settings
+hides when logind reports a locked or unknown session. Opening it dismisses peer
+panels without cancelling Polkit authentication.
+
+The sidebar covers Displays, Bar, Appearance, Colors, Keyboard, Mouse & Touchpad,
+Power & Lock, General, and About. Search finds individual options across pages.
+Use **Apply** or **Reset changes**; navigation and closing prompt for unsaved edits.
+Edits merge against freshly read files. A conflicting external edit requires
+resetting/reloading; unrelated keys are preserved. Application providers accept
+JSON argument arrays, such as `["kitty", "--single-instance"]`; MIME associations
+are unchanged. Input preferences apply globally.
+
+Shared and bar preferences remain in their existing `settings.json` files.
+Desktop preferences and the display recovery journal live under
+`$XDG_STATE_HOME/astral-shell/astral-settings/` (version 1 JSON). Confirmed overrides
+are serialized to `$XDG_CONFIG_HOME/astral-shell/astral-settings/overrides.lua`.
+`config/hyprland/modules/astral-settings.lua`, loaded last by `hyprland.lua`, validates
+these overrides before applying them over the base modules. Missing or malformed
+overrides leave base settings in effect. Install/reload the updated Hyprland
+configuration to enable persistence across compositor reloads.
+
+Display edits run as a **20-second test**. Keep them explicitly or the independent
+worker restores the previous layout. Closing, locking, command failure and
+restarting with a pending journal also trigger recovery. Disconnected outputs are
+excluded during recovery and an available output is enabled if necessary. Unknown
+HDR, VRR and 10-bit capabilities show **Unavailable**; Astral never forces HDR
+support. Monitor fields follow the [Hyprland 0.57 monitor API](https://wiki.hypr.land/0.57.0/configuring/core/monitors/).
+
+GTK 3/4 and Qt 5/6 theme settings preserve unrelated INI keys and receive
+`.astral-backup` copies before modification. Themes, icons and cursors must already
+be installed, with separate light/dark selections. Qt style choices depend on
+installed style plugins and Qt platform-theme integration (qt5ct/qt6ct); no package
+is installed automatically. Applications may need restarting or may use their own
+themes. Kitty receives matching background, foreground, selection and cursor
+colors while retaining ANSI colors. Hyprland borders and shadows use the selected
+Astral palette. Existing Kitty windows may require reloading their configuration.
+
+Preview with `bash scripts/test-quickshell.sh settings`. It uses sample monitors
+and a private Astral XDG tree, with simulated desktop application. Run
+`bash tests/astral-settings/run.sh` or the full `bash tests/quickshell/run.sh`.
+Manual CachyOS acceptance still covers Super+Z/focus, real multi-monitor layouts,
+advertised HDR/VRR, GTK/Qt/Kitty rendering, and persistence after Hyprland reload
+and a new session. No active dotfiles are changed by these checks.

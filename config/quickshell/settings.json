@@ -135,6 +135,12 @@
       "path": "shortcuts.qml",
       "enabled": true,
       "autostart": true
+    },
+    {
+      "id": "astral-settings",
+      "path": "settings.qml",
+      "enabled": true,
+      "autostart": true
     }
   ],
   "workspaceCount": 10,

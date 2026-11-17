@@ -6,6 +6,7 @@ if rg -n '"(sh|bash)"|session\.sh' config/quickshell -g '*.qml' -g '*.js'; then
   printf 'Unexpected legacy runtime dependency.\n' >&2; exit 1
 fi
 bash tests/quickshell/install.sh
+bash tests/astral-settings/run.sh
 runner=/usr/lib/qt6/bin/qmltestrunner
 if [[ -x $runner ]]; then
   QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software "$runner" -input tests/quickshell

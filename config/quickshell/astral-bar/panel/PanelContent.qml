@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
+import Quickshell.Io
 import QtQuick.Layouts
 import "../../common" as Design
 import "../data" as Data
@@ -29,6 +30,13 @@ Item {
     anchors.fill: parent
     visible: root.pickerMode === ""
     spacing: 16
+    PanelButton {
+      objectName: "astralSettingsButton"
+      Layout.fillWidth: true
+      tokens: root.tokens
+      text: "Settings"
+      onClicked: settingsCommand.run(["astral-settings", "open"], () => {})
+    }
     ProfileHeader {
       Layout.fillWidth: true
       Layout.preferredHeight: implicitHeight
@@ -139,6 +147,7 @@ Item {
       }
     }
   }
+  Design.Command { id: settingsCommand }
   NumberAnimation { id: pageEntrance; target: pageLoader; property: "opacity"; from: 0; to: 1; duration: root.tokens.entryDuration; easing.type: Easing.OutCubic }
   Loader {
     anchors.fill: parent

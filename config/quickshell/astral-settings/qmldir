@@ -1,0 +1,5 @@
+SettingsRoot 1.0 SettingsRoot.qml
+SettingsPreview 1.0 SettingsPreview.qml
+SettingsWindow 1.0 SettingsWindow.qml
+DesktopService 1.0 DesktopService.qml
+DisplaysEditor 1.0 DisplaysEditor.qml

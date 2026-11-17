@@ -5,11 +5,11 @@ module_candidate() {
   local path=$1 name=${1##*/}
   [[ -d $path && $name == quickshell ]] || [[ -f $path && $name == shell.qml ]]
 }
-module_names=(astral-bar astral-wallpaper astral-launcher astral-polkit astral-lock astral-session astral-clipboard astral-overview astral-shortcuts)
+module_names=(astral-bar astral-wallpaper astral-launcher astral-polkit astral-lock astral-session astral-clipboard astral-overview astral-shortcuts astral-settings)
 module_commands_by_module() {
   local name
   printf '%s\n' astral-shell
-  for name in astral-lock astral-session astral-clipboard astral-overview astral-shortcuts; do
+  for name in astral-lock astral-session astral-clipboard astral-overview astral-shortcuts astral-settings; do
     if [[ -f $source_path/$name/shell.qml || -f $quickshell_destination/$name/shell.qml ]]; then printf '%s\n' "$name"; fi
   done
   if [[ -f $source_path/astral-launcher/shell.qml || -f $quickshell_destination/astral-launcher/shell.qml ]]; then printf '%s\n' astral-launcher; fi
@@ -19,7 +19,7 @@ module_commands_by_module() {
 }
 module_command_body() {
   case $1 in
-    astral-clipboard|astral-overview|astral-shortcuts)
+    astral-clipboard|astral-overview|astral-shortcuts|astral-settings)
       local short=${1#astral-}
       printf 'export ASTRAL_%s_CONTROLLER=%q\nexec bash %q %q %q "$@"\n' "${short^^}" "$module_root/$short-control.qml" "$module_root/dispatch.sh" "$module_root/$short.qml" "$short"
       ;;
@@ -79,7 +79,7 @@ module_settings_missing() {
   [[ ! -f $quickshell_destination/settings.json ]] && return 0
   jq -e 'has("workspaceCount") and has("clipboard") and has("overview")' "$quickshell_destination/settings.json" >/dev/null || return 0
   local module
-  for module in astral-lock astral-session astral-clipboard astral-overview astral-shortcuts; do
+  for module in astral-lock astral-session astral-clipboard astral-overview astral-shortcuts astral-settings; do
     if [[ -f $source_path/$module/shell.qml ]] && ! jq -e --arg id "$module" '.modules | any(.id == $id)' "$quickshell_destination/settings.json" >/dev/null; then return 0; fi
   done
   if [[ -f $source_path/astral-lock/IdleService.qml ]] && ! jq -e '.modules | any(.id == "astral-idle")' "$quickshell_destination/settings.json" >/dev/null; then return 0; fi
@@ -146,7 +146,7 @@ module_prepare_settings() {
       available=$(jq --arg id "$candidate" '. + [$id]' <<< "$available")
     fi
   done
-  jq --argjson available "$available" '.modules |= map(select(.id as $id | (["astral-clipboard","astral-overview","astral-shortcuts"] | index($id) | not) or ($available | index($id))))' "$temporary" > "$existing"
+  jq --argjson available "$available" '.modules |= map(select(.id as $id | (["astral-clipboard","astral-overview","astral-shortcuts","astral-settings"] | index($id) | not) or ($available | index($id))))' "$temporary" > "$existing"
   cp -- "$existing" "$temporary"
   # Fresh partial installations register only modules whose entries are present.
   if [[ ! -f $common ]]; then
@@ -177,7 +177,7 @@ module_prepare_settings() {
     cp -- "$existing" "$temporary"
   fi
   local module entry autostart
-  for module in astral-lock astral-session astral-clipboard astral-overview astral-shortcuts; do
+  for module in astral-lock astral-session astral-clipboard astral-overview astral-shortcuts astral-settings; do
     [[ -f $source_path/$module/shell.qml ]] || continue
     entry=${module#astral-}.qml
     autostart=true

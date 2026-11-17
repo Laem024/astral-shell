@@ -9,3 +9,5 @@ require("modules.keybindings")
 require("modules.special-workspaces")
 require("modules.rules")
 require("modules.autostart")
+
+require("modules.astral-settings")

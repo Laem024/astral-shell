@@ -8,6 +8,14 @@ if [[ ${1:-} == shell ]]; then
   shift
   if [[ ${1:-} != workspace-count ]]; then exec qs -p "$entry" --no-duplicate "$@"; fi
 fi
+if [[ ${1:-} == settings ]]; then
+  shift
+  (( $# <= 1 )) || exit 2
+  action=${1:-open}
+  case $action in open|toggle|close|daemon) ;; *) printf 'Usage: astral-settings [open|toggle|close|daemon]\n' >&2; exit 2 ;; esac
+  export ASTRAL_SETTINGS_ENTRY=$entry ASTRAL_SETTINGS_ACTION=$action
+  exec qs -p "${ASTRAL_SETTINGS_CONTROLLER:-${entry%/*}/settings-control.qml}"
+fi
 if [[ ${1:-} == clipboard || ${1:-} == overview || ${1:-} == shortcuts ]]; then
   module=$1
   shift

@@ -23,7 +23,7 @@ The monitor application installs config/monitor/ and the astral-monitor command.
 --source replaces that module with a directory containing shell.qml or a QML
 file. External modules do not need settings.json or session.sh.
 Public commands: astral-shell, astral-bar, astral-launcher, astral-wallpaper,
-astral-polkit, astral-lock, astral-session, astral-clipboard, astral-overview and astral-shortcuts.
+astral-polkit, astral-lock, astral-session, astral-clipboard, astral-overview, astral-shortcuts and astral-settings.
 --name selects a configuration destination. Settings are preserved and common
 preferences are separated from bar preferences after backing up the destination.
 --no-backup explicitly skips backups. Destination-only files are retained.
@@ -150,9 +150,13 @@ if [[ -n $selected_module ]]; then
   staging=$(mktemp -d "$staging_root/staging-XXXXXXXX")
   trap 'rm -rf -- "$staging"' EXIT
   cp -a -- "$PROJECT_ROOT/config/quickshell/common" "$staging/common"
-  for root_file in shell.qml bar.qml recorder.qml launcher.qml launcher-control.qml wallpaper.qml wallpaper-control.qml polkit.qml polkit-control.qml lock.qml lock-control.qml idle.qml session.qml session-control.qml clipboard.qml clipboard-control.qml overview.qml overview-control.qml shortcuts.qml shortcuts-control.qml settings.json dispatch.sh; do cp -- "$PROJECT_ROOT/config/quickshell/$root_file" "$staging/$root_file"; done
+  for root_file in shell.qml bar.qml recorder.qml launcher.qml launcher-control.qml wallpaper.qml wallpaper-control.qml polkit.qml polkit-control.qml lock.qml lock-control.qml idle.qml session.qml session-control.qml clipboard.qml clipboard-control.qml overview.qml overview-control.qml shortcuts.qml shortcuts-control.qml settings.qml settings-control.qml settings.json dispatch.sh; do cp -- "$PROJECT_ROOT/config/quickshell/$root_file" "$staging/$root_file"; done
   if [[ -d $selected_source ]]; then cp -a -- "$selected_source" "$staging/$selected_module"
   else mkdir -- "$staging/$selected_module"; cp -- "$selected_source" "$staging/$selected_module/shell.qml"; fi
+  if [[ $selected_module == astral-settings && -z $module_source ]]; then
+    mkdir -p -- "$staging/astral-bar"
+    cp -- "$PROJECT_ROOT/config/quickshell/astral-bar/settings.json" "$staging/astral-bar/settings.json"
+  fi
   source_path=$staging
 fi
 

@@ -13,6 +13,7 @@ import "panel" as Panel
 // qmllint disable uncreatable-type
 PanelWindow {
   id: root
+  function openSettingsPage(page) { navigation.close(); navigation.toggle(page, content, content); }
   property var navigation: previewNavigation
   property alias panelPopup: nativePanel
   required property ShellScreen modelData

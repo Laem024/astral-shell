@@ -10,7 +10,7 @@ chmod 700 "$scratch/run"
 cp -a config/quickshell/. "$scratch/config/"
 cp tests/quickshell/Headless*.qml "$scratch/config/"
 printf 'HeadlessPanel 1.0 HeadlessPanel.qml\nHeadlessAnchors 1.0 HeadlessAnchors.qml\nHeadlessMargins 1.0 HeadlessMargins.qml\n' > "$scratch/config/qmldir"
-for module in clipboard overview shortcuts; do
+for module in clipboard overview shortcuts settings; do
   while IFS= read -r -d '' file; do
     if rg -q 'PanelWindow \{' "$file"; then
       sed -i -e 's/PanelWindow {/Headless.HeadlessPanel {/g' -e '/WlrLayershell\./d' "$file"
@@ -20,10 +20,10 @@ for module in clipboard overview shortcuts; do
 done
 for tool in loginctl hyprctl wl-paste; do printf '#!/usr/bin/env bash\nexit 1\n' > "$scratch/bin/$tool"; done
 chmod 755 "$scratch/bin/"*
-export XDG_RUNTIME_DIR=$scratch/run XDG_STATE_HOME=$scratch/state XDG_CACHE_HOME=$scratch/cache PATH=$scratch/bin:$PATH
+export XDG_CONFIG_HOME=$scratch/xdg XDG_RUNTIME_DIR=$scratch/run XDG_STATE_HOME=$scratch/state XDG_CACHE_HOME=$scratch/cache PATH=$scratch/bin:$PATH
 export QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software QT_QUICK_CONTROLS_STYLE=Basic QT_NO_XDG_DESKTOP_PORTAL=1
 unset WAYLAND_DISPLAY DISPLAY HYPRLAND_INSTANCE_SIGNATURE
-for module in clipboard overview shortcuts; do
+for module in clipboard overview shortcuts settings; do
   for kind in Root Preview; do
     printf 'import QtQuick\nimport "astral-%s" as Module\nModule.%s%s { Timer { interval: 600; running: true; onTriggered: Qt.quit() } }\n' "$module" "${module^}" "$kind" > "$scratch/config/check.qml"
     timeout 10 qs -p "$scratch/config/check.qml" --no-color > "$scratch/log" 2>&1 || { cat "$scratch/log"; exit 1; }

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 mode=${1:-all}
-if (( $# > 1 )) || [[ $mode != all && $mode != bar && $mode != wallpaper && $mode != launcher && $mode != polkit && $mode != lock && $mode != session && $mode != clipboard && $mode != overview && $mode != shortcuts ]]; then
-  printf 'Usage: bash scripts/test-quickshell.sh [all|bar|wallpaper|launcher|polkit|lock|session|clipboard|overview|shortcuts]\n' >&2
+if (( $# > 1 )) || [[ $mode != all && $mode != bar && $mode != wallpaper && $mode != launcher && $mode != polkit && $mode != lock && $mode != session && $mode != clipboard && $mode != overview && $mode != shortcuts && $mode != settings ]]; then
+  printf 'Usage: bash scripts/test-quickshell.sh [all|bar|wallpaper|launcher|polkit|lock|session|clipboard|overview|shortcuts|settings]\n' >&2
   exit 2
 fi
 command -v qs >/dev/null || { printf 'Quickshell (qs) is required for graphical preview.\n' >&2; exit 1; }
@@ -14,7 +14,7 @@ preview=$(mktemp -d "$preview_root/preview-XXXXXXXX")
 process=''
 cleanup() {
   local path
-  for path in clipboard overview shortcuts; do qs kill -p "$preview/config/quickshell/$path-preview.qml" >/dev/null 2>&1 || true; done
+  for path in clipboard overview shortcuts settings; do qs kill -p "$preview/config/quickshell/$path-preview.qml" >/dev/null 2>&1 || true; done
   # Every path is inside our unique copy; installed/repository instances are untouched.
   for path in "$preview/config/quickshell/shell.qml" "$preview/config/quickshell/bar.qml" "$preview/config/quickshell/bar-preview.qml" "$preview/config/quickshell/recorder.qml" "$preview/config/quickshell/launcher-preview.qml" "$preview/config/quickshell/wallpaper-preview.qml" "$preview/config/quickshell/polkit-preview.qml" "$preview/config/quickshell/lock-preview.qml" "$preview/config/quickshell/session-preview.qml"; do
     qs kill -p "$path" >/dev/null 2>&1 || true
@@ -50,11 +50,11 @@ printf 'import "astral-launcher" as Launcher\nLauncher.LauncherPreview {}\n' > "
 printf 'import "astral-polkit" as Polkit\nPolkit.PolkitPreview {}\n' > "$preview/config/quickshell/polkit-preview.qml"
 printf 'import "astral-lock" as Lock\nLock.LockPreview {}\n' > "$preview/config/quickshell/lock-preview.qml"
 printf 'import "astral-session" as Session\nSession.SessionPreview {}\n' > "$preview/config/quickshell/session-preview.qml"
-for panel in clipboard overview shortcuts; do
+for panel in clipboard overview shortcuts settings; do
   printf 'import "astral-%s" as Module\nModule.%sPreview {}\n' "$panel" "${panel^}" > "$preview/config/quickshell/$panel-preview.qml"
 done
 # Preview instances never run native idle policies or the real session menu.
-jq '.providers |= with_entries(.value=[]) | (.idle.enabled)=false | .modules |= map(if .id=="astral-clipboard" then .path="clipboard-preview.qml" elif .id=="astral-overview" then .path="overview-preview.qml" elif .id=="astral-shortcuts" then .path="shortcuts-preview.qml" elif .id=="astral-idle" then .enabled=false elif .id=="astral-session" then .path="session-preview.qml" else . end)' "$preview/config/quickshell/settings.json" > "$preview/settings.json"
+jq '.providers |= with_entries(.value=[]) | (.idle.enabled)=false | .modules |= map(if .id=="astral-clipboard" then .path="clipboard-preview.qml" elif .id=="astral-overview" then .path="overview-preview.qml" elif .id=="astral-shortcuts" then .path="shortcuts-preview.qml" elif .id=="astral-settings" then .path="settings-preview.qml" elif .id=="astral-idle" then .enabled=false elif .id=="astral-session" then .path="session-preview.qml" else . end)' "$preview/config/quickshell/settings.json" > "$preview/settings.json"
 mv -- "$preview/settings.json" "$preview/config/quickshell/settings.json"
 if [[ $mode == all ]]; then
   jq '(.modules[] | select(.id=="astral-launcher") | .path)="launcher-preview.qml" | (.modules[] | select(.id=="astral-polkit") | .path)="polkit-preview.qml" | (.modules[] | select(.id=="astral-lock")) |= (.path="lock-preview.qml" | .autostart=true)' "$preview/config/quickshell/settings.json" > "$preview/settings.json"
@@ -79,7 +79,7 @@ entry=$preview/config/quickshell/shell.qml
 [[ $mode != launcher ]] || entry=$preview/config/quickshell/launcher-preview.qml
 [[ $mode != polkit ]] || entry=$preview/config/quickshell/polkit-preview.qml
 [[ $mode != lock ]] || entry=$preview/config/quickshell/lock-preview.qml
-for panel in clipboard overview shortcuts; do [[ $mode != "$panel" ]] || entry=$preview/config/quickshell/$panel-preview.qml; done
+for panel in clipboard overview shortcuts settings; do [[ $mode != "$panel" ]] || entry=$preview/config/quickshell/$panel-preview.qml; done
 [[ $mode != session ]] || entry=$preview/config/quickshell/session-preview.qml
 [[ $mode != bar ]] || entry=$preview/config/quickshell/bar-preview.qml
 printf 'Previewing %s. Close with Ctrl+C.\n' "$mode"

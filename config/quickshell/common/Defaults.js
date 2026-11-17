@@ -53,6 +53,7 @@ const common = {
     "poweroff": ["astral-lock", "poweroff"]
   },
   "modules": [
+    { "id": "astral-settings", "path": "settings.qml", "enabled": true, "autostart": true },
     {"id": "astral-clipboard", "path": "clipboard.qml", "enabled": true, "autostart": true},
     {"id": "astral-overview", "path": "overview.qml", "enabled": true, "autostart": true},
     {"id": "astral-shortcuts", "path": "shortcuts.qml", "enabled": true, "autostart": true},
