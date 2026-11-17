@@ -66,6 +66,8 @@ FocusScope {
         Layout.fillWidth: true
         Layout.minimumWidth: 0
         implicitHeight: 44
+        leftPadding: 16; rightPadding: 16
+        topPadding: 10; bottomPadding: 10
         placeholderText: "Search applications"
         Accessible.name: "Search applications"
         selectByMouse: true

@@ -14,7 +14,7 @@ Rectangle {
   property string current: ""
   signal selected(string key)
   Layout.fillWidth: true
-  implicitHeight: 38
+  implicitHeight: 44
   radius: tokens.rowRadius
   color: tokens.sunken
   border.color: tokens.hairline
@@ -29,11 +29,13 @@ Rectangle {
         id: tab
         required property var modelData
         readonly property bool current: root.current === tab.modelData.key
+        Layout.preferredWidth: 1
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.minimumWidth: 0
-        implicitHeight: 30
-        padding: 0
+        implicitHeight: 36
+        leftPadding: 10; rightPadding: 10
+        topPadding: 6; bottomPadding: 6
         focusPolicy: Qt.StrongFocus
         Accessible.name: tab.modelData.label
         Accessible.role: Accessible.RadioButton

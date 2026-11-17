@@ -81,6 +81,7 @@ Item {
     boundsBehavior: Flickable.StopAtBounds
     flickableDirection: root.vertical ? Flickable.VerticalFlick : Flickable.HorizontalFlick
     Rectangle {
+      id: startPlate
       objectName: "startPlate"
       x: root.vertical ? (viewport.width - root.verticalPlateWidth) / 2 : startGroup.x * composition.scale
       y: root.vertical ? startGroup.y * composition.scale : (composition.height - height) / 2
@@ -92,6 +93,7 @@ Item {
       radius: root.tokens.rowRadius; color: root.tokens.raised; border.color: root.tokens.hairline
     }
     Rectangle {
+      id: endPlate
       objectName: "endPlate"
       x: root.vertical ? (viewport.width - root.verticalPlateWidth) / 2 : endGroup.x * composition.scale
       y: root.vertical ? endGroup.y * composition.scale : (composition.height - height) / 2
@@ -384,8 +386,20 @@ Item {
     var rightInset = !root.vertical && segment === focus ? root.tokens.gap : 0;
     var endPoint = segment.mapToItem(root, Math.max(0, segment.width - rightInset), segment.height);
     var end = root.vertical ? endPoint.y : endPoint.x;
-    var minimum = root.vertical ? viewport.y : viewport.x;
-    var maximum = minimum + (root.vertical ? viewport.height : viewport.width);
+    // At the indicator's 5px offset, keep both ends inside the rounded shell.
+    // Include the small leading marker in the safe area.
+    var radius = Math.min(root.tokens.panelRadius, Math.min(root.width, root.height) / 2);
+    var edgeInset = radius - Math.sqrt(Math.max(0, radius * radius - Math.pow(Math.max(0, radius - 5), 2)));
+    var minimum = Math.max(root.vertical ? viewport.y : viewport.x, edgeInset + 3);
+    var maximum = Math.min((root.vertical ? viewport.y + viewport.height : viewport.x + viewport.width),
+      (root.vertical ? root.height : root.width) - edgeInset - 1);
+    if (!root.vertical) {
+      const plate = segment === clock || segment === focus ? startPlate : endPlate;
+      const plateStart = plate.mapToItem(root, 0, 0).x;
+      const plateEnd = plate.mapToItem(root, plate.width, 0).x;
+      minimum = Math.max(minimum, plateStart + plate.radius + 3);
+      maximum = Math.min(maximum, plateEnd - plate.radius);
+    }
     start = Math.max(start, minimum);
     end = Math.min(end, maximum);
     if (end <= start) { indicator.clear(); return; }

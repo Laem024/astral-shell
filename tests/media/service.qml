@@ -155,10 +155,10 @@ Scope {
           root.check(selector.popup.visible && selector.popup.contentItem.count > 0, "player selector remains usable inside rounded viewport");
           selector.popup.close();
           root.check(!fallback.visible && artwork.fillMode === Image.PreserveAspectFit, "artwork replaces fallback without cropping");
-          root.check(artwork.paintedWidth < artwork.width && artwork.paintedHeight <= artwork.height + 1, "portrait artwork fully visible");
+          root.check(Math.abs(artwork.paintedWidth - artwork.width) <= 1 && Math.abs(artwork.paintedHeight - artwork.height) <= 1, "portrait artwork fits its frame without side bars");
           root.check(artwork.sourceSize.width >= artwork.width * 2, "artwork resolution");
           const frame = root.find(page, "mediaArtworkFrame");
-          root.check(frame.width >= 150 && frame.width === frame.height, "prominent square artwork frame");
+          root.check(frame.height >= 150 && Math.abs(frame.width / frame.height - 0.75) < 0.01, "artwork frame follows portrait proportions");
           first.trackArtUrl = "file:///nonexistent-astral-test-cover";
           root.stage++;
         } else if (root.stage === 2 && artwork.status === Image.Error) {

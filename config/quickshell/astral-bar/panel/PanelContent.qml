@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Shapes
 import "../../common" as Design
 import "../data" as Data
 import "../components" as Components
@@ -35,15 +36,14 @@ Item {
     Rectangle {
       id: header
       Layout.fillWidth: true
-      implicitHeight: 192
-      Layout.minimumHeight: 192
+      implicitHeight: 160
+      Layout.minimumHeight: 160
       radius: root.tokens.cardRadius
       color: root.tokens.background
       border.color: root.tokens.border
       readonly property bool hasBanner: bannerImage.status === Image.Ready
       Components.RoundedClip {
-        anchors { left: parent.left; right: parent.right; top: parent.top }
-        height: 96
+        anchors.fill: parent
         radius: root.tokens.cardRadius
         Components.CropImage {
           id: bannerImage
@@ -56,8 +56,7 @@ Item {
       }
       Item {
         id: bannerControl
-        anchors { left: parent.left; right: parent.right; top: parent.top }
-        height: 96
+        anchors.fill: parent
         activeFocusOnTab: true
         Accessible.role: Accessible.Button
         Accessible.name: Data.BannerData.file ? "Change or remove banner" : "Add banner"
@@ -77,6 +76,27 @@ Item {
           onClicked: { bannerControl.forceActiveFocus(); root.pickerMode = "banner"; }
         }
       }
+      // The identity ribbon grows out of the portrait and fades over the banner.
+      Shape {
+        x: root.tokens.inset + 24
+        y: header.height - root.tokens.inset - 64
+        width: Math.min(360, header.width - root.tokens.inset * 2 - 24)
+        height: 64
+        preferredRendererType: Shape.CurveRenderer
+        ShapePath {
+          strokeColor: "transparent"
+          fillGradient: LinearGradient {
+            x1: 0; y1: 32; x2: Math.min(360, header.width - root.tokens.inset * 2 - 24); y2: 32
+            GradientStop { position: 0; color: Qt.alpha(root.tokens.background, 0.98) }
+            GradientStop { position: 0.6; color: Qt.alpha(root.tokens.background, 0.88) }
+            GradientStop { position: 1; color: "transparent" }
+          }
+          startX: 0; startY: 0
+          PathCubic { x: Math.min(360, header.width - root.tokens.inset * 2 - 24); y: 32; control1X: 150; control1Y: 0; control2X: 180; control2Y: 20 }
+          PathCubic { x: 0; y: 64; control1X: 180; control1Y: 44; control2X: 150; control2Y: 64 }
+          PathLine { x: 0; y: 0 }
+        }
+      }
       RowLayout {
         objectName: "panelAccount"
         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
@@ -89,10 +109,11 @@ Item {
           leftPadding: 0; rightPadding: 0; topPadding: 0; bottomPadding: 0
           text: "Change account photo"
           onClicked: root.pickerMode = "avatar"
+          background: Rectangle { radius: 32; color: root.tokens.background }
           contentItem: Item {
             Components.RoundedClip {
               anchors.fill: parent
-              radius: root.tokens.rowRadius + 2
+              radius: 32
               Image {
                 id: avatar
                 anchors.fill: parent
@@ -104,9 +125,9 @@ Item {
             }
             Rectangle {
               anchors.fill: parent
-              radius: root.tokens.rowRadius + 2; color: "transparent"
+              radius: 32; color: "transparent"
               border.width: parent.parent.activeFocus ? 2 : 1
-              border.color: parent.parent.activeFocus ? root.tokens.cyan : root.tokens.border
+              border.color: root.tokens.cyan
             }
             Text {
               anchors.centerIn: parent
@@ -285,7 +306,7 @@ Item {
     sourceComponent: AvatarPicker {
       tokens: root.tokens
       mode: root.pickerMode
-      bannerAspect: root.width / 96
+      bannerAspect: root.width / 160
       onClosed: root.pickerMode = ""
     }
   }

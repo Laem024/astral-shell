@@ -129,9 +129,6 @@ Item {
         }
       }
     }
-
-
-
   }
 
   Rectangle {
@@ -268,21 +265,17 @@ Item {
             id: sleeve
             objectName: "mediaArtworkFrame"
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: root.largeArtwork
+            readonly property real aspect: artwork.status === Image.Ready && artwork.implicitHeight > 0
+              ? Math.max(0.5, Math.min(1.8, artwork.implicitWidth / artwork.implicitHeight)) : 1
+            Layout.preferredHeight: root.largeArtwork
               ? Math.floor(Math.min(composition.width - 20, Math.max(64, scroll.height - root.inset * 2
                   - selector.implicitHeight - trackInfo.implicitHeight - timeline.implicitHeight
                   - transportRow.implicitHeight - repeatMode.implicitHeight
                   - composition.spacing * 4 - hero.rowSpacing - 1)))
               : Math.min(96, composition.width * 0.4)
-            Layout.preferredHeight: Layout.preferredWidth
+            Layout.preferredWidth: Math.min(composition.width, Layout.preferredHeight * aspect)
             Accessible.role: Accessible.Graphic
             Accessible.name: root.player ? "Artwork for " + root.media.title : "No track artwork"
-            Rectangle {
-              x: 3; y: 6
-              width: parent.width - 6; height: parent.height
-              radius: 16
-              color: Qt.alpha(root.tokens.cyan, 0.06)
-            }
             Components.RoundedClip {
               anchors.fill: parent
               radius: 16
@@ -327,7 +320,7 @@ Item {
                 objectName: "mediaArtwork"
                 anchors.fill: parent
                 source: root.media.artwork
-                sourceSize: Qt.size(Math.ceil(width * 2 * root.tokens.scale), Math.ceil(height * 2 * root.tokens.scale))
+                sourceSize.width: Math.ceil(1024 * root.tokens.scale)
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
                 smooth: true
@@ -434,7 +427,7 @@ Item {
           id: repeatMode
           objectName: "mediaRepeatMode"
           Layout.fillWidth: true
-          text: "Repeat · " + root.media.repeatMode
+          text: root.player ? root.media.application + (root.media.repeatMode === "Off" ? "" : " · Repeat " + root.media.repeatMode) : "No player connected"
           horizontalAlignment: Text.AlignHCenter
           color: root.tokens.muted
           font { family: root.tokens.font; pixelSize: 10 }

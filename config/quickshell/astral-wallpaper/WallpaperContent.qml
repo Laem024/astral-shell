@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import "Logic.js" as Logic
+import "../common" as Common
 
 Pane {
   id: root
@@ -322,7 +323,6 @@ Pane {
             cacheBuffer: cellHeight
             keyNavigationEnabled: true
             activeFocusOnTab: true
-            onCurrentIndexChanged: if (activeFocus && currentIndex >= 0 && currentIndex < root.items.length) root.selected = root.items[currentIndex]
             Keys.onReturnPressed: root.choose(currentIndex)
             delegate: Item {
               id: tile
@@ -348,21 +348,25 @@ Pane {
                   radius: root.tokens.rowRadius
                   color: root.tokens.sunken
                   clip: true
-                  Loader {
-                    id: thumbnailLoader
-                    readonly property var image: item
+                  Common.RoundedClip {
                     anchors.fill: parent
-                    sourceComponent: root.remote ? remoteThumb : localThumb
-                    Component {
-                      id: localThumb
-                      Thumbnail { service: root.service; path: tile.modelData.path; sourceSize.width: 480 }
-                    }
-                    Component {
-                      id: remoteThumb
-                      Image {
-                        source: tile.modelData.thumbs.large || tile.modelData.thumbs.small || ""
-                        asynchronous: true; fillMode: Image.PreserveAspectCrop
-                        sourceSize.width: 480
+                    radius: thumbFrame.radius
+                    Loader {
+                      id: thumbnailLoader
+                      readonly property var image: item
+                      anchors.fill: parent
+                      sourceComponent: root.remote ? remoteThumb : localThumb
+                      Component {
+                        id: localThumb
+                        Thumbnail { service: root.service; path: tile.modelData.path; sourceSize.width: 480 }
+                      }
+                      Component {
+                        id: remoteThumb
+                        Image {
+                          source: tile.modelData.thumbs.large || tile.modelData.thumbs.small || ""
+                          asynchronous: true; fillMode: Image.PreserveAspectCrop
+                          sourceSize.width: 480
+                        }
                       }
                     }
                   }
@@ -577,7 +581,11 @@ Pane {
     property bool opened: false
     visible: opened
     function open() { opened = true; forceActiveFocus(); }
-    function close() { opened = false; }
+    function close() {
+      if (!opened) return;
+      opened = false;
+      grid.forceActiveFocus();
+    }
     Keys.onEscapePressed: event => { close(); event.accepted = true; }
     Rectangle { anchors.fill: parent; color: Qt.alpha(root.tokens.background, 0.72) }
     MouseArea { anchors.fill: parent; onClicked: confirmation.close() }
@@ -606,29 +614,33 @@ Pane {
               Layout.fillWidth: true; Layout.preferredHeight: Math.max(120, Math.min(300, root.height * 0.36))
               color: root.tokens.sunken; radius: root.tokens.cardRadius; clip: true
               border.width: 1; border.color: root.tokens.border
-              Loader {
-                id: previewLoader
-                readonly property var media: item
-                objectName: "wallpaperPreview"
+              Common.RoundedClip {
                 anchors.fill: parent
-                active: confirmation.visible && !!root.previewEntry && root.tab !== "Settings"
-                sourceComponent: root.remote ? remotePreview : localPreview
-                Component {
-                  id: remotePreview
-                  Image {
-                    source: root.previewEntry ? root.previewEntry.thumbs.large || root.previewEntry.thumbs.small || "" : ""
-                    asynchronous: true; fillMode: Image.PreserveAspectFit
+                radius: root.tokens.cardRadius
+                Loader {
+                  id: previewLoader
+                  readonly property var media: item
+                  objectName: "wallpaperPreview"
+                  anchors.fill: parent
+                  active: confirmation.visible && !!root.previewEntry && root.tab !== "Settings"
+                  sourceComponent: root.remote ? remotePreview : localPreview
+                  Component {
+                    id: remotePreview
+                    Image {
+                      source: root.previewEntry ? root.previewEntry.thumbs.large || root.previewEntry.thumbs.small || "" : ""
+                      asynchronous: true; fillMode: Image.PreserveAspectFit
+                    }
                   }
-                }
-                Component {
-                  id: localPreview
-                  WallpaperMedia {
-                    path: root.previewEntry ? root.previewEntry.path : ""
-                    paused: root.service.blocked
-                    fit: true
-                    property string previewError: ""
-                    onPathChanged: previewError = ""
-                    onFailed: detail => previewError = detail
+                  Component {
+                    id: localPreview
+                    WallpaperMedia {
+                      path: root.previewEntry ? root.previewEntry.path : ""
+                      paused: root.service.blocked
+                      fit: true
+                      property string previewError: ""
+                      onPathChanged: previewError = ""
+                      onFailed: detail => previewError = detail
+                    }
                   }
                 }
               }
