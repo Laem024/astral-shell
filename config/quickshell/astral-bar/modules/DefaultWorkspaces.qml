@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Shapes
 import "../../common" as Design
-import "../components" as Components
 
 Item {
   id: root
@@ -20,8 +19,6 @@ Item {
   readonly property int step: compact ? 26 : 32
   readonly property int normalLength: count * step
   readonly property int length: normalLength + 10 + step
-  property int hoveredIndex: -1
-  readonly property Item hoveredItem: hoveredIndex < 0 ? null : nodes.itemAt(hoveredIndex)
   signal selected(int workspace)
   signal specialSelected(string name)
   implicitWidth: vertical ? 46 : length
@@ -44,7 +41,7 @@ Item {
     x: root.vertical ? (root.width - width) / 2 : (root.active - 1) * root.step + (root.step - width) / 2
     y: root.vertical ? (root.active - 1) * root.step + (root.step - height) / 2 : (root.height - height) / 2 - 2
     width: 24; height: 24
-    radius: 5
+    radius: 6
     color: Qt.alpha(root.tokens.cyan, 0.14)
     border.color: root.tokens.cyan
     Rectangle {
@@ -93,7 +90,7 @@ Item {
         text: String(node.workspaceId)
         color: node.ink
         font.family: root.tokens.mono
-        font.pixelSize: 12
+        font.pixelSize: root.tokens.textSize
         Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
       }
       Shape {
@@ -141,26 +138,12 @@ Item {
         visible: node.special && node.current
         anchors.centerIn: parent
         anchors.verticalCenterOffset: root.vertical ? 0 : -2
-        width: 24; height: 24; radius: 5
+        width: 24; height: 24; radius: 12
         color: Qt.alpha(node.specialInk, 0.12); border.color: node.specialInk
         Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
         Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
       }
-      Components.NeonOutline {
-        anchors.centerIn: parent
-        anchors.verticalCenterOffset: root.vertical ? 0 : -2
-        width: 24; height: 24
-        tokens: root.tokens
-        accent: node.special ? node.specialInk : root.tokens.cyan
-        active: node.hovered && (!node.special || node.current)
-      }
-      HoverHandler {
-        id: hover
-        onHoveredChanged: {
-          if (hovered) root.hoveredIndex = node.index;
-          else if (root.hoveredIndex === node.index) root.hoveredIndex = -1;
-        }
-      }
+      HoverHandler { id: hover }
       TapHandler {
         enabled: root.interactive && (!node.special || node.current)
         onTapped: {

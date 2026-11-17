@@ -3,10 +3,8 @@ CaptureGlyph 1.0 CaptureGlyph.qml
 Constellation 1.0 Constellation.qml
 CropImage 1.0 CropImage.qml
 Emblem 1.0 Emblem.qml
-HoverIndex 1.0 HoverIndex.qml
 InfoTile 1.0 InfoTile.qml
 Meter 1.0 Meter.qml
-NeonOutline 1.0 NeonOutline.qml
 RoundedClip 1.0 RoundedClip.qml
 SoundGlyph 1.0 SoundGlyph.qml
 StatusNode 1.0 StatusNode.qml

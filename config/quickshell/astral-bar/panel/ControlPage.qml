@@ -63,18 +63,19 @@ ScrollView {
     property color accent: root.tokens.cyan
     property bool live: false
     Layout.fillWidth: true
-    implicitHeight: 64
-    padding: 10
+    Layout.minimumWidth: 0
+    implicitHeight: 76
+    leftPadding: 12; rightPadding: 12; topPadding: 10; bottomPadding: 10
     focusPolicy: Qt.StrongFocus
     Accessible.name: name + ". " + value + ". " + detail + ". Show section"
     contentItem: ColumnLayout {
-      spacing: 3
+      spacing: 4
       RowLayout {
-        spacing: 5
+        spacing: 6
         Rectangle {
-          width: 5
-          height: 5
-          radius: 2.5
+          Layout.preferredWidth: 6
+          Layout.preferredHeight: 6
+          radius: 3
           color: chip.live ? chip.accent : Qt.alpha(root.tokens.muted, 0.5)
         }
         Text {
@@ -83,13 +84,13 @@ ScrollView {
           textFormat: Text.PlainText
           elide: Text.ElideRight
           color: chip.accent
-          font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 1 }
+          font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 0.8 }
         }
         Text {
           text: "›"
           textFormat: Text.PlainText
           color: chip.hovered ? chip.accent : root.tokens.muted
-          font { family: root.tokens.mono; pixelSize: 11 }
+          font { family: root.tokens.mono; pixelSize: 13 }
         }
       }
       Text {
@@ -98,7 +99,7 @@ ScrollView {
         textFormat: Text.PlainText
         elide: Text.ElideRight
         color: root.tokens.text
-        font { family: root.tokens.font; pixelSize: 11; weight: Font.Medium }
+        font { family: root.tokens.font; pixelSize: 13; weight: Font.Medium }
       }
       Text {
         Layout.fillWidth: true
@@ -106,14 +107,15 @@ ScrollView {
         textFormat: Text.PlainText
         elide: Text.ElideRight
         color: root.tokens.muted
-        font { family: root.tokens.mono; pixelSize: 8 }
+        font { family: root.tokens.font; pixelSize: 10 }
       }
     }
     background: Rectangle {
-      radius: 9
-      color: chip.hovered || chip.activeFocus ? Qt.alpha(chip.accent, 0.06) : Qt.alpha(root.tokens.surface, 0.5)
-      border.color: chip.activeFocus ? chip.accent
-        : chip.live ? Qt.alpha(chip.accent, 0.28) : root.tokens.border
+      radius: root.tokens.rowRadius
+      color: chip.hovered || chip.activeFocus ? Qt.alpha(chip.accent, 0.08) : root.tokens.raised
+      border.width: chip.activeFocus ? 2 : 1
+      border.color: chip.activeFocus ? root.tokens.cyan
+        : chip.live ? Qt.alpha(chip.accent, 0.35) : root.tokens.border
     }
   }
 

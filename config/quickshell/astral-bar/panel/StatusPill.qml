@@ -8,10 +8,10 @@ Rectangle {
   property color accent: tokens.cyan
   property string text: ""
   implicitWidth: label.implicitWidth + 16
-  implicitHeight: 20
-  radius: 10
-  color: Qt.alpha(root.accent, 0.08)
-  border.color: Qt.alpha(root.accent, 0.22)
+  implicitHeight: 22
+  radius: height / 2
+  color: Qt.alpha(root.accent, 0.12)
+  border.color: Qt.alpha(root.accent, 0.3)
   Accessible.ignored: true
 
   Text {
@@ -20,6 +20,6 @@ Rectangle {
     text: root.text
     textFormat: Text.PlainText
     color: root.accent
-    font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 0.7 }
+    font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 0.6 }
   }
 }

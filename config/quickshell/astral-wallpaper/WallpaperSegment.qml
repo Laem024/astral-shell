@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 
-// Compact segmented control for choices that deserve one click.
+// Compact pill-shaped segmented control for choices that deserve one click.
 Rectangle {
   id: root
   required property var tokens
@@ -10,9 +10,10 @@ Rectangle {
   property int currentIndex: 0
   signal activated(int index)
   implicitWidth: row.implicitWidth + 8
-  implicitHeight: 36
-  radius: 9
-  color: tokens.background
+  implicitHeight: 38
+  radius: height / 2
+  color: tokens.sunken
+  border.width: 1
   border.color: tokens.border
   Row {
     id: row
@@ -25,11 +26,12 @@ Rectangle {
         id: segment
         required property string modelData
         required property int index
-        width: Math.max(64, implicitContentWidth + leftPadding + rightPadding)
+        width: Math.max(72, implicitContentWidth + leftPadding + rightPadding)
         height: row.height
-        leftPadding: 14; rightPadding: 14
+        leftPadding: 16; rightPadding: 16
+        hoverEnabled: true
         font.family: root.tokens.font
-        font.pixelSize: 12
+        font.pixelSize: 13
         font.bold: root.currentIndex === index
         text: modelData
         onClicked: root.activated(index)
@@ -38,11 +40,12 @@ Rectangle {
         Accessible.checkable: true
         Accessible.checked: root.currentIndex === index
         background: Rectangle {
-          radius: 6
+          radius: height / 2
           color: root.currentIndex === segment.index ? root.tokens.cyan
-            : segment.hovered ? Qt.alpha(root.tokens.cyan, 0.1) : "transparent"
-          border.width: root.currentIndex === segment.index ? 0 : 1
-          border.color: root.tokens.border
+            : segment.hovered ? Qt.alpha(root.tokens.cyan, 0.14) : "transparent"
+          border.width: segment.activeFocus ? 2 : 0
+          border.color: root.tokens.cyan
+          Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
         }
         contentItem: Text {
           text: segment.text

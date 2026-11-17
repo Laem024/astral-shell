@@ -20,17 +20,17 @@ Item {
     Column {
       id: column
       width: parent.width
-      spacing: 22
+      spacing: 24
 
       Text {
         width: parent.width
-        text: "✦   A S T R A L"
+        text: "✦  ASTRAL"
         color: root.tokens.cyan
         horizontalAlignment: Text.AlignHCenter
         font {
           family: root.tokens.mono
-          pixelSize: 11
-          letterSpacing: 2.4
+          pixelSize: root.tokens.captionSize + 1
+          letterSpacing: 3
         }
       }
 
@@ -47,9 +47,10 @@ Item {
         text: root.hostname
         color: root.tokens.muted
         horizontalAlignment: Text.AlignHCenter
+        elide: Text.ElideRight
         font {
           family: root.tokens.mono
-          pixelSize: 10
+          pixelSize: root.tokens.captionSize + 1
           letterSpacing: 1
         }
       }
@@ -61,12 +62,12 @@ Item {
         Rectangle {
           id: hint
           anchors.horizontalCenter: parent.horizontalCenter
-          width: hintText.implicitWidth + 62
-          height: 52
-          radius: 26
-          color: root.tokens.glassSoft
+          width: hintText.implicitWidth + 56
+          height: 40
+          radius: root.tokens.controlRadius
+          color: root.tokens.surface
           border.width: 1
-          border.color: root.tokens.glassEdge
+          border.color: root.tokens.border
 
           Rectangle {
             id: dot
@@ -92,21 +93,18 @@ Item {
             id: hintText
             anchors {
               left: dot.right
-              leftMargin: 14
-              right: parent.right
-              rightMargin: 24
+              leftMargin: 12
               verticalCenter: parent.verticalCenter
             }
             text: root.clickable ? "Click to sign in here" : "Sign in on the primary display"
             color: root.tokens.text
             font {
               family: root.tokens.font
-              pixelSize: 12
+              pixelSize: root.tokens.bodySize
             }
           }
         }
       }
-
     }
   }
 

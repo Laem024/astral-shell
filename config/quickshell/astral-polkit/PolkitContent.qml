@@ -110,7 +110,7 @@ Item {
 
   Rectangle {
     anchors.fill: parent
-    color: Qt.alpha(root.tokens.background, 0.62)
+    color: root.tokens.scrim
     opacity: root.reveal
   }
 
@@ -124,13 +124,13 @@ Item {
   Rectangle {
     id: card
     anchors.centerIn: parent
-    width: Math.max(1, Math.min(520, (root.width - 48) / root.tokens.scale))
-    height: content.implicitHeight + root.tokens.padding * 2
+    width: Math.max(1, Math.min(480, (root.width - 48) / root.tokens.scale))
+    height: content.implicitHeight + root.tokens.section * 2
     Behavior on height { NumberAnimation { duration: root.tokens.entryDuration; easing.type: Easing.OutCubic } }
     scale: root.tokens.scale * (0.97 + 0.03 * root.reveal)
     transformOrigin: Item.Center
     color: root.tokens.surface
-    radius: 24
+    radius: root.tokens.panelRadius
     border.width: 1
     border.color: root.tokens.border
     opacity: root.reveal
@@ -160,36 +160,38 @@ Item {
         top: parent.top
         left: parent.left
         right: parent.right
-        margins: root.tokens.padding
+        margins: root.tokens.section
       }
-      spacing: root.tokens.gap
+      spacing: 16
 
       RowLayout {
         Layout.fillWidth: true
-        spacing: 12
+        spacing: 16
 
         Rectangle {
           Layout.alignment: Qt.AlignTop
-          implicitWidth: 46
-          implicitHeight: 46
-          radius: 13
+          implicitWidth: 44
+          implicitHeight: 44
+          radius: root.tokens.cardRadius
           color: Qt.alpha(root.tokens.cyan, 0.1)
           border.width: 1
-          border.color: Qt.alpha(root.tokens.cyan, 0.26)
+          border.color: Qt.alpha(root.tokens.cyan, 0.3)
 
           Image {
             id: icon
             anchors.centerIn: parent
-            width: 24
-            height: 24
-            sourceSize.width: 48
-            sourceSize.height: 48
+            width: 22
+            height: 22
+            sourceSize.width: 44
+            sourceSize.height: 44
             source: root.iconSource
             visible: false
             layer.enabled: true
           }
           MultiEffect {
-            anchors.fill: icon
+            anchors.centerIn: parent
+            width: 22
+            height: 22
             visible: root.iconSource !== ""
             source: icon
             colorization: 1
@@ -200,96 +202,147 @@ Item {
             visible: root.iconSource === ""
             text: "󰌾"
             color: root.tokens.cyan
-            font { family: root.tokens.mono; pixelSize: 22 }
+            font { family: root.tokens.mono; pixelSize: 20 }
           }
         }
 
         ColumnLayout {
           Layout.fillWidth: true
-          spacing: 2
+          Layout.minimumWidth: 0
+          spacing: 4
 
           Text {
             Layout.fillWidth: true
-            text: "AUTHENTICATION"
-            color: Qt.alpha(root.tokens.cyan, 0.85)
+            text: "AUTHENTICATION REQUIRED"
+            color: root.tokens.cyan
+            elide: Text.ElideRight
             font {
               family: root.tokens.mono
               pixelSize: 10
-              letterSpacing: 1.6
-              weight: Font.Medium
+              letterSpacing: 1.4
             }
           }
           Text {
             Layout.fillWidth: true
-            text: "Authentication required"
+            text: root.messageText
             color: root.tokens.text
+            wrapMode: Text.Wrap
+            maximumLineCount: 3
             elide: Text.ElideRight
+            textFormat: Text.PlainText
+            lineHeight: 1.15
             font {
               family: root.tokens.font
-              pixelSize: 17
+              pixelSize: 15
               weight: Font.DemiBold
             }
           }
         }
-
-        Text {
-          Layout.alignment: Qt.AlignTop
-          Layout.maximumWidth: 150
-          visible: root.identityName !== "" && !root.hasIdentities
-          text: root.identityName
-          color: root.tokens.muted
-          elide: Text.ElideRight
-          font { family: root.tokens.mono; pixelSize: 11 }
-        }
       }
 
-      Text {
+      // The requesting action and the user it will run as.
+      Rectangle {
         Layout.fillWidth: true
-        Layout.topMargin: 2
-        text: root.messageText
-        color: root.tokens.text
-        wrapMode: Text.Wrap
-        textFormat: Text.PlainText
-        lineHeight: 1.15
-        font { family: root.tokens.font; pixelSize: 13 }
-      }
+        implicitHeight: requestDetails.implicitHeight + root.tokens.padding * 2
+        radius: root.tokens.rowRadius
+        color: root.tokens.sunken
+        border.width: 1
+        border.color: root.tokens.border
 
-      RowLayout {
-        Layout.fillWidth: true
-        visible: root.hasIdentities
-        spacing: 6
+        ColumnLayout {
+          id: requestDetails
+          anchors {
+            left: parent.left
+            right: parent.right
+            top: parent.top
+            margins: root.tokens.padding
+          }
+          spacing: 10
 
-        Repeater {
-          model: root.flow ? root.flow.identities : []
-
-          delegate: Rectangle {
-            id: chip
-            required property var modelData
-            readonly property bool selected: root.flow && root.flow.selectedIdentity
-              && root.flow.selectedIdentity.id === modelData.id
-              && root.flow.selectedIdentity.isGroup === modelData.isGroup
-            implicitWidth: chipText.implicitWidth + 20
-            implicitHeight: 28
-            radius: 14
-            color: chip.selected ? Qt.alpha(root.tokens.cyan, 0.16) : Qt.alpha(root.tokens.muted, 0.06)
-            border.width: 1
-            border.color: chip.selected ? Qt.alpha(root.tokens.cyan, 0.5) : Qt.alpha(root.tokens.muted, 0.1)
+          RowLayout {
+            Layout.fillWidth: true
+            spacing: 12
 
             Text {
-              id: chipText
-              anchors.centerIn: parent
-              text: chip.modelData.displayName || chip.modelData.string || ""
-              color: chip.selected ? root.tokens.cyan : root.tokens.muted
-              font { family: root.tokens.font; pixelSize: 11 }
+              Layout.preferredWidth: 56
+              Layout.alignment: Qt.AlignTop
+              text: "Action"
+              color: root.tokens.muted
+              font { family: root.tokens.font; pixelSize: 12 }
             }
-            MouseArea {
-              anchors.fill: parent
-              cursorShape: Qt.PointingHandCursor
-              onClicked: { root.settle(); root.service.select(chip.modelData); }
+            Text {
+              Layout.fillWidth: true
+              text: root.flow && root.flow.actionId ? root.flow.actionId : "unknown"
+              color: root.tokens.text
+              wrapMode: Text.WrapAnywhere
+              maximumLineCount: 2
+              elide: Text.ElideRight
+              textFormat: Text.PlainText
+              font { family: root.tokens.mono; pixelSize: 11 }
+            }
+          }
+
+          RowLayout {
+            Layout.fillWidth: true
+            spacing: 12
+
+            Text {
+              Layout.preferredWidth: 56
+              Layout.alignment: Qt.AlignTop
+              text: "User"
+              color: root.tokens.muted
+              font { family: root.tokens.font; pixelSize: 12 }
+            }
+            Text {
+              Layout.fillWidth: true
+              visible: !root.hasIdentities
+              text: root.identityName !== "" ? root.identityName : "Unknown user"
+              color: root.tokens.text
+              elide: Text.ElideRight
+              textFormat: Text.PlainText
+              font { family: root.tokens.font; pixelSize: 12 }
+            }
+            Flow {
+              Layout.fillWidth: true
+              visible: root.hasIdentities
+              spacing: 6
+
+              Repeater {
+                model: root.flow ? root.flow.identities : []
+
+                delegate: Rectangle {
+                  id: chip
+                  required property var modelData
+                  readonly property bool selected: root.flow && root.flow.selectedIdentity
+                    && root.flow.selectedIdentity.id === modelData.id
+                    && root.flow.selectedIdentity.isGroup === modelData.isGroup
+                  implicitWidth: chipText.implicitWidth + 20
+                  implicitHeight: 26
+                  radius: root.tokens.controlRadius
+                  color: chip.selected ? Qt.alpha(root.tokens.cyan, 0.14)
+                    : chipHover.hovered ? Qt.alpha(root.tokens.muted, 0.1)
+                    : "transparent"
+                  border.width: chip.selected ? 1.5 : 1
+                  border.color: chip.selected ? Qt.alpha(root.tokens.cyan, 0.6) : root.tokens.border
+
+                  Text {
+                    id: chipText
+                    anchors.centerIn: parent
+                    text: chip.modelData.displayName || chip.modelData.string || ""
+                    color: chip.selected ? root.tokens.cyan : root.tokens.muted
+                    font { family: root.tokens.font; pixelSize: 11; weight: chip.selected ? Font.DemiBold : Font.Normal }
+                  }
+                  HoverHandler { id: chipHover }
+                  MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: { root.settle(); root.service.select(chip.modelData); }
+                  }
+                }
+              }
             }
           }
         }
-        Item { Layout.fillWidth: true }
       }
 
       Text {
@@ -299,7 +352,7 @@ Item {
         color: root.tokens.alert
         wrapMode: Text.Wrap
         textFormat: Text.PlainText
-        font { family: root.tokens.font; pixelSize: 11 }
+        font { family: root.tokens.font; pixelSize: 12 }
       }
 
       Text {
@@ -309,30 +362,29 @@ Item {
         color: root.supplementaryError ? root.tokens.alert : root.tokens.muted
         wrapMode: Text.Wrap
         textFormat: Text.PlainText
-        font { family: root.tokens.font; pixelSize: 11 }
+        font { family: root.tokens.font; pixelSize: 12 }
       }
 
       ColumnLayout {
         Layout.fillWidth: true
-        Layout.topMargin: 2
-        spacing: 6
+        Layout.topMargin: 4
+        spacing: 8
         visible: root.responseRequired
 
         Text {
           Layout.fillWidth: true
-          visible: root.promptText !== ""
-          text: root.promptText
+          text: root.promptText !== "" ? root.promptText : "Password"
           color: root.tokens.muted
           elide: Text.ElideRight
-          font { family: root.tokens.font; pixelSize: 11 }
+          font { family: root.tokens.font; pixelSize: 12 }
         }
 
         TextField {
           id: field
           Layout.fillWidth: true
-          implicitHeight: 42
-          leftPadding: 12
-          rightPadding: 12
+          implicitHeight: 46
+          leftPadding: 14
+          rightPadding: 14
           enabled: !root.submitting
           selectByMouse: true
           passwordCharacter: "•"
@@ -341,18 +393,21 @@ Item {
           selectionColor: root.tokens.cyan
           selectedTextColor: root.tokens.background
           placeholderTextColor: root.tokens.muted
-          font { family: root.tokens.font; pixelSize: 13 }
+          font { family: root.tokens.font; pixelSize: 14 }
           verticalAlignment: TextInput.AlignVCenter
           onTextChanged: if (root.password !== text) root.password = text
           onAccepted: root.submit()
           Accessible.name: root.promptText !== "" ? root.promptText : "Password"
           background: Rectangle {
-            radius: 10
-            color: Qt.alpha(root.tokens.background, 0.55)
-            border.width: 1
+            radius: root.tokens.rowRadius
+            color: root.tokens.sunken
+            border.width: field.activeFocus ? 2 : 1
             border.color: field.activeFocus
               ? root.tokens.cyan
-              : root.failed ? Qt.alpha(root.tokens.alert, 0.7) : root.tokens.border
+              : root.failed ? Qt.alpha(root.tokens.alert, 0.7)
+              : fieldHover.hovered && field.enabled ? root.tokens.muted
+              : root.tokens.border
+            HoverHandler { id: fieldHover }
             Behavior on border.color { ColorAnimation { duration: root.tokens.entryDuration } }
           }
         }
@@ -360,7 +415,7 @@ Item {
 
       RowLayout {
         Layout.fillWidth: true
-        Layout.topMargin: 2
+        Layout.topMargin: 4
         visible: !root.responseRequired
         spacing: 8
 
@@ -380,20 +435,20 @@ Item {
           Layout.fillWidth: true
           text: "Waiting for authentication…"
           color: root.tokens.muted
-          font { family: root.tokens.font; pixelSize: 11 }
+          font { family: root.tokens.font; pixelSize: 12 }
         }
       }
 
       RowLayout {
         Layout.fillWidth: true
-        Layout.topMargin: 6
+        Layout.topMargin: 8
         spacing: 8
 
         Text {
           visible: root.submitting
           text: "Checking credentials…"
           color: root.tokens.muted
-          font { family: root.tokens.font; pixelSize: 11 }
+          font { family: root.tokens.font; pixelSize: 12 }
         }
 
         Item { Layout.fillWidth: true }
@@ -418,7 +473,7 @@ Item {
         RowLayout {
           id: detailsToggle
           anchors.left: parent.left
-          spacing: 5
+          spacing: 6
           Text {
             text: root.details ? "▾" : "▸"
             color: root.tokens.muted
@@ -426,10 +481,11 @@ Item {
           }
           Text {
             text: root.details ? "Hide details" : "Show details"
-            color: root.tokens.muted
+            color: detailsHover.hovered ? root.tokens.text : root.tokens.muted
             font { family: root.tokens.font; pixelSize: 11 }
           }
         }
+        HoverHandler { id: detailsHover }
         MouseArea {
           anchors.fill: parent
           cursorShape: Qt.PointingHandCursor
@@ -443,20 +499,6 @@ Item {
         spacing: 4
 
         Text {
-          text: "ACTION"
-          color: Qt.alpha(root.tokens.muted, 0.8)
-          font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1.2 }
-        }
-        Text {
-          Layout.fillWidth: true
-          text: root.flow && root.flow.actionId ? root.flow.actionId : "unknown"
-          color: root.tokens.text
-          wrapMode: Text.WrapAnywhere
-          textFormat: Text.PlainText
-          font { family: root.tokens.mono; pixelSize: 10 }
-        }
-        Text {
-          Layout.topMargin: 2
           text: "IDENTITIES"
           color: Qt.alpha(root.tokens.muted, 0.8)
           font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1.2 }
@@ -469,6 +511,7 @@ Item {
             text: (modelData.isGroup ? "group · " : "user · ") + (modelData.string || "")
             color: root.tokens.muted
             elide: Text.ElideRight
+            textFormat: Text.PlainText
             font { family: root.tokens.mono; pixelSize: 10 }
           }
         }
@@ -482,15 +525,15 @@ Item {
     property bool primary: false
     signal clicked()
 
-    implicitWidth: buttonLabel.implicitWidth + 30
-    implicitHeight: 38
-    radius: 10
+    implicitWidth: buttonLabel.implicitWidth + 32
+    implicitHeight: 36
+    radius: height / 2
     opacity: enabled ? 1 : 0.45
-    color: !enabled ? Qt.alpha(root.tokens.muted, 0.08)
-      : primary ? (pointer.containsMouse ? Qt.lighter(root.tokens.cyan, 1.08) : root.tokens.cyan)
-      : (pointer.containsMouse ? Qt.alpha(root.tokens.muted, 0.1) : "transparent")
+    color: primary ? (pointer.pressed ? Qt.alpha(root.tokens.cyan, 0.85) : pointer.containsMouse && enabled ? Qt.lighter(root.tokens.cyan, 1.08) : root.tokens.cyan)
+      : !enabled ? "transparent"
+      : pointer.pressed ? Qt.alpha(root.tokens.muted, 0.16) : pointer.containsMouse ? Qt.alpha(root.tokens.muted, 0.1) : "transparent"
     border.width: primary ? 0 : 1
-    border.color: root.tokens.border
+    border.color: pointer.containsMouse && enabled && !primary ? Qt.alpha(root.tokens.muted, 0.5) : root.tokens.border
 
     Text {
       id: buttonLabel
@@ -499,7 +542,7 @@ Item {
       color: button.primary ? root.tokens.background : root.tokens.text
       font {
         family: root.tokens.font
-        pixelSize: 11
+        pixelSize: 12
         weight: Font.DemiBold
       }
     }

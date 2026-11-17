@@ -146,12 +146,13 @@ Scope {
     Rectangle {
       id: card
       anchors.centerIn: parent
-      width: Math.max(1, Math.min(980, (window.width - 24) / root.tokens.scale))
-      height: Math.max(1, Math.min(680, (window.height - 24) / root.tokens.scale))
+      width: Math.max(1, Math.min(980, (window.width - 48) / root.tokens.scale))
+      height: Math.max(1, Math.min(680, (window.height - 48) / root.tokens.scale))
       scale: root.tokens.scale * (0.97 + 0.03 * root.reveal)
       transformOrigin: Item.Center
       color: root.tokens.surface
-      radius: 22
+      radius: root.tokens.panelRadius
+      border.width: 1
       border.color: root.tokens.border
       opacity: root.reveal
       enabled: root.opened

@@ -37,7 +37,7 @@ ScrollView {
   }
   component Eyebrow: Caption {
     color: root.tokens.cyan
-    font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1.3 }
+    font { family: root.tokens.mono; pixelSize: 10; letterSpacing: 1 }
   }
   component Diagnostic: Caption {
     visible: text !== ""
@@ -46,7 +46,6 @@ ScrollView {
   }
   component Section: PanelCard {
     tokens: root.tokens
-    radius: 12
     contentSpacing: 12
   }
   component ProfileIcon: Shape {
@@ -73,12 +72,10 @@ ScrollView {
   component Action: PanelButton {
     id: action
     property string symbol: ""
-    readonly property color accent: destructive ? root.tokens.alert : root.tokens.cyan
     tokens: root.tokens
     Layout.fillWidth: true
     Layout.minimumWidth: 0
-    implicitHeight: 38
-    opacity: enabled ? 1 : 0.4
+    implicitHeight: 40
     contentItem: RowLayout {
       spacing: 8
       Text {
@@ -92,16 +89,10 @@ ScrollView {
         text: action.text
         textFormat: Text.PlainText
         elide: Text.ElideRight
-        color: action.destructive || action.selected ? action.accent : root.tokens.text
-        font { family: root.tokens.font; pixelSize: 11; weight: Font.Medium }
+        color: action.ink
+        font { family: root.tokens.font; pixelSize: 12; weight: Font.Medium }
         verticalAlignment: Text.AlignVCenter
       }
-    }
-    background: Rectangle {
-      radius: 8
-      color: Qt.alpha(action.accent, action.down ? 0.16 : action.selected ? 0.1 : action.hovered ? 0.07 : 0.025)
-      border.color: action.visualFocus ? root.tokens.gold : Qt.alpha(action.accent, action.selected ? 0.4 : action.hovered ? 0.3 : 0.13)
-      Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
     }
   }
 
@@ -128,7 +119,7 @@ ScrollView {
             anchors.centerIn: parent
             text: Data.SystemData.externalPower ? "PLUGGED IN" : root.batteryAvailable ? "BATTERY" : "NO DATA"
             color: root.batteryAccent
-            font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 0.8 }
+            font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 0.8 }
           }
         }
       }
@@ -262,30 +253,16 @@ ScrollView {
           }
           Caption { text: "Keeps your device awake while you work." }
         }
-        Switch {
+        PanelSwitch {
           id: caffeineToggle
           objectName: "powerCaffeineToggle"
-          implicitWidth: 44; implicitHeight: 32
+          tokens: root.tokens
           checked: root.power.caffeineSaved
           enabled: root.power.caffeineAvailable && !root.power.caffeinePending
           opacity: enabled ? 1 : 0.4
-          focusPolicy: Qt.StrongFocus
           Accessible.name: "Caffeine"
           Accessible.description: "Preference " + (root.power.caffeineSaved ? "on" : "off") + (root.power.caffeineActive ? ", service active" : ", service inactive")
           onToggled: root.power.caffeineToggle()
-          indicator: Rectangle {
-            x: 2; y: (caffeineToggle.height - height) / 2
-            implicitWidth: 40; implicitHeight: 24; radius: 12
-            color: caffeineToggle.checked ? root.tokens.cyan : Qt.alpha(root.tokens.muted, 0.15)
-            border.color: caffeineToggle.visualFocus ? root.tokens.gold : root.tokens.border
-            Rectangle {
-              x: caffeineToggle.checked ? 19 : 3; y: 3
-              width: 18; height: 18; radius: 9
-              color: caffeineToggle.checked ? root.tokens.background : root.tokens.muted
-              Behavior on x { NumberAnimation { duration: root.tokens.hoverDuration } }
-            }
-          }
-          contentItem: Item {}
         }
       }
       Diagnostic { text: root.power.caffeineError }
@@ -345,8 +322,9 @@ ScrollView {
           validator: IntValidator { bottom: 1; top: 100 }
           Accessible.name: "Charge limit percentage"
           background: Rectangle {
-            radius: 8
-            color: root.tokens.surface
+            radius: root.tokens.rowRadius
+            color: root.tokens.background
+            border.width: threshold.activeFocus ? 2 : 1
             border.color: threshold.activeFocus ? root.tokens.gold : root.tokens.border
           }
         }
@@ -393,9 +371,9 @@ ScrollView {
         Layout.fillWidth: true
         implicitHeight: confirmationBody.implicitHeight + 24
         visible: Data.SessionData.confirmation !== ""
-        radius: 8
-        color: Qt.alpha(root.tokens.alert, 0.055)
-        border.color: Qt.alpha(root.tokens.alert, 0.2)
+        radius: root.tokens.rowRadius
+        color: Qt.alpha(root.tokens.alert, 0.08)
+        border.color: Qt.alpha(root.tokens.alert, 0.35)
         ColumnLayout {
           id: confirmationBody
           anchors { left: parent.left; right: parent.right; top: parent.top; margins: 12 }

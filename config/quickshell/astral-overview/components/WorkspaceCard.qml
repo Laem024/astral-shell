@@ -55,7 +55,7 @@ Item {
   Rectangle {
     id: background
     anchors.fill: parent
-    radius: 16
+    radius: root.tokens.cardRadius
     color: "transparent"
     gradient: Gradient {
       orientation: Gradient.Vertical
@@ -175,7 +175,7 @@ Item {
       Layout.alignment: Qt.AlignVCenter
       implicitWidth: chipRow.implicitWidth + 16
       implicitHeight: 32
-      radius: 10
+      radius: 16
       color: root.monitorMenuOpen ? Qt.alpha(root.tokens.cyan, 0.18)
         : chipHover.hovered && root.canMoveMonitor ? Qt.alpha(root.tokens.cyan, 0.10)
         : "transparent"
@@ -315,7 +315,7 @@ Item {
     height: menuColumn.implicitHeight + 12
     x: parent.width - width - root.cardPadding
     y: root.cardPadding + root.headerHeight + 4
-    radius: 10
+    radius: root.tokens.cardRadius
     color: Qt.alpha(root.tokens.surface, 0.99)
     border.width: 1
     border.color: Qt.alpha(root.tokens.cyan, 0.38)
@@ -403,7 +403,7 @@ Item {
   Rectangle {
     visible: root.dropTarget
     anchors.fill: parent
-    radius: 16
+    radius: root.tokens.cardRadius
     color: "transparent"
     border.width: 2
     border.color: root.tokens.cyan

@@ -36,7 +36,12 @@ FocusScope {
       width: 28; height: 28; text: "‹"; focus: true
       Accessible.name: "Back"
       onClicked: root.backRequested()
-      background: Rectangle { radius: 5; color: backButton.hovered || backButton.activeFocus ? Qt.alpha(root.tokens.cyan, 0.15) : "transparent" }
+      background: Rectangle {
+        radius: root.tokens.rowRadius
+        color: backButton.hovered ? Qt.alpha(root.tokens.text, 0.08) : "transparent"
+        border.width: backButton.activeFocus ? 2 : 0
+        border.color: root.tokens.cyan
+      }
       contentItem: Text { text: backButton.text; color: root.tokens.cyan; font.pixelSize: 22; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
     }
     Text {
@@ -94,8 +99,10 @@ FocusScope {
               else { modelData.triggered(); root.dismissed(); }
             }
             background: Rectangle {
-              radius: 5
-              color: action.hovered || action.activeFocus ? Qt.alpha(root.tokens.cyan, 0.15) : "transparent"
+              radius: root.tokens.rowRadius
+              color: action.hovered ? Qt.alpha(root.tokens.text, 0.08) : "transparent"
+              border.width: action.activeFocus ? 2 : 0
+              border.color: root.tokens.cyan
             }
             contentItem: Item {
               opacity: action.enabled ? 1 : 0.45

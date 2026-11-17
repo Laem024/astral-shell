@@ -92,19 +92,19 @@ Scope {
     }
     Rectangle {
       anchors.fill: parent
-      color: Qt.alpha(root.tokens.background, 0.58)
+      color: root.tokens.scrim
       opacity: root.reveal
     }
     MouseArea { anchors.fill: parent; onClicked: root.close() }
     Rectangle {
       id: card
       anchors.centerIn: parent
-      width: Math.max(1, Math.min(820, (window.width - 24) / root.tokens.scale))
-      height: Math.max(1, Math.min(500, (window.height - 24) / root.tokens.scale))
+      width: Math.max(1, Math.min(640, (window.width - 48) / root.tokens.scale))
+      height: Math.max(1, Math.min(480, (window.height - 48) / root.tokens.scale))
       scale: root.tokens.scale * (0.97 + 0.03 * root.reveal)
       transformOrigin: Item.Center
       color: root.tokens.surface
-      radius: 22
+      radius: root.tokens.panelRadius
       border.color: root.tokens.border
       opacity: root.reveal
       enabled: root.opened

@@ -9,7 +9,6 @@ import "../data" as Data
 PanelCard {
   id: root
   title: ""
-  radius: 12
   contentSpacing: 14
   readonly property color accent: root.tokens.gold
   readonly property var service: Data.VpnData
@@ -71,54 +70,20 @@ PanelCard {
     textFormat: Text.PlainText
     wrapMode: Text.Wrap
     color: root.tokens.text
-    font { family: root.tokens.font; pixelSize: 12 }
+    font { family: root.tokens.font; pixelSize: 13 }
   }
   component Caption: Label {
     color: root.tokens.muted
-    font.pixelSize: 10
+    font.pixelSize: 11
   }
   component Eyebrow: Caption {
     color: root.accent
-    font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1.2 }
+    font { family: root.tokens.mono; pixelSize: 10; letterSpacing: 1 }
   }
   component Action: PanelButton {
-    id: action
     tokens: root.tokens
-    property color tint: root.accent
-    readonly property color accent: action.destructive ? root.tokens.alert : action.tint
-    property string symbol: ""
-    property bool quiet: false
+    tint: root.accent
     Layout.minimumWidth: 0
-    implicitHeight: 36
-    opacity: enabled ? 1 : 0.4
-    contentItem: RowLayout {
-      spacing: 6
-      Text {
-        visible: action.symbol !== ""
-        text: action.symbol
-        color: action.accent
-        font { family: root.tokens.mono; pixelSize: 13 }
-      }
-      Text {
-        Layout.fillWidth: true
-        text: action.text
-        textFormat: Text.PlainText
-        elide: Text.ElideRight
-        horizontalAlignment: Text.AlignLeft
-        verticalAlignment: Text.AlignVCenter
-        color: action.destructive || action.selected ? action.accent : root.tokens.text
-        font { family: root.tokens.font; pixelSize: 11; weight: Font.Medium }
-      }
-    }
-    background: Rectangle {
-      radius: 7
-      color: action.quiet
-        ? (action.down || action.hovered || action.activeFocus ? Qt.alpha(action.accent, 0.07) : "transparent")
-        : Qt.alpha(action.accent, action.down ? 0.16 : action.selected ? 0.1 : action.hovered ? 0.06 : 0.025)
-      border.color: action.activeFocus ? root.tokens.gold
-        : action.quiet ? "transparent"
-        : Qt.alpha(action.accent, action.selected ? 0.38 : action.hovered ? 0.26 : 0.12)
-    }
   }
   component Field: TextField {
     Layout.fillWidth: true
@@ -129,11 +94,12 @@ PanelCard {
     placeholderTextColor: root.tokens.muted
     selectionColor: root.accent
     selectedTextColor: root.tokens.background
-    font { family: root.tokens.font; pixelSize: 12 }
+    font { family: root.tokens.font; pixelSize: 13 }
     background: Rectangle {
-      radius: 7
-      color: Qt.alpha(root.tokens.surface, 0.7)
-      border.color: parent.activeFocus ? root.accent : root.tokens.border
+      radius: root.tokens.rowRadius
+      color: root.tokens.background
+      border.width: parent.activeFocus ? 2 : 1
+      border.color: parent.activeFocus ? root.tokens.cyan : root.tokens.border
     }
   }
   component VpnRow: Button {
@@ -143,8 +109,8 @@ PanelCard {
     property bool active: false
     Layout.fillWidth: true
     Layout.minimumWidth: 0
-    implicitHeight: 56
-    leftPadding: 12; rightPadding: 12; topPadding: 10; bottomPadding: 10
+    implicitHeight: 58
+    leftPadding: 12; rightPadding: 12; topPadding: 8; bottomPadding: 8
     opacity: enabled ? 1 : 0.5
     Accessible.name: name + ". " + detail + (active ? ". Disconnect" : ". Connect")
 
@@ -175,7 +141,7 @@ PanelCard {
         text: "CONNECT"
         textFormat: Text.PlainText
         color: root.tokens.muted
-        font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 0.5 }
+        font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 0.5 }
       }
       Text {
         visible: !vpnRow.active
@@ -185,11 +151,12 @@ PanelCard {
       }
     }
     background: Rectangle {
-      radius: 9
-      color: vpnRow.active ? Qt.alpha(root.accent, 0.06)
-        : vpnRow.hovered ? Qt.alpha(root.tokens.surface, 0.7) : "transparent"
-      border.color: vpnRow.activeFocus ? root.accent
-        : vpnRow.active ? Qt.alpha(root.accent, 0.3) : "transparent"
+      radius: root.tokens.rowRadius
+      color: vpnRow.active ? Qt.alpha(root.accent, 0.08)
+        : vpnRow.hovered || vpnRow.activeFocus ? Qt.alpha(root.tokens.text, 0.05) : root.tokens.background
+      border.width: vpnRow.activeFocus ? 2 : 1
+      border.color: vpnRow.activeFocus ? root.tokens.cyan
+        : vpnRow.active ? Qt.alpha(root.accent, 0.35) : root.tokens.hairline
     }
   }
   component FileRow: Button {
@@ -232,9 +199,10 @@ PanelCard {
       }
     }
     background: Rectangle {
-      radius: 7
-      color: fileRow.hovered ? Qt.alpha(root.tokens.surface, 0.7) : "transparent"
-      border.color: fileRow.activeFocus ? root.accent : "transparent"
+      radius: root.tokens.rowRadius
+      color: fileRow.hovered ? Qt.alpha(root.tokens.text, 0.05) : "transparent"
+      border.width: fileRow.activeFocus ? 2 : 0
+      border.color: root.tokens.cyan
     }
   }
 
@@ -257,7 +225,7 @@ PanelCard {
         text: "VPN"
         textFormat: Text.PlainText
         color: root.tokens.text
-        font { family: root.tokens.font; pixelSize: 19; weight: Font.Medium }
+        font { family: root.tokens.font; pixelSize: 18; weight: Font.Medium }
       }
       Caption { text: root.service.state }
     }
@@ -272,9 +240,9 @@ PanelCard {
     Layout.fillWidth: true
     visible: root.service.error !== ""
     implicitHeight: errorText.implicitHeight + 24
-    radius: 8
-    color: Qt.alpha(root.tokens.alert, 0.07)
-    border.color: Qt.alpha(root.tokens.alert, 0.3)
+    radius: root.tokens.rowRadius
+    color: Qt.alpha(root.tokens.alert, 0.1)
+    border.color: Qt.alpha(root.tokens.alert, 0.35)
     Text {
       id: errorText
       anchors { left: parent.left; right: parent.right; top: parent.top; margins: 12 }

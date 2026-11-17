@@ -43,7 +43,7 @@ PanelWindow {
   // The tray cap fits four complete 72px rows plus its header and margins, so
   // scrolling only appears once a fifth row would be needed.
   implicitHeight: Math.max(1, Math.min((menu
-    ? Math.max(120, (contentLoader.item ? (contentLoader.item as Item).implicitHeight : 176) + 24)
+    ? Math.max(120, (contentLoader.item ? (contentLoader.item as Item).implicitHeight : 176) + 32)
     : tray ? Math.min(364, (contentLoader.item ? (contentLoader.item as Item).implicitHeight : 108) + 32) : 680) * factor, barWindow.screen.height - (!vertical ? barWindow.height + settings.value.margin + 6 * factor : 0)))
   readonly property real popupX: clamp(edge === "left" ? barX + barWindow.width + 6 * factor
     : edge === "right" ? barX - width - 6 * factor
@@ -81,25 +81,15 @@ PanelWindow {
     id: frame
     width: root.width / root.factor; height: root.height / root.factor
     scale: root.factor; transformOrigin: Item.TopLeft
-    radius: 7; color: root.tokens.surface; border.color: root.tokens.border
+    radius: root.tokens.panelRadius; color: root.tokens.surface
+    border.color: root.tokens.border; border.width: 1
     focus: true
     Keys.onEscapePressed: root.navigation.close()
-    Rectangle {
-      anchors {
-        left: parent.left
-        leftMargin: 1
-        top: contentLoader.top
-        bottom: contentLoader.bottom
-      }
-      width: 2
-      radius: 1
-      color: root.tokens.alert
-    }
     Loader {
       id: contentLoader
       focus: true
       active: root.visible
-      anchors.fill: parent; anchors.margins: root.tray ? 16 : 12
+      anchors.fill: parent; anchors.margins: root.tokens.inset
       sourceComponent: root.menu ? windowMenu : root.tray ? trayContent : panelContent
     }
   }

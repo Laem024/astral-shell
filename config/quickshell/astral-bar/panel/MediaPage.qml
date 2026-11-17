@@ -135,18 +135,9 @@ Item {
 
   Rectangle {
     anchors.fill: parent
-    radius: 14
-    color: root.tokens.background
+    radius: root.tokens.cardRadius
+    color: root.tokens.raised
     border.color: root.tokens.border
-    Rectangle {
-      x: 1; y: 1
-      width: parent.width - 2; height: Math.min(180, parent.height - 2)
-      radius: 13
-      gradient: Gradient {
-        GradientStop { position: 0; color: Qt.alpha(root.tokens.cyan, 0.065) }
-        GradientStop { position: 1; color: "transparent" }
-      }
-    }
   }
   Flickable {
     id: scroll
@@ -176,17 +167,18 @@ Item {
         currentIndex: Math.max(0, model.findIndex(row => row.key === root.media.manualName))
         onActivated: index => root.media.select(model[index].key)
         background: Rectangle {
-          radius: 9
-          color: Qt.alpha(root.tokens.cyan, selector.hovered || selector.popup.visible ? 0.08 : 0.035)
-          border.color: selector.visualFocus ? root.tokens.gold
-            : Qt.alpha(root.tokens.cyan, selector.popup.visible ? 0.3 : 0.12)
+          radius: root.tokens.rowRadius
+          color: selector.hovered || selector.popup.visible ? Qt.alpha(root.tokens.text, 0.08) : root.tokens.background
+          border.width: selector.visualFocus ? 2 : 1
+          border.color: selector.visualFocus ? root.tokens.cyan
+            : Qt.alpha(root.tokens.cyan, selector.popup.visible ? 0.4 : 0.2)
         }
         contentItem: RowLayout {
           spacing: 12
           Text {
             text: "PLAYER"
             color: root.tokens.muted
-            font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 1 }
+            font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1 }
           }
           Text {
             Layout.fillWidth: true
@@ -287,13 +279,6 @@ Item {
             radius: 16
             color: Qt.alpha(root.tokens.cyan, 0.06)
           }
-          Rectangle {
-            anchors.fill: parent
-            anchors.margins: -3
-            radius: 16
-            color: root.tokens.surface
-            border.color: Qt.alpha(root.tokens.cyan, 0.18)
-          }
           Item {
             anchors.fill: parent
             clip: true
@@ -344,26 +329,33 @@ Item {
               smooth: true
               mipmap: true
             }
-            // Native corner masks keep artwork visible on software renderers too.
-            Repeater {
-              model: 4
-              Shape {
-                required property int index
-                width: 13; height: 13
-                x: index === 1 || index === 2 ? parent.width - width : 0
-                y: index >= 2 ? parent.height - height : 0
-                rotation: index * 90
-                preferredRendererType: Shape.CurveRenderer
-                ShapePath {
-                  strokeColor: "transparent"
-                  fillColor: root.tokens.surface
-                  startX: 0; startY: 0
-                  PathLine { x: 13; y: 0 }
-                  PathQuad { x: 0; y: 13; controlX: 0; controlY: 0 }
-                  PathLine { x: 0; y: 0 }
-                }
+          }
+          // Corner masks use the card colour and the outline radius, so the
+          // artwork meets the rounded contour without a visible notch.
+          Repeater {
+            model: 4
+            Shape {
+              required property int index
+              width: 16; height: 16
+              x: index === 1 || index === 2 ? parent.width - width : 0
+              y: index >= 2 ? parent.height - height : 0
+              rotation: index * 90
+              preferredRendererType: Shape.CurveRenderer
+              ShapePath {
+                strokeColor: "transparent"
+                fillColor: root.tokens.raised
+                startX: 0; startY: 0
+                PathLine { x: 16; y: 0 }
+                PathCubic { x: 0; y: 16; control1X: 7.16; control1Y: 0; control2X: 0; control2Y: 7.16 }
+                PathLine { x: 0; y: 0 }
               }
             }
+          }
+          Rectangle {
+            anchors.fill: parent
+            radius: 16
+            color: "transparent"
+            border.color: Qt.alpha(root.tokens.cyan, 0.18)
           }
         }
         ColumnLayout {

@@ -92,9 +92,10 @@ FocusScope {
         anchors.centerIn: parent
         width: 48; height: 48
         Rectangle {
-          anchors.fill: parent; radius: 8
-          color: hover.hovered || app.activeFocus || root.menuOpen ? Qt.alpha(root.tokens.cyan, 0.15) : "transparent"
-          border.color: app.activeFocus ? root.tokens.cyan : "transparent"
+          anchors.fill: parent; radius: root.tokens.rowRadius
+          color: hover.hovered || app.activeFocus || root.menuOpen ? Qt.alpha(root.tokens.text, 0.08) : "transparent"
+          border.width: app.activeFocus ? 2 : 0
+          border.color: root.tokens.cyan
           Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
         }
         Image {

@@ -137,7 +137,7 @@ Item {
       anchors { right: closeButton.left; rightMargin: 14; verticalCenter: parent.verticalCenter }
       spacing: 8
       Rectangle {
-        width: collectionLabel.implicitWidth + 18; height: 24; radius: 7
+        width: collectionLabel.implicitWidth + 20; height: 24; radius: 12
         color: Qt.alpha(root.tokens.cyan, 0.10)
         border.width: 1
         border.color: Qt.alpha(root.tokens.cyan, 0.30)
@@ -152,7 +152,7 @@ Item {
       }
       Rectangle {
         visible: root.monitorName.length > 0
-        width: monitorRow.implicitWidth + 18; height: 24; radius: 7
+        width: monitorRow.implicitWidth + 20; height: 24; radius: 12
         color: "transparent"
         border.width: 1
         border.color: root.tokens.border
@@ -274,7 +274,7 @@ Item {
           Rectangle {
             id: card
             anchors.fill: parent
-            radius: 18
+            radius: root.tokens.cardRadius + 4
             clip: true
             color: root.tokens.background
             Thumbnail {
@@ -471,7 +471,7 @@ Item {
       id: panel
       anchors { left: parent.left; right: parent.right; top: parent.top }
       height: 88
-      radius: 20
+      radius: root.tokens.panelRadius
       color: Qt.alpha(root.tokens.surface, 0.84)
       border.width: 1
       border.color: Qt.alpha(root.tokens.text, 0.07)
@@ -487,7 +487,7 @@ Item {
             id: numberText
             text: root.currentIndex >= 0 ? root.pad(root.currentIndex + 1) : "00"
             color: root.tokens.cyan
-            font.family: root.tokens.font
+            font.family: root.tokens.mono
             font.pixelSize: 30
             font.bold: true
             anchors.verticalCenter: parent.verticalCenter
@@ -497,7 +497,7 @@ Item {
             anchors { left: numberText.right; leftMargin: 3; baseline: numberText.baseline }
             text: "/ " + root.items.length
             color: root.tokens.muted
-            font.family: root.tokens.font
+            font.family: root.tokens.mono
             font.pixelSize: 12
           }
           Text {
@@ -560,7 +560,7 @@ Item {
               anchors.verticalCenter: parent.verticalCenter
               text: root.current ? (root.current.relative || root.current.path) : ""
               color: root.tokens.muted
-              font.family: root.tokens.font
+              font.family: root.tokens.mono
               font.pixelSize: 10
               elide: Text.ElideMiddle
             }
@@ -610,7 +610,7 @@ Item {
               anchors.centerIn: parent
               text: modelData.key
               color: root.tokens.text
-              font.family: root.tokens.font
+              font.family: root.tokens.mono
               font.pixelSize: 9
               font.bold: true
             }

@@ -2,7 +2,8 @@ import QtQuick
 
 QtObject {
   required property var settings
-  readonly property var palette: settings.value.colors[settings.value.mode === "light" ? "light" : "dark"]
+  readonly property bool light: settings.value.mode === "light"
+  readonly property var palette: settings.value.colors[light ? "light" : "dark"]
   readonly property color background: palette.background
   readonly property color surface: palette.surface
   readonly property color text: palette.text
@@ -11,12 +12,16 @@ QtObject {
   readonly property color lavender: palette.lavender
   readonly property color gold: palette.gold
   readonly property color alert: palette.alert
-  readonly property color border: Qt.alpha(muted, 0.18)
-  readonly property color hairline: Qt.alpha(muted, 0.1)
+  readonly property color raised: Qt.tint(surface, Qt.alpha(text, light ? 0.05 : 0.06))
+  readonly property color sunken: Qt.tint(background, Qt.alpha(text, 0.03))
+  readonly property color border: Qt.alpha(text, light ? 0.14 : 0.1)
+  readonly property color hairline: Qt.alpha(text, 0.06)
+  readonly property color scrim: Qt.alpha(background, 0.72)
   readonly property var accents: [cyan, lavender, gold]
-  readonly property int panelRadius: 26
-  readonly property int cardRadius: 17
-  readonly property int rowRadius: 7
+  readonly property int panelRadius: 20
+  readonly property int cardRadius: 14
+  readonly property int rowRadius: 10
+  readonly property int controlRadius: 999
   function accentAt(index) { return accents[((index % accents.length) + accents.length) % accents.length]; }
   readonly property string font: "sans-serif"
   readonly property string mono: "JetBrainsMono Nerd Font"

@@ -12,9 +12,11 @@ Button {
   property bool holding: false
   property real progress: 0
   readonly property bool holdRequired: actionData.hold === true
-  readonly property color accent: actionData.accent === "alert" ? tokens.alert : actionData.accent === "gold" ? tokens.gold : tokens.cyan
+  readonly property bool destructive: actionData.id === "reboot" || actionData.id === "poweroff"
+  readonly property color accent: destructive || actionData.accent === "alert" ? tokens.alert
+    : actionData.accent === "gold" ? tokens.gold : tokens.cyan
   readonly property string detail: actionData.detail || ""
-  readonly property int orbSize: root.compact ? 36 : 42
+  readonly property int orbSize: root.compact ? 36 : 40
   signal holdStarted()
   signal holdEnded()
   signal activated()
@@ -29,14 +31,14 @@ Button {
   onClicked: if (!root.holdRequired) root.activated()
 
   contentItem: Item {
-    implicitHeight: root.compact ? 54 : 62
+    implicitHeight: root.compact ? 52 : 60
     HoverHandler { cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
 
     RowLayout {
       anchors.fill: parent
-      anchors.leftMargin: root.compact ? 10 : 12
-      anchors.rightMargin: root.compact ? 10 : 12
-      spacing: root.compact ? 10 : 14
+      anchors.leftMargin: root.compact ? 12 : 16
+      anchors.rightMargin: root.compact ? 12 : 16
+      spacing: root.compact ? 12 : 16
 
       Item {
         id: orb
@@ -84,15 +86,16 @@ Button {
         Rectangle {
           anchors.fill: parent
           radius: width / 2
-          color: Qt.alpha(root.accent, root.holding ? 0.2 : root.hovered ? 0.1 : 0.06)
-          border.color: Qt.alpha(root.accent, root.holding ? 0.6 : 0.18)
+          color: Qt.alpha(root.accent, root.holding ? 0.22 : root.hovered ? 0.14 : 0.08)
+          border.width: 1
+          border.color: Qt.alpha(root.accent, root.holding ? 0.6 : root.hovered ? 0.35 : 0.22)
           Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
           Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
           Text {
             anchors.centerIn: parent
             text: root.actionData.glyph
             color: root.accent
-            font { family: root.tokens.mono; pixelSize: root.compact ? 18 : 21 }
+            font { family: root.tokens.mono; pixelSize: root.compact ? 17 : 19 }
           }
         }
       }
@@ -100,14 +103,14 @@ Button {
       ColumnLayout {
         Layout.fillWidth: true
         Layout.minimumWidth: 0
-        spacing: 1
+        spacing: 2
         Text {
           Layout.fillWidth: true
           text: root.actionData.label
           textFormat: Text.PlainText
           elide: Text.ElideRight
           color: root.holding ? root.accent : root.tokens.text
-          font { family: root.tokens.font; pixelSize: root.compact ? 13 : 15; weight: Font.DemiBold }
+          font { family: root.tokens.font; pixelSize: root.compact ? 13 : 14; weight: Font.DemiBold }
         }
         Text {
           Layout.fillWidth: true
@@ -123,16 +126,17 @@ Button {
 
       Rectangle {
         Layout.alignment: Qt.AlignVCenter
-        implicitWidth: 24
-        implicitHeight: 24
-        radius: 7
-        color: Qt.alpha(root.accent, root.holding ? 0.22 : 0.08)
-        border.color: Qt.alpha(root.accent, root.holding ? 0.55 : 0.22)
+        implicitWidth: 26
+        implicitHeight: 22
+        radius: root.tokens.rowRadius
+        color: root.holding ? Qt.alpha(root.accent, 0.16) : "transparent"
+        border.width: 1
+        border.color: root.holding ? Qt.alpha(root.accent, 0.55) : root.tokens.border
         Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
         Text {
           anchors.centerIn: parent
           text: root.actionData.shortcut
-          color: root.accent
+          color: root.holding ? root.accent : root.tokens.muted
           font { family: root.tokens.mono; pixelSize: 10; weight: Font.DemiBold }
         }
       }
@@ -140,15 +144,17 @@ Button {
   }
 
   background: Rectangle {
-    radius: root.compact ? 12 : 14
-    color: root.holding ? Qt.alpha(root.accent, 0.1)
-      : root.down ? Qt.alpha(root.accent, 0.08)
-      : root.hovered ? Qt.alpha(root.accent, 0.045)
-      : Qt.alpha(root.tokens.muted, 0.025)
-    border.width: root.visualFocus ? 1.5 : 1
-    border.color: root.visualFocus ? Qt.alpha(root.accent, 0.6)
-      : root.holding ? Qt.alpha(root.accent, 0.4)
-      : "transparent"
+    radius: root.compact ? root.tokens.rowRadius : root.tokens.cardRadius
+    color: root.holding ? Qt.alpha(root.accent, 0.12)
+      : root.down ? Qt.alpha(root.accent, 0.1)
+      : root.hovered ? Qt.alpha(root.accent, 0.07)
+      : root.destructive ? Qt.alpha(root.accent, 0.04)
+      : root.tokens.raised
+    border.width: root.visualFocus ? 2 : 1
+    border.color: root.visualFocus ? Qt.alpha(root.accent, 0.7)
+      : root.holding ? Qt.alpha(root.accent, 0.45)
+      : root.hovered ? Qt.alpha(root.accent, 0.25)
+      : root.tokens.border
     Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
     Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
   }

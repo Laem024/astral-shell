@@ -15,17 +15,11 @@ InfoTile {
   implicitHeight: 40
   Rectangle {
     anchors.centerIn: parent
-    width: 38; height: 38
-    radius: 7
-    color: Qt.alpha(root.tokens.cyan, 0.06)
-    border.color: Qt.alpha(root.ink, 0.25)
+    width: 36; height: 36
+    radius: root.tokens.rowRadius
+    color: root.tokens.raised
+    border.color: Qt.alpha(root.ink, root.hovered ? 0.5 : 0.25)
     Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
-  }
-  NeonOutline {
-    anchors.centerIn: parent
-    width: 38; height: 38; radius: 7
-    tokens: root.tokens
-    active: root.hovered
   }
   Shape {
     anchors.centerIn: parent

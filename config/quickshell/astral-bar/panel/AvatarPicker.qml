@@ -78,12 +78,13 @@ FocusScope {
     Text {
       Layout.fillWidth: true
       text: root.banner ? "Panel banner" : "Account photo"
-      color: root.tokens.text; font { family: root.tokens.font; pixelSize: 22 }
+      color: root.tokens.text; font { family: root.tokens.font; pixelSize: 18; weight: Font.Medium }
     }
     Text {
       Layout.fillWidth: true
       text: root.banner ? "A background shared by your panels." : "This changes your system account photo."
-      color: root.tokens.muted; font.family: root.tokens.font; wrapMode: Text.Wrap
+      color: root.tokens.muted; wrapMode: Text.Wrap
+      font { family: root.tokens.font; pixelSize: 12 }
     }
     RowLayout {
       visible: !root.editing
@@ -98,7 +99,11 @@ FocusScope {
         text: decodeURIComponent(files.folder.toString().replace(/^file:\/\//, ""))
         color: root.tokens.text
         font.family: root.tokens.font
-        background: Rectangle { color: root.tokens.background; radius: 5; border.color: parent.activeFocus ? root.tokens.cyan : root.tokens.border }
+        background: Rectangle {
+          color: root.tokens.background; radius: root.tokens.rowRadius
+          border.width: parent.activeFocus ? 2 : 1
+          border.color: parent.activeFocus ? root.tokens.cyan : root.tokens.border
+        }
         Accessible.name: "Folder path"
         onAccepted: {
           if (text.startsWith("/")) files.folder = Data.BannerData.fileUrl(text);

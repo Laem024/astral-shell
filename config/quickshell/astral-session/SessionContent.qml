@@ -12,7 +12,7 @@ FocusScope {
   readonly property var actions: Logic.actions.filter(action => Common.SessionActions.available(action.id))
   readonly property bool busy: Common.SessionActions.pending
   readonly property bool failed: Common.SessionActions.error !== ""
-  readonly property bool compact: width < 760 || height < 470
+  readonly property bool compact: width < 480 || height < 420
   readonly property string subtitle: root.busy ? "Working…"
     : root.failed ? Common.SessionActions.error
     : "Choose an action. Destructive ones need a short hold."
@@ -126,25 +126,26 @@ FocusScope {
 
   ColumnLayout {
     anchors.fill: parent
-    anchors.margins: root.compact ? 18 : 28
-    spacing: root.compact ? 10 : 14
+    anchors.margins: root.compact ? 16 : 24
+    spacing: root.compact ? 12 : 16
 
     RowLayout {
       Layout.fillWidth: true
-      spacing: root.compact ? 12 : 16
+      spacing: 16
 
       Rectangle {
-        Layout.preferredWidth: root.compact ? 46 : 54
+        Layout.preferredWidth: root.compact ? 44 : 48
         Layout.preferredHeight: Layout.preferredWidth
         Layout.alignment: Qt.AlignTop
         radius: width / 2
-        color: Qt.alpha(root.tokens.cyan, 0.08)
-        border.color: Qt.alpha(root.tokens.cyan, 0.24)
+        color: Qt.alpha(root.tokens.cyan, 0.1)
+        border.width: 1
+        border.color: Qt.alpha(root.tokens.cyan, 0.3)
         Text {
           anchors.centerIn: parent
           text: "✦"
           color: root.tokens.cyan
-          font { family: root.tokens.mono; pixelSize: root.compact ? 23 : 27 }
+          font { family: root.tokens.mono; pixelSize: root.compact ? 20 : 22 }
         }
       }
 
@@ -155,25 +156,25 @@ FocusScope {
         Text {
           text: "ASTRAL"
           color: root.tokens.cyan
-          font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1.8 }
+          font { family: root.tokens.mono; pixelSize: 10; letterSpacing: 1.6 }
         }
         Text {
           Layout.fillWidth: true
           text: "End session"
           color: root.tokens.text
           elide: Text.ElideRight
-          font { family: root.tokens.font; pixelSize: root.compact ? 24 : 30; weight: Font.DemiBold }
+          font { family: root.tokens.font; pixelSize: root.compact ? 20 : 22; weight: Font.DemiBold }
         }
         Text {
           Layout.fillWidth: true
-          Layout.topMargin: 1
+          Layout.topMargin: 2
           text: root.subtitle
           textFormat: Text.PlainText
           color: root.subtitleColor
           wrapMode: Text.Wrap
           maximumLineCount: 2
           elide: Text.ElideRight
-          font { family: root.tokens.font; pixelSize: root.compact ? 11 : 12 }
+          font { family: root.tokens.font; pixelSize: 12 }
         }
       }
 
@@ -186,15 +187,18 @@ FocusScope {
         onClicked: root.closeRequested()
         contentItem: Text {
           text: "×"
-          color: root.tokens.muted
-          font.pixelSize: 23
+          color: closeButton.hovered ? root.tokens.text : root.tokens.muted
+          font { family: root.tokens.font; pixelSize: 20 }
           horizontalAlignment: Text.AlignHCenter
           verticalAlignment: Text.AlignVCenter
         }
         background: Rectangle {
-          radius: 16
-          color: closeButton.hovered ? Qt.alpha(root.tokens.muted, 0.12) : "transparent"
-          border.color: closeButton.activeFocus ? root.tokens.cyan : "transparent"
+          radius: root.tokens.controlRadius
+          color: closeButton.down ? Qt.alpha(root.tokens.muted, 0.18)
+            : closeButton.hovered ? Qt.alpha(root.tokens.muted, 0.1)
+            : "transparent"
+          border.width: closeButton.visualFocus ? 2 : 0
+          border.color: root.tokens.cyan
         }
       }
     }
@@ -202,13 +206,13 @@ FocusScope {
     Rectangle {
       Layout.fillWidth: true
       implicitHeight: 1
-      color: root.tokens.border
+      color: root.tokens.hairline
     }
 
     ColumnLayout {
       Layout.fillWidth: true
       Layout.fillHeight: true
-      spacing: root.compact ? 4 : 6
+      spacing: root.compact ? 6 : 8
 
       Repeater {
         id: listRepeater
@@ -216,10 +220,12 @@ FocusScope {
         delegate: ActionTile {
           required property var modelData
           required property int index
+          // A small gap separates session actions from power actions.
+          Layout.topMargin: index > 0 && modelData.hold && !root.actions[index - 1].hold ? 8 : 0
           Layout.fillWidth: true
           Layout.fillHeight: true
           Layout.minimumHeight: 46
-          Layout.preferredHeight: root.compact ? 54 : 62
+          Layout.preferredHeight: root.compact ? 52 : 60
           compact: root.compact
           tokens: root.tokens
           actionData: modelData

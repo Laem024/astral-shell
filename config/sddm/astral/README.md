@@ -1,8 +1,9 @@
 # Tema SDDM Astral
 
-Tema de inicio de sesión para SDDM 0.21 o superior con Qt 6. Usa la paleta oscura
-de Astral Shell, un cielo animado con estrellas titilantes y estrellas fugaces,
-y un panel de cristal centrado que solo aparece en la pantalla activa.
+Tema de inicio de sesión para SDDM 0.21 o superior con Qt 6. Usa el sistema de
+diseño de Astral (`docs/design-system.md`) en modo oscuro por defecto o claro, con
+un cielo animado y una tarjeta de acceso centrada que solo aparece en la pantalla
+activa.
 
 La interfaz está en inglés. La configuración vive en `theme.conf`; después de
 instalar el tema, edítala con privilegios:
@@ -35,12 +36,12 @@ astral-sddm-background --list
 
 | Clave | Valor por defecto | Efecto |
 | --- | --- | --- |
+| `mode` | `dark` | `dark` o `light` (cualquier otro valor usa `dark`) |
 | `background` | `aurora` | Preset, ruta relativa o absoluta |
 | `backgroundMode` | `fill` | `fill`, `fit`, `stretch` o `tile` |
 | `backgroundDrift` | `true` | Deriva lenta del fondo |
-| `overlay` | `0.24` | Oscurecimiento del fondo (0 a 1) |
-| `glassOpacity` | `0.52` | Opacidad del panel de cristal (0 a 1) |
-| `animations` | `true` | Entrada, estrellas, fugaces y shake |
+| `overlay` | `0.5` en oscuro, `0.72` en claro | Tinte del fondo hacia la paleta (0 a 1) |
+| `animations` | `true` | Entrada, estrellas, fugaces, parpadeo y sacudida |
 | `stars` | `true` | Estrellas titilantes |
 | `starDensity` | `1.0` | Densidad de estrellas |
 | `shootingStars` | `true` | Estrellas fugaces |
@@ -56,14 +57,25 @@ astral-sddm-background --list
 | `showHostname` | `true` | Nombre del equipo |
 | `showKeyboard` | `true` | Distribución de teclado activa |
 | `avatar` | vacío | Avatar común opcional |
-| `accentColor` | `#B1D7CB` | Color principal |
-| `lavenderColor` | `#C6CCD2` | Color secundario |
-| `goldColor` | `#E4B882` | Fechas y detalles |
-| `textColor` | `#F4EEDF` | Texto principal |
-| `mutedColor` | `#B1B5AD` | Texto secundario |
-| `surfaceColor` | `#202629` | Panel de acceso |
-| `backgroundColor` | `#151918` | Fondo base |
-| `alertColor` | `#FF957C` | Errores |
+
+Los colores salen de la paleta del modo elegido. Las claves opcionales
+`backgroundColor`, `surfaceColor`, `textColor`, `mutedColor`, `accentColor`,
+`lavenderColor`, `goldColor` y `alertColor` solo reemplazan un color si tienen
+un valor; déjalas vacías o bórralas para volver a la paleta.
+
+## Modo claro
+
+Pon `mode=light` en `theme.conf` para la paleta clara de Astral. Ambos modos usan
+los mismos valores que Quickshell (`config/quickshell/settings.json`).
+
+Las instalaciones previas conservan su `theme.conf` al actualizar. Si tenía
+colores fijos antiguos (`accentColor`, `surfaceColor`, etc.) o `glassOpacity`,
+bórralos para que se aplique la paleta nueva.
+
+## Confirmaciones
+
+Apagar y reiniciar usan el color de alerta y piden una segunda pulsación en
+cuatro segundos. Suspender se ejecuta de inmediato.
 
 ## Pantallas
 
@@ -105,8 +117,8 @@ pasa a la siguiente. Usa `showKeyboard=false` para ocultarla.
 
 ```text
 Main.qml                 Raíz por pantalla
-design/Theme.qml         Paleta y opciones
-components/              Fondo, estrellas, reloj, panel y popups
+design/Theme.qml         Paleta, modos y opciones
+components/              Fondo, estrellas, reloj, tarjeta, botones, avatar
 assets/backgrounds/      Cuatro fondos incluidos
 assets/texture/          Grano fino del fondo
 faces/.face.icon         Avatar por defecto del tema

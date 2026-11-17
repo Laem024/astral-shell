@@ -11,39 +11,39 @@ Rectangle {
   property int columns: 1
   property bool compact: false
 
-  readonly property int padding: root.compact ? 13 : 17
+  readonly property int padding: root.compact ? 12 : 16
   readonly property int entryCount: root.category.entries.length
   implicitWidth: 300
   implicitHeight: layout.implicitHeight + root.padding * 2
   radius: root.tokens.cardRadius
-  color: Qt.alpha(root.tokens.muted, 0.035)
+  color: root.tokens.raised
   border.width: 1
-  border.color: Qt.alpha(root.tokens.muted, 0.1)
+  border.color: root.tokens.hairline
 
   ColumnLayout {
     id: layout
     anchors.fill: parent
     anchors.margins: root.padding
-    spacing: root.compact ? 6 : 8
+    spacing: root.compact ? 8 : 12
 
     RowLayout {
       Layout.fillWidth: true
-      spacing: root.compact ? 8 : 10
+      spacing: root.compact ? 8 : 12
 
       Rectangle {
-        Layout.preferredWidth: root.compact ? 30 : 34
+        Layout.preferredWidth: root.compact ? 28 : 32
         Layout.preferredHeight: Layout.preferredWidth
-        radius: root.compact ? 8 : 10
+        radius: root.tokens.rowRadius
         color: Qt.alpha(root.accent, 0.12)
         border.width: 1
-        border.color: Qt.alpha(root.accent, 0.3)
+        border.color: Qt.alpha(root.accent, 0.35)
         Text {
           anchors.centerIn: parent
           text: root.category.glyph
           color: root.accent
           font {
             family: root.tokens.mono
-            pixelSize: root.compact ? 15 : 17
+            pixelSize: root.compact ? 14 : 16
             weight: Font.DemiBold
           }
         }
@@ -57,28 +57,35 @@ Rectangle {
         color: root.tokens.text
         font {
           family: root.tokens.font
-          pixelSize: root.compact ? 12 : 13
+          pixelSize: root.compact ? 13 : 14
           weight: Font.DemiBold
-          letterSpacing: 0.2
         }
       }
 
-      Text {
-        text: root.entryCount
-        color: root.accent
-        font {
-          family: root.tokens.mono
-          pixelSize: root.compact ? 9 : 10
-          weight: Font.DemiBold
+      Rectangle {
+        Layout.alignment: Qt.AlignVCenter
+        implicitWidth: countText.implicitWidth + 12
+        implicitHeight: 20
+        radius: height / 2
+        color: Qt.alpha(root.accent, 0.1)
+        Text {
+          id: countText
+          anchors.centerIn: parent
+          text: root.entryCount
+          color: root.accent
+          font {
+            family: root.tokens.mono
+            pixelSize: 10
+            weight: Font.DemiBold
+          }
         }
       }
     }
 
     GridLayout {
       Layout.fillWidth: true
-      Layout.topMargin: root.compact ? 2 : 4
       columns: Math.max(1, root.columns)
-      columnSpacing: root.compact ? 10 : 14
+      columnSpacing: root.compact ? 8 : 16
       rowSpacing: 0
 
       Repeater {

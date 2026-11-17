@@ -43,7 +43,6 @@ ScrollView {
   }
   component Section: PanelCard {
     tokens: root.tokens
-    radius: 10
     contentSpacing: 14
   }
   component Choice: PanelButton {
@@ -52,20 +51,15 @@ ScrollView {
     Layout.preferredWidth: 1
     Layout.minimumWidth: 0
     tokens: root.tokens
-    implicitHeight: 36
+    implicitHeight: 38
     opacity: enabled ? 1 : 0.45
     contentItem: Text {
       text: choice.text
-      color: choice.selected ? root.tokens.cyan : root.tokens.muted
-      font { family: root.tokens.font; pixelSize: 11; weight: choice.selected ? Font.Medium : Font.Normal }
+      color: choice.selected ? root.tokens.cyan : root.tokens.text
+      font { family: root.tokens.font; pixelSize: 12; weight: choice.selected ? Font.Medium : Font.Normal }
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter
       elide: Text.ElideRight
-    }
-    background: Rectangle {
-      radius: 7
-      color: Qt.alpha(root.tokens.cyan, choice.selected ? 0.09 : choice.hovered ? 0.04 : 0)
-      border.color: choice.activeFocus ? root.tokens.cyan : choice.selected ? Qt.alpha(root.tokens.cyan, 0.4) : root.tokens.border
     }
   }
   ColumnLayout {
@@ -110,7 +104,7 @@ ScrollView {
         id: outputs
         objectName: "captureMonitorSelector"
         Layout.fillWidth: true
-        implicitHeight: 38
+        implicitHeight: 40
         visible: root.mode === "monitor"
         enabled: !root.busy && count > 0
         model: Data.BrightnessData.outputNames
@@ -121,7 +115,12 @@ ScrollView {
         leftPadding: 12; rightPadding: 30
         contentItem: Text { text: outputs.displayText; color: root.tokens.text; font { family: root.tokens.mono; pixelSize: 11 } verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
         indicator: Text { x: outputs.width - width - 12; anchors.verticalCenter: parent.verticalCenter; text: outputs.popup.visible ? "−" : "+"; color: root.tokens.cyan }
-        background: Rectangle { radius: 7; color: root.tokens.surface; border.color: outputs.activeFocus ? root.tokens.cyan : root.tokens.border }
+        background: Rectangle {
+          radius: root.tokens.rowRadius
+          color: root.tokens.background
+          border.width: outputs.activeFocus ? 2 : 1
+          border.color: outputs.activeFocus ? root.tokens.cyan : root.tokens.border
+        }
         delegate: ItemDelegate {
           id: monitorOption
           required property string modelData

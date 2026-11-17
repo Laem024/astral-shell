@@ -1,10 +1,10 @@
 [SddmGreeterTheme]
 Name=Astral
-Description=Centered glass login theme with an astral starfield, multi-monitor support and a session picker
+Description=Centered login card in the Astral palette with dark and light modes, a starfield, multi-monitor support and a session picker
 Author=Astral Shell
 Copyright=(c) 2026 Astral Shell
 Type=sddm-theme
-Version=1.0
+Version=2.0
 MainScript=Main.qml
 ConfigFile=theme.conf
 Theme-Id=astral

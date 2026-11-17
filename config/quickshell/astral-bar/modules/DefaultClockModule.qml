@@ -58,7 +58,7 @@ Item {
         text: root.period
         color: root.tokens.muted
         font.family: root.tokens.mono
-        font.pixelSize: 9
+        font.pixelSize: 10
       }
     }
     Text {
@@ -69,7 +69,7 @@ Item {
       text: root.vertical ? root.date.split("·")[1].trim() : root.date.replace(" · ", "   /   ")
       color: root.tokens.muted
       font.family: root.tokens.mono
-      font.pixelSize: 9
+      font.pixelSize: 10
       font.letterSpacing: 0.8
     }
   }

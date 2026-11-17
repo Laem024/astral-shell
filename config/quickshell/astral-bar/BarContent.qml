@@ -46,8 +46,8 @@ Item {
   function labeledEndMinimum() {
     const statusCount = ["network", "audio", "battery", "notifications"].filter(key => shown[key]).length;
     const modules = 1 + statusCount + Number(!!shown.music) + Number(!!shown.tray);
-    // Labeled status nodes are 68px; compact media keeps its 124px transport.
-    return 40 + statusCount * 68 + Number(!!shown.music) * (124 + 10) + Number(!!shown.tray) * 40
+    // Labeled status nodes are 84px; compact media keeps its 124px transport.
+    return 40 + statusCount * 84 + Number(!!shown.music) * (124 + 10) + Number(!!shown.tray) * 40
       + (modules + Number(!!shown.music)) * tokens.gap;
   }
   readonly property var shown: settings.value.modules
@@ -89,7 +89,7 @@ Item {
       width: root.vertical ? root.verticalPlateWidth / composition.scale : startGroup.width
       height: root.vertical ? startGroup.height : Math.max(0, Math.min(composition.height - 4, Math.max(startGroup.height, endGroup.height) + 6))
       visible: (root.shown.logo || root.shown.clock || (root.shown.window && (root.vertical || !root.compact)))
-      radius: 7; color: root.tokens.surface; border.color: root.tokens.border
+      radius: root.tokens.rowRadius; color: root.tokens.raised; border.color: root.tokens.hairline
     }
     Rectangle {
       objectName: "endPlate"
@@ -100,7 +100,7 @@ Item {
       width: root.vertical ? root.verticalPlateWidth / composition.scale : endGroup.width
       height: root.vertical ? endGroup.height : Math.max(0, Math.min(composition.height - 4, Math.max(startGroup.height, endGroup.height) + 6))
       visible: true
-      radius: 7; color: root.tokens.surface; border.color: root.tokens.border
+      radius: root.tokens.rowRadius; color: root.tokens.raised; border.color: root.tokens.hairline
     }
     GridLayout {
       id: composition
@@ -156,7 +156,7 @@ Item {
           implicitWidth: root.vertical ? 20 : 3
           implicitHeight: root.vertical ? 3 : 20
           Layout.alignment: Qt.AlignCenter
-          color: root.tokens.alert
+          color: root.tokens.border
         }
         Modules.ClockModule {
           id: clock
@@ -174,10 +174,10 @@ Item {
           objectName: "clockWindowDivider"
           visible: focus.visible
           Layout.topMargin: root.vertical && !logo.visible && !clock.visible ? 12 : 0
-          implicitWidth: root.vertical ? 20 : 3
-          implicitHeight: root.vertical ? 3 : 20
+          implicitWidth: root.vertical ? 20 : 1
+          implicitHeight: root.vertical ? 1 : 20
           Layout.alignment: Qt.AlignCenter
-          color: root.tokens.alert
+          color: root.tokens.border
         }
         Modules.WindowModule {
           id: focus
@@ -368,63 +368,4 @@ Item {
         root.navigation.close();
     }
   }
-  // This visual layer has no input handlers; controls retain their own hit areas.
-  readonly property Item hoveredSegment: {
-    var modules = [clock, focus, music, capture, networkNode, audio, battery, notifications, tray];
-    for (const module of modules)
-      if (module.visible && module.hovered) return module;
-    return null;
-  }
-  function syncIndicator(indicator: Components.HoverIndex, segment: Item): void {
-    if (!segment || !segment.visible) { indicator.clear(); return; }
-    var point = segment.mapToItem(root, 0, 0);
-    var start = root.vertical ? point.y : point.x;
-    // Stop the active-window line before the plate's rounded right corner.
-    var rightInset = !root.vertical && segment === focus ? root.tokens.gap : 0;
-    var endPoint = segment.mapToItem(root, Math.max(0, segment.width - rightInset), segment.height);
-    var end = root.vertical ? endPoint.y : endPoint.x;
-    var minimum = root.vertical ? viewport.y : viewport.x;
-    var maximum = minimum + (root.vertical ? viewport.height : viewport.width);
-    start = Math.max(start, minimum);
-    end = Math.min(end, maximum);
-    if (end <= start) { indicator.clear(); return; }
-    indicator.retarget(start, end - start);
-  }
-  Components.HoverIndex {
-    id: sharedIndex
-    objectName: "sharedHoverIndex"
-    anchors.fill: parent
-    tokens: root.tokens
-    vertical: root.vertical
-    rightEdge: root.settings.value.position === "right"
-    ink: root.hoveredSegment === battery && battery.warning ? root.tokens.alert
-      : root.hoveredSegment === clock ? clock.accent
-      : root.hoveredSegment === music ? music.ink
-      : root.hoveredSegment === focus ? focus.ink
-      : root.hoveredSegment === networkNode ? networkNode.ink
-      : root.hoveredSegment === audio ? audio.ink
-      : root.hoveredSegment === battery ? battery.ink
-      : root.hoveredSegment === capture ? capture.ink
-      : root.hoveredSegment === notifications ? notifications.ink
-      : root.hoveredSegment === tray ? tray.ink : root.tokens.cyan
-  }
-  Components.HoverIndex {
-    id: warningIndex
-    objectName: "batteryWarningIndex"
-    anchors.fill: parent
-    tokens: root.tokens
-    vertical: root.vertical
-    rightEdge: root.settings.value.position === "right"
-    ink: root.tokens.alert
-    animate: false
-  }
-  function syncIndicators(): void {
-    syncIndicator(sharedIndex, hoveredSegment);
-    syncIndicator(warningIndex, battery.warning && hoveredSegment !== battery ? battery : null);
-  }
-  onHoveredSegmentChanged: syncIndicators()
-  Connections { target: battery; function onWarningChanged(): void { root.syncIndicators(); } }
-  // Mapping is refreshed during scroll, layout, scale and visibility changes,
-  // without restarting a transition whose destination has not changed.
-  Timer { interval: 16; running: root.hoveredSegment !== null || battery.warning; repeat: true; onTriggered: root.syncIndicators() }
 }

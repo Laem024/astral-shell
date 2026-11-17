@@ -23,8 +23,8 @@ Rectangle {
   implicitHeight: content.implicitHeight + inset * 2
   Layout.fillWidth: true
   Layout.minimumHeight: implicitHeight
-  radius: popup ? 12 : 8
-  color: popup ? tokens.surface : tokens.background
+  radius: popup ? tokens.cardRadius : tokens.rowRadius
+  color: popup ? tokens.surface : tokens.raised
   border.color: entry.urgency === 2 ? Qt.alpha(tokens.alert, 0.5) : tokens.border
   Rectangle {
     x: root.popup ? 16 : 0
@@ -40,13 +40,9 @@ Rectangle {
   component Action: PanelButton {
     id: action
     tokens: root.tokens
+    tint: root.accent
     implicitHeight: 32
     focusPolicy: root.popup ? Qt.NoFocus : Qt.StrongFocus
-    background: Rectangle {
-      radius: 7
-      color: Qt.alpha(root.accent, action.selected ? 0.12 : action.hovered ? 0.06 : 0)
-      border.color: action.visualFocus ? root.accent : action.selected ? Qt.alpha(root.accent, 0.3) : root.tokens.border
-    }
   }
   ColumnLayout {
     id: content
@@ -56,9 +52,9 @@ Rectangle {
       Layout.fillWidth: true
       spacing: 9
       Rectangle {
-        Layout.preferredWidth: 30; Layout.preferredHeight: 30
-        radius: 8
-        color: Qt.alpha(root.accent, 0.08)
+        Layout.preferredWidth: 32; Layout.preferredHeight: 32
+        radius: root.tokens.rowRadius
+        color: Qt.alpha(root.accent, 0.12)
         Components.CaptureGlyph {
           anchors.centerIn: parent
           visible: root.fileNotice

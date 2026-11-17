@@ -25,7 +25,7 @@ FocusScope {
     textFormat: Text.PlainText
     color: root.tokens.muted
     font.family: root.tokens.mono
-    font.pixelSize: 8
+    font.pixelSize: 9
     font.letterSpacing: 0.8
   }
 
@@ -46,7 +46,7 @@ FocusScope {
         color: root.tokens.text
         elide: Text.ElideRight
         maximumLineCount: 1
-        font { family: root.tokens.font; pixelSize: 15; weight: Font.Medium }
+        font { family: root.tokens.font; pixelSize: 16; weight: Font.Medium }
       }
       Text {
         Layout.fillWidth: true
@@ -69,7 +69,7 @@ FocusScope {
         text: "SUPER + T"
         textFormat: Text.PlainText
         color: root.tokens.muted
-        font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 0.6 }
+        font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 0.6 }
       }
     }
 
@@ -171,10 +171,11 @@ FocusScope {
         }
       }
       background: Rectangle {
-        radius: 8
-        color: root.window.floating ? Qt.alpha(root.tokens.cyan, 0.07)
-          : modeToggle.hovered ? Qt.alpha(root.tokens.cyan, 0.04)
-          : root.tokens.background
+        radius: root.tokens.cardRadius
+        color: root.window.floating ? Qt.alpha(root.tokens.cyan, 0.1)
+          : modeToggle.hovered ? Qt.alpha(root.tokens.text, 0.06)
+          : root.tokens.raised
+        border.width: modeToggle.activeFocus ? 2 : 1
         border.color: modeToggle.activeFocus ? root.tokens.cyan : root.tokens.border
         Rectangle {
           visible: root.window.floating

@@ -6,14 +6,14 @@ Rectangle {
   required property var tokens
   property string label: ""
   property bool compact: false
-  readonly property int horizontalPadding: root.compact ? 6 : 8
+  readonly property int horizontalPadding: root.compact ? 6 : 7
   readonly property int verticalPadding: root.compact ? 2 : 3
-  implicitWidth: Math.max(root.compact ? 18 : 22, keyText.implicitWidth + root.horizontalPadding * 2)
+  implicitWidth: Math.max(root.compact ? 20 : 24, keyText.implicitWidth + root.horizontalPadding * 2)
   implicitHeight: keyText.implicitHeight + root.verticalPadding * 2
-  radius: root.compact ? 4 : 5
-  color: Qt.alpha(root.tokens.text, 0.055)
+  radius: 6
+  color: root.tokens.raised
   border.width: 1
-  border.color: Qt.alpha(root.tokens.muted, 0.26)
+  border.color: root.tokens.border
 
   // A hairline at the bottom gives the cap a subtle key-like depth.
   Rectangle {
@@ -23,7 +23,7 @@ Rectangle {
     anchors.margins: 2
     height: 1
     radius: 1
-    color: Qt.alpha(root.tokens.text, 0.08)
+    color: Qt.alpha(root.tokens.text, 0.1)
   }
 
   Text {
@@ -33,7 +33,7 @@ Rectangle {
     color: root.tokens.text
     font {
       family: root.tokens.mono
-      pixelSize: root.compact ? 9 : 10
+      pixelSize: root.compact ? 10 : 11
       weight: Font.DemiBold
     }
   }

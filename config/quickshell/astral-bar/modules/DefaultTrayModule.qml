@@ -28,6 +28,15 @@ Item {
   Keys.onSpacePressed: root.toggle()
   Keys.onReturnPressed: root.toggle()
   Keys.onEnterPressed: root.toggle()
+  Rectangle {
+    anchors.centerIn: parent
+    width: 32; height: 32
+    radius: root.tokens.rowRadius
+    color: root.expanded ? Qt.alpha(root.tokens.cyan, 0.1) : "transparent"
+    border.color: root.activeFocus ? root.tokens.gold : "transparent"
+    Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
+    Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
+  }
   Item {
     objectName: "trayArrow"
     width: 16; height: 16

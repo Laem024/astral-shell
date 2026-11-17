@@ -127,7 +127,7 @@ ScrollView {
   component Eyebrow: Text {
     color: root.tokens.cyan
     textFormat: Text.PlainText
-    font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1.3 }
+    font { family: root.tokens.mono; pixelSize: 10; letterSpacing: 1 }
   }
   component Metric: ColumnLayout {
     id: metric
@@ -148,7 +148,7 @@ ScrollView {
       text: metric.label
       color: root.tokens.muted
       elide: Text.ElideRight
-      font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 0.6 }
+      font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 0.6 }
     }
   }
   component Badge: Rectangle {
@@ -165,7 +165,7 @@ ScrollView {
       anchors.centerIn: parent
       color: badge.accent
       textFormat: Text.PlainText
-      font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 0.7 }
+      font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 0.7 }
     }
   }
   component Divider: Rectangle {
@@ -180,7 +180,6 @@ ScrollView {
     PanelCard {
       tokens: root.tokens
       contentSpacing: 16
-      radius: 8
       border.color: Qt.alpha(root.tokens.cyan, 0.18)
       gradient: Gradient {
         GradientStop { position: 0; color: Qt.tint(root.tokens.background, Qt.alpha(root.tokens.cyan, 0.06)) }
@@ -204,7 +203,7 @@ ScrollView {
             color: root.tokens.muted
             Layout.alignment: Qt.AlignBottom
             Layout.bottomMargin: 2
-            font { family: root.tokens.mono; pixelSize: 8 }
+            font { family: root.tokens.mono; pixelSize: 9 }
           }
         }
       }
@@ -267,7 +266,7 @@ ScrollView {
             text: root.weekdayShortNames[weekday]
             color: root.tokens.muted
             horizontalAlignment: Text.AlignHCenter
-            font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 0.8 }
+            font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 0.8 }
           }
         }
         Repeater {
@@ -280,7 +279,7 @@ ScrollView {
             Layout.fillWidth: true
             Layout.minimumWidth: 0
             implicitHeight: 30
-            radius: 7
+            radius: root.tokens.rowRadius
             color: currentDay ? root.tokens.cyan
               : modelData > 0 && hover.hovered ? Qt.alpha(root.tokens.cyan, 0.07) : "transparent"
             border.color: currentDay ? root.tokens.cyan : "transparent"
@@ -309,14 +308,13 @@ ScrollView {
           text: root.offsetText
           color: root.tokens.muted
           elide: Text.ElideRight
-          font { family: root.tokens.mono; pixelSize: 8 }
+          font { family: root.tokens.mono; pixelSize: 9 }
         }
       }
     }
     PanelCard {
       tokens: root.tokens
       contentSpacing: 14
-      radius: 8
       RowLayout {
         Layout.fillWidth: true
         spacing: 6
@@ -395,14 +393,13 @@ ScrollView {
         text: root.weatherStatus
         color: root.weatherData.offline ? root.tokens.alert : root.tokens.muted
         wrapMode: Text.Wrap
-        font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 0.6 }
+        font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 0.6 }
       }
     }
     PanelCard {
       tokens: root.tokens
       title: "WEEK AHEAD"
       contentSpacing: 12
-      radius: 8
       Repeater {
         model: root.daily ? root.daily.time : []
         RowLayout {

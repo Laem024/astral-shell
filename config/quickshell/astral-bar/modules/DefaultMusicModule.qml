@@ -33,8 +33,8 @@ Item {
     Accessible.name: label
     opacity: enabled ? 1 : 0.3
     background: Rectangle {
-      radius: 5
-      color: control.hovered || control.down ? Qt.alpha(root.tokens.cyan, 0.1) : "transparent"
+      radius: height / 2
+      color: "transparent"
       border.color: control.visualFocus ? root.tokens.gold : "transparent"
       border.width: control.visualFocus ? 1 : 0
       scale: control.down ? 0.92 : 1
@@ -104,7 +104,7 @@ Item {
       Accessible.name: root.media.title + " · " + root.media.artist + ". Open Music"
       onClicked: root.activated()
       background: Rectangle {
-        radius: 5
+        radius: root.tokens.rowRadius
         color: "transparent"
         border.color: information.visualFocus ? root.tokens.gold : "transparent"
       }
@@ -115,7 +115,7 @@ Item {
           Layout.preferredWidth: root.vertical || root.compact ? 28 : 32
           Layout.preferredHeight: Layout.preferredWidth
           Layout.alignment: Qt.AlignCenter
-          radius: 4
+          radius: 8
           color: "transparent"
           clip: true
           Item {
@@ -159,14 +159,14 @@ Item {
         ColumnLayout {
           visible: !root.vertical && !root.compact
           Layout.fillWidth: true
-          spacing: 2
+          spacing: 3
           Text {
             Layout.fillWidth: true
             text: root.media.title
             textFormat: Text.PlainText
             elide: Text.ElideRight
             color: information.hovered ? root.tokens.cyan : root.tokens.text
-            font { family: root.tokens.font; pixelSize: 13; weight: Font.Medium }
+            font { family: root.tokens.font; pixelSize: root.tokens.textSize + 1; weight: Font.Medium }
           }
           Text {
             Layout.fillWidth: true

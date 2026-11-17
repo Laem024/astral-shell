@@ -8,31 +8,31 @@ RowLayout {
   property string key: ""
   property bool monitorIcon: false
   property string label: ""
-  spacing: 6
+  spacing: 8
 
   Rectangle {
     Layout.alignment: Qt.AlignVCenter
-    implicitWidth: (root.monitorIcon ? monitorGlyph.implicitWidth : keyText.implicitWidth) + 14
-    implicitHeight: 28
-    radius: 6
-    color: Qt.alpha(root.tokens.cyan, 0.10)
+    implicitWidth: Math.max(28, (root.monitorIcon ? monitorGlyph.implicitWidth : keyText.implicitWidth) + 16)
+    implicitHeight: 26
+    radius: height / 2
+    color: root.tokens.raised
     border.width: 1
-    border.color: Qt.alpha(root.tokens.cyan, 0.22)
+    border.color: root.tokens.border
     Text {
       id: keyText
       visible: !root.monitorIcon
       anchors.centerIn: parent
       text: root.key
-      color: root.tokens.cyan
+      color: root.tokens.text
       font.family: root.tokens.mono
-      font.pixelSize: 12
+      font.pixelSize: 11
       font.letterSpacing: 0.5
     }
     MonitorGlyph {
       id: monitorGlyph
       anchors.centerIn: parent
       visible: root.monitorIcon
-      ink: root.tokens.cyan
+      ink: root.tokens.text
     }
   }
 

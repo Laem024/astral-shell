@@ -37,13 +37,13 @@ Item {
       Layout.fillWidth: true
       implicitHeight: 112
       Layout.minimumHeight: 112
-      radius: 8
+      radius: root.tokens.cardRadius
       color: root.tokens.background
       border.color: root.tokens.border
       readonly property bool hasBanner: bannerImage.status === Image.Ready
       Components.RoundedClip {
         anchors.fill: parent
-        radius: 8
+        radius: root.tokens.cardRadius
         Components.CropImage {
           id: bannerImage
           anchors.fill: parent
@@ -70,8 +70,9 @@ Item {
         Keys.onSpacePressed: root.pickerMode = "banner"
         Rectangle {
           anchors.fill: parent
-          radius: 8; color: "transparent"
-          border.color: bannerControl.activeFocus ? root.tokens.cyan : "transparent"
+          radius: root.tokens.cardRadius; color: "transparent"
+          border.width: bannerControl.activeFocus ? 2 : 0
+          border.color: root.tokens.cyan
         }
         MouseArea {
           anchors.fill: parent
@@ -81,18 +82,18 @@ Item {
       }
       RowLayout {
         anchors.fill: parent
-        anchors.margins: 16
+        anchors.margins: root.tokens.inset
         spacing: root.compact ? 12 : 16
         PanelButton {
           tokens: root.tokens
-          Layout.preferredWidth: 80; Layout.preferredHeight: 80
+          Layout.preferredWidth: 72; Layout.preferredHeight: 72
           leftPadding: 0; rightPadding: 0; topPadding: 0; bottomPadding: 0
           text: "Change account photo"
           onClicked: root.pickerMode = "avatar"
           contentItem: Item {
             Components.RoundedClip {
               anchors.fill: parent
-              radius: 8
+              radius: root.tokens.rowRadius + 2
               Image {
                 id: avatar
                 anchors.fill: parent
@@ -104,7 +105,8 @@ Item {
             }
             Rectangle {
               anchors.fill: parent
-              radius: 8; color: "transparent"
+              radius: root.tokens.rowRadius + 2; color: "transparent"
+              border.width: parent.parent.activeFocus ? 2 : 1
               border.color: parent.parent.activeFocus ? root.tokens.cyan : root.tokens.border
             }
             Text {
@@ -129,7 +131,7 @@ Item {
             styleColor: "#CC000000"
             elide: Text.ElideRight
             Accessible.name: root.profileName
-            font { family: root.tokens.font; pixelSize: 22; weight: Font.Medium }
+            font { family: root.tokens.font; pixelSize: 18; weight: Font.Medium }
           }
           Text {
             Layout.fillWidth: true
@@ -153,6 +155,7 @@ Item {
             text: "Settings"
             Accessible.name: "Settings (coming soon)"
             preview: true
+            leftPadding: 0; rightPadding: 0
             contentItem: Item {
               Item {
                 anchors.centerIn: parent
@@ -184,45 +187,71 @@ Item {
       text: Data.UserData.error || Data.BannerData.error
       color: root.tokens.alert
       wrapMode: Text.Wrap
+      font { family: root.tokens.font; pixelSize: 11 }
     }
     RowLayout {
       Layout.fillWidth: true
       Layout.fillHeight: true
       spacing: 16
-      ScrollView {
-        Layout.preferredWidth: root.compact ? 46 : 142
+      Rectangle {
+        Layout.preferredWidth: root.compact ? 52 : 148
         Layout.fillHeight: true
-        contentWidth: availableWidth
-        clip: true
-        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-        ColumnLayout {
-          width: parent.width
-          spacing: 8
-          Repeater {
-            model: root.categories
-            PanelButton {
-              required property var modelData
-              Layout.fillWidth: true
-              tokens: root.tokens
-              text: root.compact ? modelData.shortName : ({ "Weather & Calendar": "Calendar", "Media": "Music", "Display": "Screen & capture", "Sound": "Sound", "Control Center": "Connections", "Power": "Power & session", "Notifications": "Notifications" })[modelData.key]
-              Accessible.name: modelData.title
-              selected: root.tab === modelData.key
-              onClicked: root.tabSelected(modelData.key)
-
+        radius: root.tokens.cardRadius
+        color: root.tokens.sunken
+        border.color: root.tokens.hairline
+        ScrollView {
+          anchors { fill: parent; margins: 6 }
+          contentWidth: availableWidth
+          clip: true
+          ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+          ColumnLayout {
+            width: parent.width
+            spacing: 4
+            Repeater {
+              model: root.categories
+              PanelButton {
+                required property var modelData
+                Layout.fillWidth: true
+                tokens: root.tokens
+                text: root.compact ? modelData.shortName : ({ "Weather & Calendar": "Calendar", "Media": "Music", "Display": "Screen & capture", "Sound": "Sound", "Control Center": "Connections", "Power": "Power & session", "Notifications": "Notifications" })[modelData.key]
+                Accessible.name: modelData.title
+                selected: root.tab === modelData.key
+                leftPadding: root.compact ? 0 : 12
+                rightPadding: root.compact ? 0 : 12
+                implicitHeight: 40
+                onClicked: root.tabSelected(modelData.key)
+              }
             }
           }
         }
       }
-      Rectangle { Layout.fillHeight: true; implicitWidth: 1; color: root.tokens.border }
       ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
+        Layout.minimumWidth: 0
         spacing: 12
-        Text { Layout.fillWidth: true; text: root.current.title; color: root.tokens.text; wrapMode: Text.Wrap; font { family: root.tokens.font; pixelSize: 22 } }
-        Text { Layout.fillWidth: true; text: root.current.hint; color: root.tokens.muted; wrapMode: Text.Wrap; font { family: root.tokens.font; pixelSize: 11 } }
+        ColumnLayout {
+          Layout.fillWidth: true
+          spacing: 2
+          Text {
+            Layout.fillWidth: true
+            text: root.current.title
+            color: root.tokens.text
+            elide: Text.ElideRight
+            font { family: root.tokens.font; pixelSize: 18; weight: Font.Medium }
+          }
+          Text {
+            Layout.fillWidth: true
+            text: root.current.hint
+            color: root.tokens.muted
+            elide: Text.ElideRight
+            font { family: root.tokens.font; pixelSize: 11 }
+          }
+        }
         Loader {
           Layout.fillWidth: true
           Layout.fillHeight: true
+          Layout.minimumWidth: 0
           sourceComponent: root.tab === "Weather & Calendar" ? weatherPage : root.tab === "Media" ? mediaPage : root.tab === "Display" ? displayPage : root.tab === "Sound" ? soundPage : root.tab === "Power" ? powerPage : root.tab === "Notifications" ? noticesPage : controlPage
         }
       }
