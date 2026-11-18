@@ -26,3 +26,6 @@ VpnCard 1.0 VpnCard.qml
 WeatherPage 1.0 WeatherPage.qml
 WifiCard 1.0 WifiCard.qml
 WindowMenu 1.0 WindowMenu.qml
+CategoryGlyph 1.0 CategoryGlyph.qml
+PageIntro 1.0 PageIntro.qml
+ProfileHeader 1.0 ProfileHeader.qml

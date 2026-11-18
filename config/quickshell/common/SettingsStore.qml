@@ -25,19 +25,27 @@ QtObject {
     onSaveFailed: root.error = "Cannot save settings: " + root.path
     onLoadFailed: { root.error = "Cannot read settings: " + root.path; console.warn(root.error); }
   }
-  function setMode(mode) {
-    if (scope !== "common" || !["light", "dark"].includes(mode)) return false;
+  function previewPatch(baseline, changes) { return Validation.patch(Validation.parse(file.text(), scope), baseline, changes, scope); }
+  function updateFields(baseline, changes) {
     try {
+      error = "";
       file.reload();
-      const next = Validation.parse(file.text(), scope);
-      next.mode = mode;
-      Validation.parse(JSON.stringify(next), scope);
-      file.setText(JSON.stringify(next, null, 2) + "\n");
+      file.waitForJob();
+      const next = Validation.patch(Validation.parse(file.text(), scope), baseline, changes, scope);
+      const encoded = JSON.stringify(next, null, 2) + "\n";
+      file.setText(encoded);
       file.waitForJob();
       if (error) return false;
+      file.reload();
+      file.waitForJob();
+      if (file.text() !== encoded) throw new Error("Write verification failed");
       value = next;
       return true;
-    } catch (e) { error = "Cannot update theme: " + e.message; return false; }
+    } catch (e) { error = "Cannot update settings: " + e.message; return false; }
+  }
+  function setMode(mode) {
+    if (scope !== "common" || !["light", "dark"].includes(mode)) return false;
+    return updateFields(value, {mode: mode});
   }
   Component.onCompleted: load(file.text())
 }

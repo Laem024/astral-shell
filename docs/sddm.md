@@ -1,11 +1,14 @@
 # Tema SDDM Astral
 
-Tema de inicio de sesión para SDDM 0.21 o superior con Qt 6. Usa la paleta
-oscura de Astral Shell, un cielo animado con estrellas titilantes y estrellas
-fugaces diagonales, y un panel de cristal centrado que solo aparece en la
-pantalla activa. La composición combina un reloj tipográfico grande, capas
-translúcidas con grano fino y un único campo de contraseña. La interfaz está en
-inglés.
+Tema de inicio de sesión para SDDM 0.21 o superior con Qt 6. Usa los modos
+oscuro y claro de Astral Shell, un fondo configurable y una composición con el
+reloj y la bienvenida a la izquierda y el acceso a la derecha, sobre una banda
+atenuada y dentro de un marco fino. En pantallas pequeñas, reloj y
+formulario se centran en una columna. El formulario incluye una cabecera de
+bienvenida, la identidad del usuario es compacta y las acciones de energía
+se alinean con el acceso. La interfaz está en inglés.
+El formulario solo existe en la pantalla activa: al perderla se borra la
+contraseña y se destruye su componente.
 
 El tema vive en el repositorio (`config/sddm/astral/`) para poder aplicarlo,
 pero al instalarse se copia completo a `/usr/share/sddm/themes/astral` y deja de
@@ -96,12 +99,12 @@ usan los valores por defecto del QML, así que una actualización no rompe un
 
 | Clave | Valor por defecto | Efecto |
 | --- | --- | --- |
+| `mode` | `dark` | `dark` o `light` |
 | `background` | `aurora` | Preset, ruta relativa o absoluta |
 | `backgroundMode` | `fill` | `fill`, `fit`, `stretch` o `tile` |
 | `backgroundDrift` | `true` | Deriva lenta del fondo |
-| `overlay` | `0.24` | Oscurecimiento del fondo |
-| `glassOpacity` | `0.52` | Opacidad del panel de cristal (0 a 1) |
-| `animations` | `true` | Entrada, estrellas, fugaces y shake |
+| `overlay` | `0.5` oscuro / `0.72` claro | Tinte del fondo hacia la paleta |
+| `animations` | `true` | Entrada, estrellas, fugaces y sacudida |
 | `stars` | `true` | Estrellas titilantes |
 | `starDensity` | `1.0` | Densidad de estrellas |
 | `shootingStars` | `true` | Estrellas fugaces |
@@ -117,14 +120,16 @@ usan los valores por defecto del QML, así que una actualización no rompe un
 | `showHostname` | `true` | Nombre del equipo |
 | `showKeyboard` | `true` | Distribución de teclado activa |
 | `avatar` | vacío | Avatar común opcional |
-| `accentColor` | `#B1D7CB` | Color principal |
-| `lavenderColor` | `#C6CCD2` | Color secundario |
-| `goldColor` | `#E4B882` | Fechas y detalles |
-| `textColor` | `#F4EEDF` | Texto principal |
-| `mutedColor` | `#B1B5AD` | Texto secundario |
-| `surfaceColor` | `#202629` | Panel de acceso |
-| `backgroundColor` | `#151918` | Fondo base |
-| `alertColor` | `#FF957C` | Errores |
+| `accentColor` | vacío (paleta del modo) | Color principal, opcional |
+| `lavenderColor` | vacío (paleta del modo) | Color secundario, opcional |
+| `goldColor` | vacío (paleta del modo) | Avisos como Caps Lock, opcional |
+| `textColor` | vacío (paleta del modo) | Texto principal, opcional |
+| `mutedColor` | vacío (paleta del modo) | Texto secundario, opcional |
+| `surfaceColor` | vacío (paleta del modo) | Tarjeta de acceso, opcional |
+| `backgroundColor` | vacío (paleta del modo) | Fondo base, opcional |
+| `alertColor` | vacío (paleta del modo) | Errores y acciones destructivas, opcional |
+
+Las paletas `dark` y `light` coinciden con `docs/design-system.md`.
 
 ### Fondos
 

@@ -148,3 +148,5 @@ hl.bind(main_mod .. " + CTRL + SHIFT + V", hl.dsp.exec_cmd("astral-clipboard cle
 hl.bind(main_mod .. " + slash", hl.dsp.exec_cmd("astral-shortcuts"), described("Astral · Keyboard shortcuts"))
 hl.bind("ALT + Tab", hl.dsp.exec_cmd("astral-overview alt-tab next"), described("Workspaces · Overview next"))
 hl.bind("ALT + SHIFT + Tab", hl.dsp.exec_cmd("astral-overview alt-tab previous"), described("Workspaces · Overview previous"))
+
+hl.bind(main_mod .. " + Z", hl.dsp.exec_cmd("astral-settings"), described("Astral · Settings"))

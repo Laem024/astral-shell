@@ -15,7 +15,7 @@ root=$XDG_CONFIG_HOME/quickshell
 [[ -f $root/bar.qml && -f $root/recorder.qml && -f $root/astral-bar/BarRoot.qml ]]
 jq -e '.modules[] | select(.id == "astral-bar") | .path == "bar.qml"' "$root/settings.json" >/dev/null
 [[ -x $HOME/.local/bin/astral-shell && -x $HOME/.local/bin/astral-bar ]]
-[[ $(find "$HOME/.local/bin" -type f | wc -l) == 10 ]]
+[[ $(find "$HOME/.local/bin" -type f | wc -l) == 11 ]]
 [[ -f $root/lock.qml && -f $root/session.qml && ! -e $root/astral-bar/session.sh ]]
 [[ $($HOME/.local/bin/astral-bar workspace-count) == 10 ]]
 [[ $($HOME/.local/bin/astral-shell workspace-count) == 10 ]]
@@ -161,3 +161,11 @@ for panel in clipboard overview shortcuts; do
   rg -qF "$root/$panel-external/$panel-control.qml" "$scratch/args"
 done
 printf 'QUICKSHELL_INSTALL_PASS\n'
+
+# Settings installs with isolated common dependencies and destination-aware public dispatch.
+install_config --name "settings-custom" --module astral-settings
+jq -e '(.modules|length)==1 and .modules[0].id=="astral-settings" and .modules[0].path=="settings.qml"' "$root/settings-custom/settings.json" >/dev/null
+[[ -f $root/settings-custom/settings-control.qml && -f $root/settings-custom/astral-settings/DesktopService.qml ]]
+"$HOME/.local/bin/astral-settings"
+rg -qF "$root/settings-custom/settings-control.qml" "$scratch/args"
+if "$HOME/.local/bin/astral-settings" invalid; then exit 1; fi

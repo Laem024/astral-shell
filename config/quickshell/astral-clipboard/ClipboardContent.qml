@@ -17,6 +17,7 @@ FocusScope {
   readonly property var items: service.items
   readonly property var selected: list.currentIndex >= 0 && list.currentIndex < items.length ? items[list.currentIndex] : null
   readonly property int limit: settings.value.historySize || 50
+  readonly property color modeColor: root.mode === "delete" ? root.tokens.alert : root.tokens.cyan
   signal closeRequested()
   signal acceptRequested(var item)
   signal removeRequested(string id)
@@ -49,26 +50,29 @@ FocusScope {
     ColumnLayout {
       Layout.fillWidth: true
       Layout.fillHeight: true
+      Layout.minimumWidth: 0
       Layout.margins: root.compact ? 16 : 24
-      spacing: 14
+      spacing: root.compact ? 12 : 16
       RowLayout {
         Layout.fillWidth: true
+        spacing: 12
         ColumnLayout {
           Layout.fillWidth: true
-          spacing: 3
+          Layout.minimumWidth: 0
+          spacing: 4
           Text {
             text: "CLIPBOARD"
             color: root.tokens.muted
-            font.family: root.tokens.font
-            font.pixelSize: 9
-            font.letterSpacing: 1.8
+            font.family: root.tokens.mono
+            font.pixelSize: 10
+            font.letterSpacing: 1.4
           }
           Text {
             Layout.fillWidth: true
             text: root.mode === "delete" ? "Delete an entry" : "Clipboard history"
             color: root.tokens.text
             font.family: root.tokens.font
-            font.pixelSize: root.compact ? 22 : 28
+            font.pixelSize: root.compact ? 20 : 26
             font.weight: Font.DemiBold
             elide: Text.ElideRight
           }
@@ -80,53 +84,61 @@ FocusScope {
             color: root.tokens.muted
             font.family: root.tokens.font
             font.pixelSize: 12
+            elide: Text.ElideRight
           }
         }
         Rectangle {
-          Layout.preferredWidth: modeLabel.implicitWidth + 20
+          Layout.alignment: Qt.AlignTop
+          Layout.topMargin: 2
+          Layout.preferredWidth: modeLabel.implicitWidth + 24
           Layout.preferredHeight: 26
-          radius: 13
-          color: Qt.alpha(root.mode === "delete" ? root.tokens.alert : root.tokens.cyan, 0.12)
-          border.color: Qt.alpha(root.mode === "delete" ? root.tokens.alert : root.tokens.cyan, 0.35)
+          radius: height / 2
+          color: Qt.alpha(root.modeColor, 0.12)
+          border.width: 1
+          border.color: Qt.alpha(root.modeColor, 0.4)
           Text {
             id: modeLabel
             anchors.centerIn: parent
             text: root.mode === "delete" ? "DELETE MODE" : "PASTE MODE"
-            color: root.mode === "delete" ? root.tokens.alert : root.tokens.cyan
+            color: root.modeColor
             font.family: root.tokens.mono
-            font.pixelSize: 9
-            font.letterSpacing: 1.2
+            font.pixelSize: 10
+            font.weight: Font.DemiBold
+            font.letterSpacing: 1.1
           }
         }
         Button {
           id: closeButton
+          Layout.alignment: Qt.AlignTop
           Layout.preferredWidth: 32
           Layout.preferredHeight: 32
           Accessible.name: "Close clipboard history"
           onClicked: root.closeRequested()
           contentItem: Text {
             text: "×"
-            color: root.tokens.muted
-            font.pixelSize: 23
+            color: closeButton.hovered ? root.tokens.text : root.tokens.muted
+            font.pixelSize: 20
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
           }
           background: Rectangle {
-            radius: 16
-            color: closeButton.hovered ? Qt.alpha(root.tokens.muted, 0.12) : "transparent"
-            border.color: closeButton.activeFocus ? root.tokens.cyan : root.tokens.border
+            radius: height / 2
+            color: closeButton.hovered ? root.tokens.raised : "transparent"
+            border.width: 1
+            border.color: closeButton.activeFocus ? root.tokens.cyan : closeButton.hovered ? root.tokens.border : "transparent"
           }
         }
       }
       Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: 1
-        color: root.tokens.border
+        color: root.tokens.hairline
       }
       ListView {
         id: list
         Layout.fillWidth: true
         Layout.fillHeight: true
+        Layout.minimumHeight: 0
         clip: true
         spacing: 4
         model: root.items
@@ -144,13 +156,22 @@ FocusScope {
           readonly property bool image: modelData.kind === "image"
           width: list.width
           height: 64
-          radius: 12
-          color: row.selected ? Qt.alpha(root.tokens.cyan, 0.11)
+          radius: root.tokens.rowRadius
+          color: row.selected ? root.tokens.raised
             : hover.hovered ? Qt.alpha(root.tokens.muted, 0.06) : "transparent"
-          border.color: row.selected ? Qt.alpha(root.tokens.cyan, 0.5) : "transparent"
+          border.width: row.selected ? 1 : 0
+          border.color: row.selected ? Qt.alpha(root.tokens.cyan, list.activeFocus ? 0.85 : 0.5) : "transparent"
           Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
           Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
           HoverHandler { id: hover }
+          Rectangle {
+            visible: row.selected
+            anchors.left: parent.left
+            anchors.leftMargin: 0
+            anchors.verticalCenter: parent.verticalCenter
+            width: 3; height: 24; radius: 2
+            color: root.tokens.cyan
+          }
           MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
@@ -162,18 +183,20 @@ FocusScope {
           }
           RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 10
-            anchors.rightMargin: 8
+            anchors.leftMargin: 12
+            anchors.rightMargin: 10
             spacing: 12
             Rectangle {
               Layout.preferredWidth: 44
               Layout.preferredHeight: 44
-              radius: 10
-              color: Qt.alpha(root.tokens.cyan, 0.07)
+              radius: root.tokens.rowRadius
+              color: root.tokens.sunken
+              border.width: 1
+              border.color: root.tokens.hairline
+              clip: true
               Image {
                 id: thumbnail
                 anchors.fill: parent
-                anchors.margins: 2
                 visible: row.image && status === Image.Ready
                 source: row.image ? root.service.source(row.modelData) : ""
                 sourceSize: Qt.size(88, 88)
@@ -186,7 +209,7 @@ FocusScope {
                 visible: !row.image
                 text: "≡"
                 color: row.selected ? root.tokens.cyan : root.tokens.muted
-                font.pixelSize: 21
+                font.pixelSize: 20
               }
               Text {
                 anchors.centerIn: parent
@@ -199,7 +222,7 @@ FocusScope {
             ColumnLayout {
               Layout.fillWidth: true
               Layout.minimumWidth: 0
-              spacing: 2
+              spacing: 3
               Text {
                 Layout.fillWidth: true
                 text: row.image ? "Image" : Logic.preview(row.modelData)
@@ -216,27 +239,28 @@ FocusScope {
                   : Logic.relativeTime(row.modelData.time, root.now)
                 color: root.tokens.muted
                 font.family: root.tokens.mono
-                font.pixelSize: 9
+                font.pixelSize: 10
                 elide: Text.ElideRight
               }
             }
             Button {
               id: deleteButton
               visible: root.mode === "delete" && (row.selected || hover.hovered)
-              Layout.preferredWidth: 30
-              Layout.preferredHeight: 30
+              Layout.preferredWidth: 32
+              Layout.preferredHeight: 32
               Accessible.name: "Remove clipboard entry"
               onClicked: root.removeRequested(row.modelData.id)
               contentItem: Text {
                 text: "⌫"
                 color: deleteButton.hovered ? root.tokens.alert : root.tokens.muted
-                font.pixelSize: 17
+                font.pixelSize: 16
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
               }
               background: Rectangle {
                 radius: 8
-                color: deleteButton.hovered ? Qt.alpha(root.tokens.alert, 0.1) : "transparent"
+                color: deleteButton.hovered ? Qt.alpha(root.tokens.alert, 0.12) : "transparent"
+                border.width: 1
                 border.color: deleteButton.activeFocus ? root.tokens.cyan : "transparent"
               }
             }
@@ -245,7 +269,7 @@ FocusScope {
         Column {
           anchors.centerIn: parent
           width: Math.max(0, parent.width - 48)
-          spacing: 10
+          spacing: 12
           visible: root.items.length === 0
           Text {
             anchors.horizontalCenter: parent.horizontalCenter
@@ -259,6 +283,7 @@ FocusScope {
             color: root.tokens.text
             font.family: root.tokens.font
             font.pixelSize: 17
+            font.weight: Font.DemiBold
             horizontalAlignment: Text.AlignHCenter
           }
           Text {
@@ -281,6 +306,11 @@ FocusScope {
         font.family: root.tokens.font
         font.pixelSize: 11
       }
+      Rectangle {
+        Layout.fillWidth: true
+        Layout.preferredHeight: 1
+        color: root.tokens.hairline
+      }
       RowLayout {
         Layout.fillWidth: true
         spacing: root.compact ? 8 : 14
@@ -292,10 +322,11 @@ FocusScope {
         }
         Text {
           Layout.fillWidth: true
+          Layout.minimumWidth: 0
           text: root.service.watching ? "History updates automatically." : "Clipboard capture is paused."
           color: root.tokens.muted
           font.family: root.tokens.font
-          font.pixelSize: 10
+          font.pixelSize: 11
           elide: Text.ElideRight
         }
         ShortcutHint { tokens: root.tokens; keys: "↑ ↓"; label: "Navigate" }
@@ -312,31 +343,32 @@ FocusScope {
       visible: !root.compact
       Layout.fillHeight: true
       Layout.preferredWidth: 1
-      color: root.tokens.border
+      color: root.tokens.hairline
     }
     ColumnLayout {
       visible: !root.compact
       Layout.preferredWidth: 300
       Layout.fillHeight: true
       Layout.margins: 24
-      spacing: 10
+      spacing: 12
       Text {
         text: "PREVIEW"
         color: root.tokens.muted
-        font.family: root.tokens.font
-        font.pixelSize: 9
-        font.letterSpacing: 1.6
+        font.family: root.tokens.mono
+        font.pixelSize: 10
+        font.letterSpacing: 1.4
       }
       Rectangle {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        radius: 16
-        color: root.tokens.background
+        radius: root.tokens.cardRadius
+        color: root.tokens.sunken
+        border.width: 1
         border.color: root.tokens.border
         clip: true
         Item {
           anchors.fill: parent
-          anchors.margins: 14
+          anchors.margins: 16
           Text {
             anchors.centerIn: parent
             visible: !root.selected
@@ -383,7 +415,7 @@ FocusScope {
           : (root.selected ? root.selected.text.length + " characters" : "")
         color: root.tokens.muted
         font.family: root.tokens.mono
-        font.pixelSize: 9
+        font.pixelSize: 10
         elide: Text.ElideRight
       }
     }

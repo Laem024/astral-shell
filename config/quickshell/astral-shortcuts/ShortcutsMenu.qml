@@ -124,39 +124,6 @@ Scope {
         anchors.margins: 1
         radius: card.radius - 1
 
-        Rectangle {
-          anchors.fill: parent
-          gradient: Gradient {
-            GradientStop { position: 0; color: Qt.alpha(root.tokens.cyan, 0.055) }
-            GradientStop { position: 0.42; color: "transparent" }
-          }
-        }
-
-        Text {
-          anchors.right: parent.right
-          anchors.bottom: parent.bottom
-          anchors.rightMargin: -24
-          anchors.bottomMargin: -150
-          text: "✦"
-          color: Qt.alpha(root.tokens.cyan, 0.035)
-          font {
-            family: root.tokens.mono
-            pixelSize: 340
-          }
-        }
-
-        Rectangle {
-          anchors.top: parent.top
-          anchors.left: parent.left
-          width: parent.width * 0.55
-          height: 1
-          gradient: Gradient {
-            orientation: Gradient.Horizontal
-            GradientStop { position: 0; color: Qt.alpha(root.tokens.cyan, 0.5) }
-            GradientStop { position: 1; color: "transparent" }
-          }
-        }
-
         ShortcutsContent {
           id: content
           anchors.fill: parent

@@ -22,7 +22,37 @@ The built-in bar starts through root `bar.qml`, which statically imports `astral
 
 ## Bar preferences
 
-`astral-bar/settings.json` owns `position` (`top`, `bottom`, `left`, `right`), `margin`, `workspaceDisplay`, `modules` visibility switches, `components` visual replacement paths, `weather`, and `logo`. Keep its complete schema when editing it. Scale, colors, animation and clock format belong to the root. Settings validation applies independently to each file.
+`astral-bar/settings.json` owns `position` (`top`, `bottom`, `left`, `right`), `margin`, `frame` (`off`, `folds`, `full`), `workspaceDisplay`, `modules` visibility switches, `components` visual replacement paths, `weather`, and `logo`. Keep its complete schema when editing it. Scale, colors, animation and clock format belong to the root. Settings validation applies independently to each file.
+
+### Bar frame
+
+Set `"frame": "off"` in `astral-bar/settings.json` for the original floating
+appearance. `"folds"` attaches the bar to its screen edge and adds two curved
+folds toward the application area, tapering back to the screen edge without
+a cut-off straight segment. `"full"` connects it to a frame on all four
+edges with rounded inner corners. All styles support top, bottom, left and
+right bars and reload live. Missing `frame` means `off`; an invalid value keeps
+the last valid settings.
+
+Active styles ignore the visible bar margin while retaining its saved value
+and module spacing. The theme supplies the surface color, border thickness
+(`8 × scale`) and curve radius (`panelRadius × scale`). Each monitor gets
+click-through decoration and separate, explicit edge reservations. The visible
+bar always ignores reserved zones; only the transparent reservation surfaces
+set `exclusiveZone`, including the main edge in `off` mode. This keeps live
+style changes from moving the bar into its own reserved space. Reservations
+cover the solid bar and border thickness, without adding the corner radius
+to the window gap. Hyprland supplies its usual outer gaps; floating windows
+follow Hyprland rules.
+The reservations persist during locking and real fullscreen, whose surfaces
+cover the frame. Panels and notifications use the same effective offsets.
+No public command or Hyprland gap change is needed.
+
+Validate seams, app clicks, panel placement, monitor changes, fractional scale,
+lock/unlock and real fullscreen on CachyOS. The bar preview uses an ordinary
+window with frame and position selectors, shares `FrameDrawing.qml` with the
+live bar, and keeps isolated Astral XDG directories. It reserves no desktop
+space. Use the live module on CachyOS to validate native panel placement.
 
 ## Visual replacements
 

@@ -19,8 +19,8 @@ FocusScope {
   readonly property bool compact: width < 900 || height < 590
   readonly property bool narrow: width < 780
   readonly property bool filtering: root.query.trim() !== "" || root.modifiers.length > 0
-  readonly property int cardGap: root.compact ? 10 : 14
-  readonly property int entryColumns: (root.compact || root.narrow) ? 1 : 2
+  readonly property int cardGap: root.compact ? 12 : 16
+  readonly property int entryColumns: width >= 960 ? 2 : 1
 
   readonly property var rail: Logic.railFor(root.shortcuts.categories, root.shortcuts.total)
   readonly property string selected: root.rail.length > 0
@@ -29,11 +29,9 @@ FocusScope {
   readonly property var display: root.selected === "All"
     ? root.filtered
     : root.filtered.filter(category => category.name === root.selected)
-  readonly property var masonry: Logic.splitColumns(root.display)
   readonly property int visibleTotal: Logic.countEntries(root.filtered)
   readonly property int displayTotal: Logic.countEntries(root.display)
   readonly property bool single: root.selected !== "All" || root.filtering
-  readonly property bool listMode: root.single || root.narrow || root.display.length < 2
   // Flat rows remain available to checks and other consumers; the card view
   // groups the same entries visually.
   readonly property var rows: Logic.rowsFor(root.display, root.selected)
@@ -202,26 +200,26 @@ FocusScope {
 
   ColumnLayout {
     anchors.fill: parent
-    anchors.margins: root.compact ? 18 : 26
-    spacing: root.compact ? 10 : 13
+    anchors.margins: root.compact ? 16 : 24
+    spacing: root.compact ? 12 : 16
 
     RowLayout {
       Layout.fillWidth: true
-      spacing: root.compact ? 12 : 18
+      spacing: root.compact ? 12 : 16
 
       ColumnLayout {
         Layout.fillWidth: true
         Layout.minimumWidth: 0
-        spacing: 2
+        spacing: 4
 
         RowLayout {
-          spacing: 7
+          spacing: 8
           Text {
             text: "✦"
             color: root.tokens.cyan
             font {
               family: root.tokens.mono
-              pixelSize: root.compact ? 9 : 10
+              pixelSize: 11
             }
           }
           Text {
@@ -229,22 +227,23 @@ FocusScope {
             color: root.tokens.cyan
             font {
               family: root.tokens.mono
-              pixelSize: root.compact ? 8 : 9
-              letterSpacing: 1.8
+              pixelSize: 10
+              weight: Font.DemiBold
+              letterSpacing: 1.6
             }
           }
           Rectangle {
             implicitWidth: 1
-            implicitHeight: 9
-            color: Qt.alpha(root.tokens.muted, 0.3)
+            implicitHeight: 10
+            color: root.tokens.border
           }
           Text {
-            text: "SHORTCUT ATLAS"
-            color: Qt.alpha(root.tokens.muted, 0.85)
+            text: "HYPRLAND"
+            color: root.tokens.muted
             font {
               family: root.tokens.mono
-              pixelSize: root.compact ? 8 : 9
-              letterSpacing: 1.5
+              pixelSize: 10
+              letterSpacing: 1.4
             }
           }
         }
@@ -252,21 +251,19 @@ FocusScope {
         Text {
           Layout.fillWidth: true
           Layout.minimumWidth: 0
-          text: "Keyboard shortcuts"
+          text: "Your keyboard, at a glance"
           color: root.tokens.text
           elide: Text.ElideRight
           font {
             family: root.tokens.font
-            pixelSize: root.compact ? 24 : 30
+            pixelSize: root.compact ? 20 : 26
             weight: Font.DemiBold
-            letterSpacing: -0.4
           }
         }
 
         Text {
           Layout.fillWidth: true
           Layout.minimumWidth: 0
-          Layout.topMargin: 1
           text: root.subtitle
           textFormat: Text.PlainText
           color: root.subtitleColor
@@ -275,7 +272,7 @@ FocusScope {
           elide: Text.ElideRight
           font {
             family: root.tokens.font
-            pixelSize: root.compact ? 10 : 11
+            pixelSize: 12
           }
         }
       }
@@ -283,13 +280,13 @@ FocusScope {
       Rectangle {
         id: syncPill
         Layout.alignment: Qt.AlignTop
-        Layout.topMargin: 2
-        implicitWidth: syncRow.implicitWidth + 18
+        Layout.topMargin: 4
+        implicitWidth: syncRow.implicitWidth + 24
         implicitHeight: 26
-        radius: 13
-        color: Qt.alpha(root.syncColor, 0.1)
+        radius: height / 2
+        color: Qt.alpha(root.syncColor, 0.12)
         border.width: 1
-        border.color: Qt.alpha(root.syncColor, 0.3)
+        border.color: Qt.alpha(root.syncColor, 0.4)
 
         RowLayout {
           id: syncRow
@@ -312,9 +309,9 @@ FocusScope {
             color: root.syncColor
             font {
               family: root.tokens.mono
-              pixelSize: 8
+              pixelSize: 10
               weight: Font.DemiBold
-              letterSpacing: 1.3
+              letterSpacing: 1.2
             }
           }
         }
@@ -323,8 +320,8 @@ FocusScope {
       Button {
         id: closeButton
         Layout.alignment: Qt.AlignTop
-        Layout.preferredWidth: 30
-        Layout.preferredHeight: 30
+        Layout.preferredWidth: 32
+        Layout.preferredHeight: 32
         padding: 0
         focusPolicy: Qt.NoFocus
         Accessible.name: "Close keyboard shortcuts"
@@ -332,15 +329,15 @@ FocusScope {
         contentItem: Text {
           text: "×"
           color: closeButton.hovered ? root.tokens.text : root.tokens.muted
-          font.pixelSize: 22
+          font.pixelSize: 20
           horizontalAlignment: Text.AlignHCenter
           verticalAlignment: Text.AlignVCenter
         }
         background: Rectangle {
-          radius: 15
-          color: closeButton.hovered ? Qt.alpha(root.tokens.muted, 0.12) : "transparent"
+          radius: height / 2
+          color: closeButton.hovered ? root.tokens.raised : "transparent"
           border.width: 1
-          border.color: closeButton.hovered ? Qt.alpha(root.tokens.muted, 0.18) : "transparent"
+          border.color: closeButton.hovered ? root.tokens.border : "transparent"
         }
       }
     }
@@ -348,17 +345,17 @@ FocusScope {
     Rectangle {
       Layout.fillWidth: true
       implicitHeight: 44
-      radius: 12
-      color: Qt.alpha(root.tokens.background, 0.35)
-      border.width: 1
+      radius: root.tokens.rowRadius
+      color: root.tokens.sunken
+      border.width: searchField.activeFocus ? 2 : 1
       border.color: searchField.activeFocus
-        ? Qt.alpha(root.tokens.cyan, 0.55) : Qt.alpha(root.tokens.muted, 0.16)
+        ? Qt.alpha(root.tokens.cyan, 0.7) : root.tokens.border
 
       RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 13
-        anchors.rightMargin: 8
-        spacing: 8
+        anchors.leftMargin: 14
+        anchors.rightMargin: 10
+        spacing: 10
 
         Item {
           Layout.preferredWidth: 14
@@ -368,15 +365,15 @@ FocusScope {
             height: 10
             radius: 5
             color: "transparent"
-            border.width: 1
+            border.width: 1.4
             border.color: searchField.activeFocus ? root.tokens.cyan : root.tokens.muted
           }
           Rectangle {
             x: 9
             y: 9
-            width: 1
+            width: 1.4
             height: 5
-            radius: 0.5
+            radius: 0.7
             rotation: -45
             transformOrigin: Item.TopLeft
             color: searchField.activeFocus ? root.tokens.cyan : root.tokens.muted
@@ -389,7 +386,7 @@ FocusScope {
           Layout.minimumWidth: 0
           Layout.preferredHeight: 40
           placeholderText: "Search shortcuts, keys or categories…"
-          placeholderTextColor: Qt.alpha(root.tokens.muted, 0.65)
+          placeholderTextColor: root.tokens.muted
           color: root.tokens.text
           selectByMouse: true
           activeFocusOnTab: false
@@ -446,8 +443,8 @@ FocusScope {
         Button {
           id: clearButton
           visible: root.query !== ""
-          Layout.preferredWidth: 24
-          Layout.preferredHeight: 24
+          Layout.preferredWidth: 26
+          Layout.preferredHeight: 26
           padding: 0
           focusPolicy: Qt.NoFocus
           Accessible.name: "Clear search"
@@ -463,18 +460,29 @@ FocusScope {
             verticalAlignment: Text.AlignVCenter
           }
           background: Rectangle {
-            radius: 12
-            color: clearButton.hovered ? Qt.alpha(root.tokens.muted, 0.12) : "transparent"
+            radius: height / 2
+            color: clearButton.hovered ? root.tokens.raised : "transparent"
           }
         }
 
-        Text {
+        Rectangle {
           visible: root.query === ""
-          text: "/"
-          color: Qt.alpha(root.tokens.muted, 0.55)
-          font {
-            family: root.tokens.mono
-            pixelSize: 9
+          implicitWidth: slashKey.implicitWidth + 12
+          implicitHeight: 20
+          radius: 5
+          color: root.tokens.raised
+          border.width: 1
+          border.color: root.tokens.border
+          Text {
+            id: slashKey
+            anchors.centerIn: parent
+            text: "/"
+            color: root.tokens.muted
+            font {
+              family: root.tokens.mono
+              pixelSize: 10
+              weight: Font.DemiBold
+            }
           }
         }
       }
@@ -482,16 +490,16 @@ FocusScope {
 
     RowLayout {
       Layout.fillWidth: true
-      spacing: 6
+      spacing: 8
 
       Text {
         text: "MODIFIERS"
-        color: Qt.alpha(root.tokens.muted, 0.85)
-        Layout.rightMargin: 3
+        color: root.tokens.muted
+        Layout.rightMargin: 4
         font {
           family: root.tokens.mono
-          pixelSize: 8
-          letterSpacing: 1.3
+          pixelSize: 10
+          letterSpacing: 1.2
         }
       }
 
@@ -502,8 +510,8 @@ FocusScope {
           required property var modelData
           readonly property bool activeChip: root.modifiers.indexOf(chip.modelData) >= 0
           Layout.preferredHeight: 26
-          leftPadding: 10
-          rightPadding: 10
+          leftPadding: 12
+          rightPadding: 12
           topPadding: 0
           bottomPadding: 0
           focusPolicy: Qt.NoFocus
@@ -519,17 +527,18 @@ FocusScope {
             verticalAlignment: Text.AlignVCenter
             font {
               family: root.tokens.mono
-              pixelSize: 9
+              pixelSize: 10
               weight: Font.DemiBold
               letterSpacing: 0.4
             }
           }
           background: Rectangle {
-            radius: 13
+            radius: height / 2
             color: chip.activeChip ? root.tokens.cyan
-              : chip.hovered ? Qt.alpha(root.tokens.muted, 0.1) : "transparent"
+              : chip.hovered ? root.tokens.raised : "transparent"
             border.width: 1
-            border.color: chip.activeChip ? root.tokens.cyan : Qt.alpha(root.tokens.muted, 0.2)
+            border.color: chip.activeChip ? root.tokens.cyan
+              : chip.hovered ? root.tokens.border : Qt.alpha(root.tokens.muted, 0.3)
           }
         }
       }
@@ -540,220 +549,58 @@ FocusScope {
         text: root.filtering
           ? root.visibleTotal + (root.visibleTotal === 1 ? " match" : " matches")
           : root.shortcuts.total + (root.shortcuts.total === 1 ? " binding" : " bindings")
-        color: root.filtering ? root.tokens.cyan : Qt.alpha(root.tokens.muted, 0.8)
+        color: root.filtering ? root.tokens.cyan : root.tokens.muted
         font {
           family: root.tokens.mono
-          pixelSize: 9
+          pixelSize: 10
         }
       }
     }
 
-    RowLayout {
+    ColumnLayout {
       Layout.fillWidth: true
       Layout.fillHeight: true
-      spacing: root.compact ? 14 : 20
+      Layout.minimumHeight: 0
+      spacing: 16
 
-      ColumnLayout {
-        Layout.preferredWidth: root.compact ? 168 : 204
-        Layout.maximumWidth: root.compact ? 168 : 204
-        Layout.fillHeight: true
-        spacing: 4
-
-        Text {
-          text: "LIBRARY"
-          Layout.bottomMargin: 4
-          color: Qt.alpha(root.tokens.muted, 0.9)
-          font {
-            family: root.tokens.mono
-            pixelSize: 8
-            letterSpacing: 1.5
-          }
-        }
-
-        Flickable {
-          id: navFlick
-          Layout.fillWidth: true
-          Layout.fillHeight: true
-          clip: true
-          boundsBehavior: Flickable.StopAtBounds
-          contentWidth: width
-          contentHeight: navColumn.implicitHeight
-          ScrollBar.vertical: ScrollBar {
-            policy: navFlick.contentHeight > navFlick.height + 1
-              ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
-            width: 4
-            contentItem: Rectangle {
-              implicitWidth: 4
-              radius: 2
-              color: Qt.alpha(root.tokens.muted, 0.3)
+      Flow {
+        Layout.fillWidth: true
+        Layout.preferredHeight: implicitHeight
+        spacing: 6
+        Repeater {
+          model: root.rail
+          delegate: Button {
+            id: categoryButton
+            required property var modelData
+            required property int index
+            readonly property bool current: root.categoryIndex === index
+            text: modelData.name + "  " + root.displayCount(modelData.name)
+            implicitHeight: 32
+            leftPadding: 14; rightPadding: 14
+            focusPolicy: Qt.NoFocus
+            Accessible.name: modelData.name + " shortcuts"
+            onClicked: { root.select(index); root.forceActiveFocus(); }
+            contentItem: Text {
+              text: categoryButton.text
+              color: categoryButton.current ? root.tokens.background : root.tokens.muted
+              font { family: root.tokens.font; pixelSize: 12; weight: Font.Medium }
+              horizontalAlignment: Text.AlignHCenter
+              verticalAlignment: Text.AlignVCenter
             }
-            background: Item {}
-          }
-
-          Column {
-            id: navColumn
-            width: navFlick.width
-            spacing: 4
-
-            Repeater {
-              model: root.rail
-              delegate: Button {
-                id: categoryButton
-                required property var modelData
-                required property int index
-                readonly property bool current: root.categoryIndex === categoryButton.index
-                readonly property color accent: root.accentFor(categoryButton.modelData.name)
-                readonly property int shownCount: root.displayCount(categoryButton.modelData.name)
-                width: navColumn.width
-                height: root.compact ? 30 : 34
-                padding: 0
-                focusPolicy: Qt.NoFocus
-                Accessible.name: categoryButton.modelData.name + " shortcuts"
-                enabled: !root.filtering || categoryButton.modelData.name === "All"
-                  || categoryButton.shownCount > 0
-                onClicked: {
-                  root.select(categoryButton.index);
-                  root.forceActiveFocus();
-                }
-
-                background: Item {}
-
-                contentItem: Item {
-                  Rectangle {
-                    anchors.fill: parent
-                    radius: 9
-                    color: categoryButton.current
-                      ? Qt.alpha(categoryButton.accent, 0.12)
-                      : categoryButton.hovered && categoryButton.enabled
-                        ? Qt.alpha(root.tokens.muted, 0.06) : "transparent"
-                    border.width: 1
-                    border.color: categoryButton.current
-                      ? Qt.alpha(categoryButton.accent, 0.35) : "transparent"
-                  }
-                  Rectangle {
-                    visible: categoryButton.current
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 3
-                    height: 16
-                    radius: 1.5
-                    color: categoryButton.accent
-                  }
-                  RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: categoryButton.current ? 11 : 9
-                    anchors.rightMargin: 9
-                    spacing: 8
-                    Text {
-                      text: categoryButton.modelData.glyph
-                      color: categoryButton.current ? categoryButton.accent
-                        : Qt.alpha(root.tokens.text, 0.62)
-                      Layout.preferredWidth: 21
-                      opacity: categoryButton.enabled ? 1 : 0.4
-                      font {
-                        family: root.tokens.mono
-                        pixelSize: root.compact ? 15 : 17
-                        weight: Font.DemiBold
-                      }
-                    }
-                    Text {
-                      Layout.fillWidth: true
-                      Layout.minimumWidth: 0
-                      text: categoryButton.modelData.name
-                      elide: Text.ElideRight
-                      color: categoryButton.current ? root.tokens.text : root.tokens.muted
-                      opacity: categoryButton.enabled ? 1 : 0.45
-                      font {
-                        family: root.tokens.font
-                        pixelSize: root.compact ? 10 : 11
-                        weight: categoryButton.current ? Font.DemiBold : Font.Normal
-                      }
-                    }
-                    Text {
-                      text: categoryButton.shownCount
-                      color: categoryButton.current
-                        ? categoryButton.accent : Qt.alpha(root.tokens.muted, 0.75)
-                      opacity: categoryButton.enabled ? 1 : 0.4
-                      font {
-                        family: root.tokens.mono
-                        pixelSize: 9
-                      }
-                    }
-                  }
-                }
-              }
+            background: Rectangle {
+              radius: 8
+              color: categoryButton.current ? root.tokens.cyan
+                : categoryButton.hovered ? root.tokens.raised : root.tokens.sunken
+              border.color: categoryButton.current ? "transparent" : root.tokens.hairline
             }
           }
         }
-
-        Rectangle {
-          Layout.fillWidth: true
-          implicitHeight: sourceColumn.implicitHeight + 20
-          radius: 11
-          color: Qt.alpha(root.tokens.muted, 0.04)
-          border.width: 1
-          border.color: Qt.alpha(root.tokens.muted, 0.1)
-
-          ColumnLayout {
-            id: sourceColumn
-            anchors.fill: parent
-            anchors.margins: 10
-            spacing: 3
-
-            RowLayout {
-              spacing: 6
-              Rectangle {
-                width: 5
-                height: 5
-                radius: 2.5
-                color: root.syncColor
-              }
-              Text {
-                text: "LIVE SOURCE"
-                color: root.syncColor
-                font {
-                  family: root.tokens.mono
-                  pixelSize: 8
-                  letterSpacing: 1.2
-                }
-              }
-            }
-            Text {
-              Layout.fillWidth: true
-              Layout.minimumWidth: 0
-              text: "hyprctl -j binds"
-              color: Qt.alpha(root.tokens.text, 0.85)
-              elide: Text.ElideRight
-              font {
-                family: root.tokens.mono
-                pixelSize: root.compact ? 9 : 10
-              }
-            }
-            Text {
-              Layout.fillWidth: true
-              Layout.minimumWidth: 0
-              visible: !root.compact
-              text: "Refreshed every time this panel opens."
-              color: Qt.alpha(root.tokens.muted, 0.8)
-              wrapMode: Text.Wrap
-              font {
-                family: root.tokens.font
-                pixelSize: 9
-              }
-            }
-          }
-        }
-      }
-
-      Rectangle {
-        Layout.fillHeight: true
-        implicitWidth: 1
-        color: root.tokens.hairline
       }
 
       ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
+        Layout.minimumWidth: 0
         spacing: 0
 
         Item {
@@ -768,7 +615,7 @@ FocusScope {
             boundsBehavior: Flickable.StopAtBounds
             flickableDirection: Flickable.VerticalFlick
             contentWidth: width
-            contentHeight: Math.max(root.listMode ? singleColumn.implicitHeight : atlas.implicitHeight, height)
+            contentHeight: Math.max(singleColumn.implicitHeight, height)
             ScrollBar.vertical: ScrollBar {
               policy: flick.contentHeight > flick.height + 1 ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
               width: 6
@@ -782,13 +629,10 @@ FocusScope {
 
             Column {
               id: singleColumn
-              width: flick.width
-              y: root.listMode && singleColumn.implicitHeight < flick.height
-                ? Math.round((flick.height - singleColumn.implicitHeight) / 2) : 0
+              width: flick.width - 12
               spacing: root.cardGap
-              visible: root.listMode
               Repeater {
-                model: root.listMode ? root.display : []
+                model: root.display
                 delegate: ShortcutCard {
                   required property var modelData
                   width: parent.width
@@ -801,47 +645,6 @@ FocusScope {
               }
             }
 
-            Row {
-              id: atlas
-              width: flick.width
-              spacing: root.cardGap
-              visible: !root.listMode
-              readonly property real columnWidth: Math.max(1, (width - spacing) / 2)
-
-              Column {
-                width: atlas.columnWidth
-                spacing: root.cardGap
-                Repeater {
-                  model: root.listMode ? [] : root.masonry.left
-                  delegate: ShortcutCard {
-                    required property var modelData
-                    width: parent.width
-                    tokens: root.tokens
-                    category: modelData
-                    accent: root.accentFor(modelData.name)
-                    columns: 1
-                    compact: root.compact
-                  }
-                }
-              }
-
-              Column {
-                width: atlas.columnWidth
-                spacing: root.cardGap
-                Repeater {
-                  model: root.listMode ? [] : root.masonry.right
-                  delegate: ShortcutCard {
-                    required property var modelData
-                    width: parent.width
-                    tokens: root.tokens
-                    category: modelData
-                    accent: root.accentFor(modelData.name)
-                    columns: 1
-                    compact: root.compact
-                  }
-                }
-              }
-            }
           }
 
           ColumnLayout {
@@ -878,12 +681,12 @@ FocusScope {
             }
             Text {
               Layout.fillWidth: true
-              text: "hyprctl -j binds"
-              color: Qt.alpha(root.tokens.muted, 0.6)
+              text: "Please wait a moment"
+              color: root.tokens.muted
               horizontalAlignment: Text.AlignHCenter
               font {
                 family: root.tokens.mono
-                pixelSize: 9
+                pixelSize: 10
               }
             }
           }
@@ -924,7 +727,7 @@ FocusScope {
               horizontalAlignment: Text.AlignHCenter
               font {
                 family: root.tokens.font
-                pixelSize: 10
+                pixelSize: 11
               }
             }
           }
@@ -932,14 +735,14 @@ FocusScope {
           ColumnLayout {
             anchors.centerIn: parent
             width: Math.min(parent.width - 48, 360)
-            spacing: 7
+            spacing: 8
             visible: !root.shortcuts.loading && root.shortcuts.error === ""
               && root.shortcuts.categories.length === 0 && root.shortcuts.total === 0
 
             Text {
               Layout.alignment: Qt.AlignHCenter
               text: "∅"
-              color: Qt.alpha(root.tokens.muted, 0.75)
+              color: root.tokens.muted
               font {
                 family: root.tokens.mono
                 pixelSize: 24
@@ -966,7 +769,7 @@ FocusScope {
             Text {
               Layout.alignment: Qt.AlignHCenter
               text: root.selected === "All" ? "⌕" : "∅"
-              color: Qt.alpha(root.tokens.muted, 0.75)
+              color: root.tokens.muted
               font {
                 family: root.tokens.mono
                 pixelSize: 24
@@ -982,7 +785,7 @@ FocusScope {
               horizontalAlignment: Text.AlignHCenter
               font {
                 family: root.tokens.font
-                pixelSize: 12
+                pixelSize: 13
                 weight: Font.DemiBold
               }
             }
@@ -994,14 +797,14 @@ FocusScope {
               horizontalAlignment: Text.AlignHCenter
               font {
                 family: root.tokens.font
-                pixelSize: 10
+                pixelSize: 11
               }
             }
             Button {
               Layout.alignment: Qt.AlignHCenter
-              Layout.topMargin: 3
-              implicitWidth: resetText.implicitWidth + 24
-              implicitHeight: 28
+              Layout.topMargin: 4
+              implicitWidth: resetText.implicitWidth + 28
+              implicitHeight: 30
               padding: 0
               focusPolicy: Qt.NoFocus
               onClicked: {
@@ -1016,15 +819,15 @@ FocusScope {
                 verticalAlignment: Text.AlignVCenter
                 font {
                   family: root.tokens.font
-                  pixelSize: 10
+                  pixelSize: 11
                   weight: Font.DemiBold
                 }
               }
               background: Rectangle {
-                radius: 14
-                color: Qt.alpha(root.tokens.cyan, 0.1)
+                radius: height / 2
+                color: Qt.alpha(root.tokens.cyan, 0.12)
                 border.width: 1
-                border.color: Qt.alpha(root.tokens.cyan, 0.3)
+                border.color: Qt.alpha(root.tokens.cyan, 0.4)
               }
             }
           }
@@ -1033,7 +836,7 @@ FocusScope {
         Rectangle {
           Layout.fillWidth: true
           implicitHeight: 1
-          color: Qt.alpha(root.tokens.muted, 0.1)
+          color: root.tokens.hairline
         }
 
         RowLayout {
@@ -1047,20 +850,20 @@ FocusScope {
             text: root.narrow
               ? "↑↓ scroll · ←→ categories · / search · Esc close"
               : "↑ ↓ scroll · ← → categories · Tab next · type or / to search · Esc clears, then closes"
-            color: Qt.alpha(root.tokens.muted, 0.75)
+            color: root.tokens.muted
             elide: Text.ElideRight
             font {
               family: root.tokens.mono
-              pixelSize: 9
+              pixelSize: 10
             }
           }
 
           Text {
-            text: "hyprctl · live"
-            color: Qt.alpha(root.tokens.muted, 0.75)
+            text: "Hyprland"
+            color: root.tokens.muted
             font {
               family: root.tokens.mono
-              pixelSize: 9
+              pixelSize: 10
             }
           }
         }

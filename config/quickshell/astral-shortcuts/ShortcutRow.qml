@@ -8,40 +8,42 @@ Item {
   required property var tokens
   required property var entry
   property bool compact: false
-  implicitHeight: root.compact ? 31 : 35
+  implicitHeight: Math.max(root.compact ? 44 : 48, row.implicitHeight + 16)
 
   HoverHandler { id: hover }
 
   Rectangle {
     anchors.fill: parent
-    anchors.leftMargin: 1
-    anchors.rightMargin: 1
     radius: root.tokens.rowRadius
-    color: hover.hovered ? Qt.alpha(root.tokens.text, 0.045) : "transparent"
+    color: hover.hovered ? root.tokens.raised : "transparent"
+    border.width: 1
+    border.color: hover.hovered ? root.tokens.hairline : "transparent"
   }
 
   RowLayout {
+    id: row
     anchors.fill: parent
-    anchors.leftMargin: root.compact ? 5 : 7
-    anchors.rightMargin: root.compact ? 5 : 7
-    spacing: root.compact ? 6 : 9
+    anchors.leftMargin: root.compact ? 8 : 10
+    anchors.rightMargin: root.compact ? 8 : 10
+    spacing: root.compact ? 8 : 12
 
     Text {
       Layout.fillWidth: true
       Layout.minimumWidth: 0
       text: root.entry.label
       textFormat: Text.PlainText
-      elide: Text.ElideRight
-      color: hover.hovered ? root.tokens.text : Qt.alpha(root.tokens.text, 0.9)
+      wrapMode: Text.Wrap
+      color: hover.hovered ? root.tokens.text : Qt.alpha(root.tokens.text, 0.88)
       font {
         family: root.tokens.font
         pixelSize: root.compact ? 11 : 12
       }
     }
 
-    Row {
-      Layout.alignment: Qt.AlignVCenter
-      spacing: root.compact ? 2 : 3
+    Flow {
+      Layout.preferredWidth: Math.min(implicitWidth, root.width * 0.55)
+      Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+      spacing: root.compact ? 3 : 4
 
       Text {
         visible: root.entry.keys.length === 0
@@ -49,7 +51,7 @@ Item {
         color: root.tokens.muted
         font {
           family: root.tokens.mono
-          pixelSize: root.compact ? 9 : 10
+          pixelSize: root.compact ? 10 : 11
         }
       }
 
@@ -59,7 +61,7 @@ Item {
           id: chord
           required property var modelData
           required property int index
-          spacing: root.compact ? 2 : 3
+          spacing: root.compact ? 3 : 4
 
           KeyCap {
             tokens: root.tokens
@@ -69,11 +71,11 @@ Item {
           Text {
             visible: chord.index < root.entry.keys.length - 1
             text: "+"
-            color: Qt.alpha(root.tokens.muted, 0.65)
+            color: root.tokens.muted
             anchors.verticalCenter: parent.verticalCenter
             font {
               family: root.tokens.mono
-              pixelSize: root.compact ? 8 : 9
+              pixelSize: root.compact ? 9 : 10
             }
           }
         }

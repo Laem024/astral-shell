@@ -22,6 +22,17 @@ Item {
   implicitHeight: vertical ? (compact ? 38 : 50) : 36
   Accessible.name: detail
   Accessible.role: Accessible.Button
+  activeFocusOnTab: true
+  Accessible.onPressAction: root.activated()
+  Keys.onSpacePressed: root.activated()
+  Keys.onReturnPressed: root.activated()
+  Keys.onEnterPressed: root.activated()
+  Rectangle {
+    anchors.fill: parent
+    color: "transparent"
+    radius: root.tokens.rowRadius
+    border.color: root.activeFocus ? root.tokens.gold : "transparent"
+  }
   GridLayout {
     id: content
     anchors.centerIn: parent

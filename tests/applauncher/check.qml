@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import QtTest
 import Quickshell
 import "../../config/quickshell/astral-launcher" as Launcher
 import "../../config/quickshell/astral-launcher/Logic.js" as Logic
@@ -9,13 +10,20 @@ Scope {
   id: root
   property int stage: 0
   property int ticks: 0
+  property int closeRequests: 0
+  function find(item, name) {
+    if (item.objectName === name) return item;
+    for (const child of item.children || []) { const found = find(child, name); if (found) return found; }
+    return null;
+  }
   function check(value, message) { if (!value) { console.error("LAUNCHER_FAIL: " + message); Qt.quit(); } }
   QtObject { id: settings; property var value: Common.SettingsData.value }
   Common.Theme { id: theme; settings: settings }
   Launcher.LauncherService { id: service; settings: settings; onAccepted: root.stage++ }
   Window {
-    visible: true; width: 820; height: 560
-    Launcher.LauncherContent { id: content; anchors.fill: parent; service: service; tokens: theme }
+    visible: true; width: 620; height: 560
+    TestCase { id: keyboard; when: false }
+    Launcher.LauncherContent { id: content; anchors.fill: parent; service: service; tokens: theme; onCloseRequested: root.closeRequests++ }
   }
   Timer {
     interval: 100; repeat: true; running: true
@@ -80,7 +88,37 @@ Scope {
         service.launch({id:"missing-terminal",runInTerminal:true,workingDirectory:"",command:["true"]});
       } else if (root.stage === 8 && !service.pending && !service.dirty) {
         root.check(service.error.length > 0 && !service.state.usage["missing-terminal.desktop"], "missing terminal rejected");
-        console.log("LAUNCHER_PASS (catalog, logic, state, launch, content)"); Qt.quit();
+        content.choose("All");
+        root.stage = 9;
+      } else if (root.stage === 9) {
+        root.stage = 10;
+        const list = root.find(content, "launcherResults");
+        const field = root.find(content, "launcherSearch");
+        root.check(list.count >= 5 && list.currentIndex === 0, "list preserves catalog");
+        field.forceActiveFocus();
+        keyboard.keyClick(Qt.Key_Down);
+        root.check(list.activeFocus && list.currentIndex === 0, "Down enters result list");
+        keyboard.keyClick(Qt.Key_Down);
+        root.check(list.currentIndex === 1, "Down selects next row");
+        const favorite = Logic.identity(content.selected);
+        const wasPinned = service.state.favorites.includes(favorite);
+        keyboard.keyClick(Qt.Key_F, Qt.ControlModifier);
+        root.check(service.state.favorites.includes(favorite) !== wasPinned, "Ctrl F favorites selected row");
+        keyboard.keyClick(Qt.Key_Up);
+        keyboard.keyClick(Qt.Key_Up);
+        root.check(field.activeFocus, "Up from first row returns to search");
+        keyboard.keyClick(Qt.Key_Right);
+        root.check(content.category === "Home", "Right wraps to first category from search");
+        keyboard.keyClick(Qt.Key_Left);
+        root.check(content.category === "All", "Left wraps to last category from search");
+        keyboard.keyClick(Qt.Key_Down);
+        keyboard.keyClick(Qt.Key_Left);
+        root.check(content.category === "Frequent", "Left changes category from results");
+        keyboard.keyClick(Qt.Key_Right);
+        root.check(content.category === "All", "Right restores category");
+        keyboard.keyClick(Qt.Key_Escape);
+        root.check(root.closeRequests === 1, "Escape closes from search");
+        console.log("LAUNCHER_PASS (catalog, logic, state, launch, content, list navigation)"); Qt.quit();
       }
     }
   }

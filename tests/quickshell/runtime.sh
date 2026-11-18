@@ -164,6 +164,8 @@ ShellRoot {
     function commandStatus(): string { return commandResult; }
     function ready(): string { return Data.SessionData.ready ? "ready" : "waiting"; }
     function blocked(): string { return Data.SessionData.blocked ? "yes" : "no"; }
+    function frame(): string { return Bar.SettingsData.value.frame; }
+    function settingsError(): string { return Bar.SettingsData.error ? "invalid" : "valid"; }
     function position(): string { return Bar.SettingsData.value.position; }
     function capture(kind: string, mode: string, audio: string): string {
       const accepted = Data.CaptureData.prepare(kind, mode, "eDP-1", audio);
@@ -197,6 +199,17 @@ sleep 0.3
 wait_value "$entry" fixture position top
 jq '.position="right"' config/quickshell/astral-bar/settings.json > "$scratch/config/astral-bar/settings.json"
 wait_value "$entry" fixture position right
+# Frame validation and hot reload keep the last valid selection on failure.
+for frame in off folds full; do
+  jq --arg frame "$frame" '.frame=$frame' config/quickshell/astral-bar/settings.json > "$scratch/config/astral-bar/settings.json"
+  wait_value "$entry" fixture frame "$frame"
+done
+jq '.frame="invalid"' config/quickshell/astral-bar/settings.json > "$scratch/config/astral-bar/settings.json"
+wait_value "$entry" fixture settingsError invalid
+wait_value "$entry" fixture frame full
+jq 'del(.frame)' config/quickshell/astral-bar/settings.json > "$scratch/config/astral-bar/settings.json"
+wait_value "$entry" fixture settingsError valid
+wait_value "$entry" fixture frame off
 printf 'unknown\n' > "$scratch/locked"
 wait_value "$entry" fixture blocked yes
 [[ $(ipc "$entry" fixture capture shot monitor none) == rejected ]] || fail 'Unknown privacy state allowed capture.'

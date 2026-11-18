@@ -6,24 +6,24 @@ const common = {
   "animations": true,
   "colors": {
     "light": {
-      "background": "#EEEDE6",
-      "surface": "#F8F6EF",
-      "text": "#202C2A",
-      "muted": "#4F5D59",
-      "cyan": "#235C50",
-      "lavender": "#4B5264",
-      "gold": "#745020",
-      "alert": "#A33420"
+      "background": "#EEF2EF",
+      "surface": "#FBFCFA",
+      "text": "#141B1D",
+      "muted": "#5A6764",
+      "cyan": "#17675A",
+      "lavender": "#3B4A7A",
+      "gold": "#8A5B16",
+      "alert": "#A9361F"
     },
     "dark": {
-      "background": "#151918",
-      "surface": "#202629",
-      "text": "#F4EEDF",
-      "muted": "#B1B5AD",
-      "cyan": "#B1D7CB",
-      "lavender": "#C6CCD2",
-      "gold": "#E4B882",
-      "alert": "#FF957C"
+      "background": "#0E1113",
+      "surface": "#171C1F",
+      "text": "#E7ECE9",
+      "muted": "#8D9994",
+      "cyan": "#7FD0BF",
+      "lavender": "#A9B5D9",
+      "gold": "#E5B873",
+      "alert": "#F08C7B"
     }
   },
   "workspaceCount": 10,
@@ -41,7 +41,7 @@ const common = {
       "kitty"
     ],
     "videoPlayer": [
-      "haruna"
+      "vlc"
     ]
   },
   "providers": {
@@ -53,6 +53,7 @@ const common = {
     "poweroff": ["astral-lock", "poweroff"]
   },
   "modules": [
+    { "id": "astral-settings", "path": "settings.qml", "enabled": true, "autostart": true },
     {"id": "astral-clipboard", "path": "clipboard.qml", "enabled": true, "autostart": true},
     {"id": "astral-overview", "path": "overview.qml", "enabled": true, "autostart": true},
     {"id": "astral-shortcuts", "path": "shortcuts.qml", "enabled": true, "autostart": true},
@@ -74,6 +75,7 @@ const common = {
 const bar = {
   "position": "top",
   "margin": 8,
+  "frame": "off",
   "workspaceDisplay": "icons",
   "modules": {
     "logo": true,

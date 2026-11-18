@@ -9,7 +9,6 @@ FocusScope {
   property string placeholderText: ""
   property bool error: false
   property bool busy: false
-  property int trailingInset: 0
 
   signal accepted()
   signal escapePressed()
@@ -27,12 +26,12 @@ FocusScope {
 
   Rectangle {
     anchors.fill: parent
-    radius: root.tokens.fieldRadius
-    color: root.error ? Qt.alpha(root.tokens.alert, 0.08) : root.tokens.glassSoft
+    radius: root.tokens.rowRadius
+    color: root.error ? Qt.alpha(root.tokens.alert, 0.08) : root.tokens.sunken
     border.width: input.activeFocus || root.error ? 2 : 1
-    border.color: root.error ? Qt.alpha(root.tokens.alert, 0.7)
-      : input.activeFocus ? Qt.alpha(root.tokens.cyan, 0.6)
-      : root.tokens.glassEdge
+    border.color: root.error ? Qt.alpha(root.tokens.alert, 0.8)
+      : input.activeFocus ? root.tokens.cyan
+      : root.tokens.border
 
     Behavior on border.color {
       ColorAnimation { duration: root.tokens.hoverDuration }
@@ -47,8 +46,8 @@ FocusScope {
     anchors {
       left: parent.left
       right: parent.right
-      leftMargin: 18
-      rightMargin: 18 + root.trailingInset
+      leftMargin: 16
+      rightMargin: 16
       verticalCenter: parent.verticalCenter
     }
     height: implicitHeight
@@ -57,8 +56,8 @@ FocusScope {
     selectedTextColor: root.tokens.text
     font {
       family: root.tokens.mono
-      pixelSize: 13
-      letterSpacing: input.text.length > 0 ? 4 : 0
+      pixelSize: root.tokens.labelSize
+      letterSpacing: input.text.length > 0 ? 3 : 0
     }
     echoMode: TextInput.Password
     passwordCharacter: "●"
@@ -87,18 +86,18 @@ FocusScope {
     anchors {
       left: parent.left
       right: parent.right
-      leftMargin: 18
-      rightMargin: 18 + root.trailingInset
+      leftMargin: 16
+      rightMargin: 16
       verticalCenter: parent.verticalCenter
     }
     text: root.placeholderText
     visible: input.text.length === 0
-    opacity: input.activeFocus ? 0.5 : 0.9
+    opacity: input.activeFocus ? 0.6 : 0.9
     color: root.tokens.muted
     elide: Text.ElideRight
     font {
       family: root.tokens.font
-      pixelSize: 12
+      pixelSize: root.tokens.bodySize
     }
   }
 

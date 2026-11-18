@@ -2,6 +2,11 @@
 
 The Display panel keeps monitor/region/window screenshots and monitor/region recordings. Audio modes are none, system, microphone, and both. Preferences remain in the Astral state directory through Qt settings.
 
+Screenshots and recordings default to the monitor whose bar opened the panel.
+You can choose another display for the current page. Reopening the page selects
+its own monitor again; if that monitor is unavailable, the saved selection or
+the first connected display is used.
+
 ## Implementation
 
 - `astral-bar/data/BrightnessData.qml` coordinates reads and writes; `BrightnessLogic.js` validates values and maps outputs. Internal panels require exactly one internal monitor and one backlight device. External displays require one matching DRM connector and its resolved DDC I2C bus. Enumeration order is never used to guess a mapping. Writes re-resolve the mapping after hotplug and read back the applied value. The model preserves delegates during updates and coalesces slider writes.

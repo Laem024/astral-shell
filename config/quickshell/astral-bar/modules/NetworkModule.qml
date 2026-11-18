@@ -10,6 +10,7 @@ Item {
   property bool compact: false
   property string connectionLabel: ""
   property string connectionDetail: ""
+  property string connectionState: "unavailable"
   property real strength: 0
   signal activated()
   signal summaryActivated()
@@ -31,6 +32,7 @@ Item {
           tokens: Qt.binding(() => root.tokens),
           connectionLabel: Qt.binding(() => root.connectionLabel),
           connectionDetail: Qt.binding(() => root.connectionDetail),
+          connectionState: Qt.binding(() => root.connectionState),
           strength: Qt.binding(() => root.strength),
           vertical: Qt.binding(() => root.vertical),
           compact: Qt.binding(() => root.compact)
@@ -47,6 +49,7 @@ Item {
           tokens: Qt.binding(() => root.tokens),
           connectionLabel: Qt.binding(() => root.connectionLabel),
           connectionDetail: Qt.binding(() => root.connectionDetail),
+          connectionState: Qt.binding(() => root.connectionState),
           strength: Qt.binding(() => root.strength),
           vertical: Qt.binding(() => root.vertical),
           compact: Qt.binding(() => root.compact)

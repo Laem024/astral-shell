@@ -8,6 +8,7 @@ runtime=$(astral_test_scratch power)
 trap 'rm -rf -- "$runtime"' EXIT
 export HOME=$runtime/home XDG_CACHE_HOME=$runtime/cache
 mkdir -p "$HOME"
+cp scripts/cleanup-install.sh "$runtime/cleanup-install.sh"
 mkdir -p "$runtime/bin" "$runtime/modules/1-test/build" "$runtime/module" "$runtime/batteries/BAT1" "$runtime/registry/source"
 bash scripts/install-msi-ec.sh --stage "$upstream" "$runtime/source"
 printf 'Katana GF76 11UD\n' > "$runtime/model"

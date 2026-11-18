@@ -20,9 +20,22 @@ done < <(find "$scratch/config/astral-bar" -name '*.qml' -print0)
 cat > "$scratch/config/bar.qml" <<'QML'
 import QtQuick
 import "astral-bar" as Bar
+import "astral-bar/settings" as Settings
 
 Bar.BarRoot {
-  Timer { interval: 1000; running: true; onTriggered: Qt.quit() }
+  Timer {
+    property int step: 0
+    interval: 120; running: true; repeat: true
+    onTriggered: {
+      if (step === 12) { Qt.quit(); return; }
+      const next = Object.assign({}, Settings.SettingsData.local.value, {
+        frame: ["off", "folds", "full"][Math.floor(step / 4)],
+        position: ["top", "bottom", "left", "right"][step % 4]
+      });
+      Settings.SettingsData.local.load(JSON.stringify(next));
+      step++;
+    }
+  }
 }
 QML
 mkdir -p "$scratch/run" "$scratch/home" "$scratch/cache" "$scratch/state" "$scratch/data" "$scratch/bin"
@@ -36,5 +49,24 @@ export QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software QT_QUICK_CONTROLS_STY
 export PATH=$scratch/bin:$PATH
 unset WAYLAND_DISPLAY DISPLAY HYPRLAND_INSTANCE_SIGNATURE
 if ! timeout 10 qs -p "$scratch/config/bar.qml" --no-color > "$scratch/log" 2>&1; then cat "$scratch/log"; exit 1; fi
-if ! rg -q 'Configuration Loaded' "$scratch/log" || rg -q 'Failed to load configuration|TypeError|ReferenceError|Binding loop|is not a type|Component is not ready' "$scratch/log"; then cat "$scratch/log"; exit 1; fi
+if ! rg -q 'Configuration Loaded' "$scratch/log" || rg -q 'Failed to load configuration|TypeError|ReferenceError|Binding loop|Cannot assign|Unable to assign|Error:|is not a type|Component is not ready' "$scratch/log"; then cat "$scratch/log"; exit 1; fi
+# The visual preview shares frame drawing but creates no native layer surface.
+cat > "$scratch/config/bar-preview.qml" <<'QML'
+import QtQuick
+import "astral-bar" as Bar
+Bar.BarPreview {
+  Timer {
+    property int step: 0
+    interval: 120; running: true; repeat: true
+    onTriggered: {
+      if (step === 12) { Qt.quit(); return; }
+      frameMode = ["off", "folds", "full"][Math.floor(step / 4)];
+      edge = ["top", "bottom", "left", "right"][step % 4];
+      step++;
+    }
+  }
+}
+QML
+if ! timeout 10 qs -p "$scratch/config/bar-preview.qml" --no-color > "$scratch/preview.log" 2>&1; then cat "$scratch/preview.log"; exit 1; fi
+if ! rg -q 'Configuration Loaded' "$scratch/preview.log" || rg -q 'Failed to load configuration|TypeError|ReferenceError|Binding loop|Cannot assign|Unable to assign|Error:|is not a type|Component is not ready' "$scratch/preview.log"; then cat "$scratch/preview.log"; exit 1; fi
 printf 'QUICKSHELL_STARTUP_PASS\n'

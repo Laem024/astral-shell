@@ -39,17 +39,23 @@ Item {
     if (!group) return 0;
     const children = group.children.filter(child => child.visible);
     return children.reduce((sum, child) => sum
-      + (child.Layout.minimumWidth >= 0 ? child.Layout.minimumWidth : child.implicitWidth)
+      + (child.Layout.minimumWidth > 0 ? child.Layout.minimumWidth
+        : child.Layout.fillWidth ? 0 : child.implicitWidth)
       + child.Layout.leftMargin + child.Layout.rightMargin, 0)
       + Math.max(0, children.length - 1) * group.columnSpacing;
   }
   function labeledEndMinimum() {
-    const statusCount = ["network", "audio", "battery", "notifications"].filter(key => shown[key]).length;
-    const modules = 1 + statusCount + Number(!!shown.music) + Number(!!shown.tray);
-    // Labeled status nodes are 68px; compact media keeps its 124px transport.
-    return 40 + statusCount * 68 + Number(!!shown.music) * (124 + 10) + Number(!!shown.tray) * 40
-      + (modules + Number(!!shown.music)) * tokens.gap;
+    const dockCount = ["tray", "capture", "network", "audio", "battery", "notifications"].filter(key => shown[key]).length;
+    const dockWidth = dockCount ? 16 + Number(!!shown.tray) * 36 + Number(!!shown.capture) * 40 + Number(!!shown.network) * 36
+      + Number(!!shown.audio) * 70 + Number(!!shown.battery) * 70
+      + Number(!!shown.notifications) * 58 + Math.max(0, dockCount - 1) * 2 : 0;
+    const groupCount = Number(!!shown.music) + Number(dockCount > 0)
+      + Number(!!shown.music && !!shown.tray);
+    return dockWidth + Number(!!shown.music) * 148
+      + Number(!!shown.music && !!shown.tray) * 10
+      + Math.max(0, groupCount - 1) * tokens.gap;
   }
+
   readonly property var shown: settings.value.modules
   Data.WorkspaceData {
     id: workspaceData
@@ -63,7 +69,7 @@ Item {
     enabled: root.settings.value.animations
     NumberAnimation { duration: root.tokens.entryDuration }
   }
-  Components.AstralSurface { anchors.fill: parent; tokens: root.tokens; vertical: root.vertical; position: root.settings.value.position }
+  Components.AstralSurface { visible: (root.settings.value.frame || "off") === "off"; anchors.fill: parent; tokens: root.tokens; vertical: root.vertical; position: root.settings.value.position }
   // Vertical content fits the available height, including a visible special.
   // Horizontal bars retain their scroll fallback on narrow screens.
   Flickable {
@@ -81,6 +87,7 @@ Item {
     boundsBehavior: Flickable.StopAtBounds
     flickableDirection: root.vertical ? Flickable.VerticalFlick : Flickable.HorizontalFlick
     Rectangle {
+      id: startPlate
       objectName: "startPlate"
       x: root.vertical ? (viewport.width - root.verticalPlateWidth) / 2 : startGroup.x * composition.scale
       y: root.vertical ? startGroup.y * composition.scale : (composition.height - height) / 2
@@ -89,9 +96,10 @@ Item {
       width: root.vertical ? root.verticalPlateWidth / composition.scale : startGroup.width
       height: root.vertical ? startGroup.height : Math.max(0, Math.min(composition.height - 4, Math.max(startGroup.height, endGroup.height) + 6))
       visible: (root.shown.logo || root.shown.clock || (root.shown.window && (root.vertical || !root.compact)))
-      radius: 7; color: root.tokens.surface; border.color: root.tokens.border
+      radius: 18; color: root.tokens.sunken; border.color: root.tokens.border
     }
     Rectangle {
+      id: endPlate
       objectName: "endPlate"
       x: root.vertical ? (viewport.width - root.verticalPlateWidth) / 2 : endGroup.x * composition.scale
       y: root.vertical ? endGroup.y * composition.scale : (composition.height - height) / 2
@@ -100,17 +108,16 @@ Item {
       width: root.vertical ? root.verticalPlateWidth / composition.scale : endGroup.width
       height: root.vertical ? endGroup.height : Math.max(0, Math.min(composition.height - 4, Math.max(startGroup.height, endGroup.height) + 6))
       visible: true
-      radius: 7; color: root.tokens.surface; border.color: root.tokens.border
+      radius: 18; color: root.tokens.sunken; border.color: root.tokens.border
     }
     GridLayout {
       id: composition
       objectName: "composition"
       readonly property real sideMinimum: Math.max(root.minimumGroupWidth(startGroup), root.minimumGroupWidth(endGroup))
-      readonly property real sideExtent: Math.max(sideMinimum, (width - (root.shown.workspaces ? centerWorkspaces.implicitWidth + 2 * root.tokens.section : root.tokens.section)) / 2)
-      readonly property real sideHeight: Math.max(startGroup.implicitHeight, endGroup.implicitHeight)
+      readonly property real sideExtent: Math.max(sideMinimum, (width - (root.shown.workspaces ? centerWorkspaces.implicitWidth + 2 * columnSpacing : columnSpacing)) / 2)
       readonly property int visibleGroups: Number(startGroup.visible) + Number(root.shown.workspaces) + Number(endGroup.visible)
-      readonly property real minimumVerticalHeight: (startGroup.visible ? sideHeight : 0)
-        + (endGroup.visible ? sideHeight : 0)
+      readonly property real minimumVerticalHeight: (startGroup.visible ? startGroup.implicitHeight : 0)
+        + (endGroup.visible ? endGroup.implicitHeight : 0)
         + (root.shown.workspaces ? workspaceContainer.implicitHeight : 0)
         + Math.max(0, visibleGroups - 1) * rowSpacing
       scale: root.vertical ? Math.min(1, viewport.height / Math.max(1, minimumVerticalHeight)) : 1
@@ -118,7 +125,7 @@ Item {
       width: viewport.contentWidth / scale
       height: viewport.contentHeight / scale
       columns: root.vertical ? 1 : 3
-      columnSpacing: root.tokens.section
+      columnSpacing: !root.vertical && root.minimal ? root.tokens.unit : root.tokens.section
       rowSpacing: root.tokens.gap
       GridLayout {
         id: startGroup
@@ -129,9 +136,6 @@ Item {
         Layout.fillWidth: !root.vertical
         Layout.fillHeight: false
         Layout.preferredWidth: root.vertical ? 60 : composition.sideMinimum
-        Layout.minimumHeight: root.vertical ? composition.sideHeight : 0
-        Layout.maximumHeight: root.vertical ? composition.sideHeight : Infinity
-        Layout.preferredHeight: root.vertical ? composition.sideHeight : -1
         Layout.alignment: root.vertical ? Qt.AlignHCenter | Qt.AlignTop : Qt.AlignVCenter
         columns: root.vertical ? 1 : 7
         columnSpacing: 12
@@ -144,7 +148,7 @@ Item {
           Layout.topMargin: root.vertical ? 12 : 0
           Layout.maximumWidth: implicitWidth
           visible: root.shown.logo
-          Layout.alignment: Qt.AlignHCenter
+          Layout.alignment: Qt.AlignCenter
           tokens: root.tokens
           logoGlyph: root.settings.value.logo.glyph
           logoImage: root.settings.value.logo.image
@@ -153,17 +157,17 @@ Item {
           objectName: "logoClockDivider"
           visible: clock.visible
           Layout.topMargin: root.vertical && !logo.visible ? 12 : 0
-          implicitWidth: root.vertical ? 20 : 3
-          implicitHeight: root.vertical ? 3 : 20
+          implicitWidth: root.vertical ? 20 : 1
+          implicitHeight: root.vertical ? 1 : 20
           Layout.alignment: Qt.AlignCenter
-          color: root.tokens.alert
+          color: root.tokens.border
         }
         Modules.ClockModule {
           id: clock
           Layout.bottomMargin: root.vertical && !focus.visible ? 12 : 0
           Layout.maximumWidth: implicitWidth
           visible: root.shown.clock
-          Layout.alignment: Qt.AlignHCenter
+          Layout.alignment: Qt.AlignCenter
           tokens: root.tokens
           offsetSeconds: Data.WeatherData.offsetFor(Data.ClockData.dateTime.getTime())
           onActivated: root.navigate("Weather & Calendar", clock)
@@ -174,10 +178,10 @@ Item {
           objectName: "clockWindowDivider"
           visible: focus.visible
           Layout.topMargin: root.vertical && !logo.visible && !clock.visible ? 12 : 0
-          implicitWidth: root.vertical ? 20 : 3
-          implicitHeight: root.vertical ? 3 : 20
+          implicitWidth: root.vertical ? 20 : 1
+          implicitHeight: root.vertical ? 1 : 20
           Layout.alignment: Qt.AlignCenter
-          color: root.tokens.alert
+          color: root.tokens.border
         }
         Modules.WindowModule {
           id: focus
@@ -185,9 +189,10 @@ Item {
           Layout.minimumWidth: root.vertical ? implicitWidth : 80
           Layout.maximumWidth: root.vertical ? implicitWidth : Infinity
           Layout.fillWidth: !root.vertical
-          Layout.fillHeight: root.vertical
+          Layout.fillHeight: false
+          Layout.rightMargin: root.vertical ? 0 : root.tokens.gap
           visible: root.shown.window && (root.vertical || !root.compact)
-          Layout.alignment: Qt.AlignHCenter
+          Layout.alignment: Qt.AlignCenter
           tokens: root.tokens
           vertical: root.vertical
           title: Data.WindowData.title
@@ -234,120 +239,140 @@ Item {
         Layout.fillWidth: !root.vertical
         Layout.fillHeight: false
         Layout.preferredWidth: root.vertical ? 60 : composition.sideMinimum
-        Layout.minimumHeight: root.vertical ? composition.sideHeight : 0
-        Layout.maximumHeight: root.vertical ? composition.sideHeight : Infinity
-        Layout.preferredHeight: root.vertical ? composition.sideHeight : -1
         Layout.alignment: root.vertical ? Qt.AlignHCenter | Qt.AlignBottom : Qt.AlignVCenter
         columns: root.vertical ? 1 : 9
-        columnSpacing: root.minimal ? Math.max(3, root.tokens.gap / 2) : root.tokens.gap
-        rowSpacing: root.vertical ? 6 : root.tokens.gap
+        columnSpacing: root.minimal ? root.tokens.unit / 2 : root.tokens.gap
+        rowSpacing: root.vertical ? 2 : root.tokens.gap
         Item { visible: !root.vertical; Layout.fillWidth: true }
         Modules.MusicModule {
           id: music
           Layout.fillWidth: !root.vertical && !root.compact
-          Layout.minimumWidth: root.vertical ? 48 : 124
+          Layout.minimumWidth: root.vertical ? 48 : 148
           Layout.preferredWidth: root.vertical || root.compact ? music.implicitWidth
             : Math.max(340, Math.min(420, root.width * 0.2))
           Layout.maximumWidth: root.vertical || root.compact ? music.implicitWidth : 420
-          Layout.topMargin: root.vertical && !(false) ? 12 : 0
+          Layout.topMargin: root.vertical ? 8 : 0
           Layout.bottomMargin: 0
           visible: root.shown.music
-          Layout.alignment: Qt.AlignHCenter
+          Layout.alignment: Qt.AlignCenter
           tokens: root.tokens
+          expanded: root.navigation.destination === "Media" && root.navigation.owner === root
           onActivated: root.navigate("Media", music)
           vertical: root.vertical
           compact: root.compact || (!root.vertical && width < 220)
         }
-        Modules.CaptureModule {
-          id: capture
-          visible: root.shown.capture
-          compact: root.minimal
-          tokens: root.tokens
-          vertical: root.vertical
-          recording: Data.CaptureData.busy
-          captureKind: Data.CaptureData.kind
-          captureState: Data.CaptureData.state
-          duration: Data.CaptureData.duration
-          Layout.alignment: Qt.AlignCenter
-          Layout.topMargin: root.vertical && !root.shown.music ? 12 : 0
-          Layout.bottomMargin: root.vertical && !(root.shown.tray || root.shown.network || root.shown.audio || root.shown.battery || root.shown.notifications) ? 12 : 0
-          onClicked: {
-            if (recording) Data.CaptureData.stop();
-            else root.navigate("Display", capture);
-          }
-        }
         Components.Constellation {
-          visible: root.shown.music && !root.minimal
-          Layout.alignment: Qt.AlignHCenter
+          objectName: "musicTrayDivider"
+          visible: !root.vertical && root.shown.music && root.shown.tray
+          Layout.alignment: Qt.AlignCenter
           tokens: root.tokens
           vertical: root.vertical
         }
-        Modules.TrayModule {
-          id: tray
-          Layout.topMargin: 0
-          Layout.bottomMargin: 0
-          visible: root.shown.tray
-          Layout.alignment: Qt.AlignHCenter
-          tokens: root.tokens
-          panel: root
-          navigation: root.navigation
-          nativeWindow: root.nativeWindow
-        }
-        Modules.NetworkModule {
-          id: networkNode
-          Layout.topMargin: 0
-          Layout.bottomMargin: 0
-          visible: root.shown.network
-          Layout.alignment: Qt.AlignHCenter
-          tokens: root.tokens
-          onActivated: root.navigate("Control Center", networkNode)
-          connectionLabel: Data.SystemData.networkLabel
-          connectionDetail: Data.SystemData.networkDetail
-          strength: Data.SystemData.networkLevel
-          vertical: root.vertical
-          compact: root.minimal
-        }
-        Modules.AudioModule {
-          id: audio
-          Layout.topMargin: 0
-          Layout.bottomMargin: 0
-          visible: root.shown.audio
-          Layout.alignment: Qt.AlignHCenter
-          tokens: root.tokens
-          onActivated: root.navigate("Sound", audio)
-          volume: Data.SystemData.volume
-          muted: Data.SystemData.muted
-          audioDetail: Data.SystemData.audioDetail
-          vertical: root.vertical
-          compact: root.minimal
-        }
-        Modules.BatteryModule {
-          id: battery
-          Layout.topMargin: 0
-          Layout.bottomMargin: 0
-          visible: root.shown.battery
-          Layout.alignment: Qt.AlignHCenter
-          tokens: root.tokens
-          onActivated: root.navigate("Power", battery)
-          percent: Data.SystemData.batteryPercent
-          externalPower: Data.SystemData.externalPower
-          discharging: Data.SystemData.discharging
-          batteryState: Data.SystemData.batteryState
-          vertical: root.vertical
-          compact: root.minimal
-        }
-        Modules.NotificationsModule {
-          id: notifications
-          Layout.topMargin: 0
-          Layout.bottomMargin: root.vertical ? 12 : 0
-          visible: root.shown.notifications
-          Layout.alignment: Qt.AlignHCenter
-          tokens: root.tokens
-          onActivated: root.navigate("Notifications", notifications)
-          onSummaryActivated: root.navigate("Notifications", notifications)
-          count: Data.NotificationData.unread
-          vertical: root.vertical
-          compact: root.minimal
+        Item {
+          id: statusDock
+          objectName: "statusDock"
+          visible: root.shown.tray || root.shown.capture || root.shown.network || root.shown.audio || root.shown.battery || root.shown.notifications
+          implicitWidth: statusLayout.implicitWidth + (root.vertical ? 8 : 16)
+          implicitHeight: statusLayout.implicitHeight + 8
+          Layout.alignment: Qt.AlignCenter
+          Layout.topMargin: root.vertical && !root.shown.music ? 8 : 0
+          Layout.bottomMargin: root.vertical ? 8 : 0
+          GridLayout {
+            id: statusLayout
+            anchors.centerIn: parent
+            anchors.horizontalCenterOffset: root.vertical ? 0 : -4
+            columns: root.vertical ? 1 : 6
+            columnSpacing: 2
+            rowSpacing: 4
+            Modules.TrayModule {
+              id: tray
+              vertical: root.vertical
+              compact: !root.vertical && root.minimal
+              Layout.topMargin: 0
+              Layout.bottomMargin: 0
+              visible: root.shown.tray
+              Layout.alignment: Qt.AlignCenter
+              tokens: root.tokens
+              panel: root
+              navigation: root.navigation
+              nativeWindow: root.nativeWindow
+            }
+            Modules.CaptureModule {
+              id: capture
+              visible: root.shown.capture
+              compact: root.minimal
+              tokens: root.tokens
+              vertical: root.vertical
+              recording: Data.CaptureData.busy
+              captureKind: Data.CaptureData.kind
+              captureState: Data.CaptureData.state
+              duration: Data.CaptureData.duration
+              Layout.alignment: Qt.AlignCenter
+              Layout.topMargin: 0
+              Layout.bottomMargin: 0
+              onClicked: {
+                if (recording) Data.CaptureData.stop();
+                else root.navigate("Display", capture);
+              }
+            }
+            Modules.NetworkModule {
+              id: networkNode
+              Layout.topMargin: 0
+              Layout.bottomMargin: 0
+              visible: root.shown.network
+              Layout.alignment: Qt.AlignCenter
+              tokens: root.tokens
+              onActivated: root.navigate("Control Center", networkNode)
+              connectionLabel: Data.SystemData.networkLabel
+              connectionDetail: Data.SystemData.networkDetail
+              connectionState: Data.SystemData.networkState
+              strength: Data.SystemData.networkLevel
+              vertical: root.vertical
+              compact: root.minimal
+            }
+            Modules.AudioModule {
+              id: audio
+              Layout.topMargin: 0
+              Layout.bottomMargin: 0
+              visible: root.shown.audio
+              Layout.alignment: Qt.AlignCenter
+              tokens: root.tokens
+              onActivated: root.navigate("Sound", audio)
+              volume: Data.SystemData.volume
+              muted: Data.SystemData.muted
+              audioDetail: Data.SystemData.audioDetail
+              vertical: root.vertical
+              compact: root.minimal
+            }
+            Modules.BatteryModule {
+              id: battery
+              Layout.topMargin: 0
+              Layout.bottomMargin: 0
+              visible: root.shown.battery
+              Layout.alignment: Qt.AlignCenter
+              tokens: root.tokens
+              onActivated: root.navigate("Power", battery)
+              percent: Data.SystemData.batteryPercent
+              externalPower: Data.SystemData.externalPower
+              discharging: Data.SystemData.discharging
+              batteryState: Data.SystemData.batteryState
+              vertical: root.vertical
+              compact: root.minimal
+            }
+            Modules.NotificationsModule {
+              id: notifications
+              Layout.topMargin: 0
+              Layout.bottomMargin: 0
+              visible: root.shown.notifications
+              Layout.alignment: Qt.AlignCenter
+              tokens: root.tokens
+              onActivated: root.navigate("Notifications", notifications)
+              onSummaryActivated: root.navigate("Notifications", notifications)
+              count: Data.NotificationData.unread
+              vertical: root.vertical
+              compact: root.minimal
+            }
+          }
         }
 
       }
@@ -368,63 +393,4 @@ Item {
         root.navigation.close();
     }
   }
-  // This visual layer has no input handlers; controls retain their own hit areas.
-  readonly property Item hoveredSegment: {
-    var modules = [clock, focus, music, capture, networkNode, audio, battery, notifications, tray];
-    for (const module of modules)
-      if (module.visible && module.hovered) return module;
-    return null;
-  }
-  function syncIndicator(indicator: Components.HoverIndex, segment: Item): void {
-    if (!segment || !segment.visible) { indicator.clear(); return; }
-    var point = segment.mapToItem(root, 0, 0);
-    var start = root.vertical ? point.y : point.x;
-    // Stop the active-window line before the plate's rounded right corner.
-    var rightInset = !root.vertical && segment === focus ? root.tokens.gap : 0;
-    var endPoint = segment.mapToItem(root, Math.max(0, segment.width - rightInset), segment.height);
-    var end = root.vertical ? endPoint.y : endPoint.x;
-    var minimum = root.vertical ? viewport.y : viewport.x;
-    var maximum = minimum + (root.vertical ? viewport.height : viewport.width);
-    start = Math.max(start, minimum);
-    end = Math.min(end, maximum);
-    if (end <= start) { indicator.clear(); return; }
-    indicator.retarget(start, end - start);
-  }
-  Components.HoverIndex {
-    id: sharedIndex
-    objectName: "sharedHoverIndex"
-    anchors.fill: parent
-    tokens: root.tokens
-    vertical: root.vertical
-    rightEdge: root.settings.value.position === "right"
-    ink: root.hoveredSegment === battery && battery.warning ? root.tokens.alert
-      : root.hoveredSegment === clock ? clock.accent
-      : root.hoveredSegment === music ? music.ink
-      : root.hoveredSegment === focus ? focus.ink
-      : root.hoveredSegment === networkNode ? networkNode.ink
-      : root.hoveredSegment === audio ? audio.ink
-      : root.hoveredSegment === battery ? battery.ink
-      : root.hoveredSegment === capture ? capture.ink
-      : root.hoveredSegment === notifications ? notifications.ink
-      : root.hoveredSegment === tray ? tray.ink : root.tokens.cyan
-  }
-  Components.HoverIndex {
-    id: warningIndex
-    objectName: "batteryWarningIndex"
-    anchors.fill: parent
-    tokens: root.tokens
-    vertical: root.vertical
-    rightEdge: root.settings.value.position === "right"
-    ink: root.tokens.alert
-    animate: false
-  }
-  function syncIndicators(): void {
-    syncIndicator(sharedIndex, hoveredSegment);
-    syncIndicator(warningIndex, battery.warning && hoveredSegment !== battery ? battery : null);
-  }
-  onHoveredSegmentChanged: syncIndicators()
-  Connections { target: battery; function onWarningChanged(): void { root.syncIndicators(); } }
-  // Mapping is refreshed during scroll, layout, scale and visibility changes,
-  // without restarting a transition whose destination has not changed.
-  Timer { interval: 16; running: root.hoveredSegment !== null || battery.warning; repeat: true; onTriggered: root.syncIndicators() }
 }

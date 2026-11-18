@@ -5,8 +5,9 @@ Column {
   required property var tokens
   property date dateTime: new Date()
   property bool compact: false
+  property bool centered: true
 
-  spacing: root.compact ? 7 : 12
+  spacing: root.compact ? 4 : 8
 
   readonly property var englishLocale: Qt.locale("en_US")
   readonly property string dateText: root.dateTime
@@ -21,12 +22,12 @@ Column {
   Text {
     width: root.width
     text: root.dateText
-    color: root.tokens.gold
-    horizontalAlignment: Text.AlignHCenter
+    color: root.tokens.muted
+    horizontalAlignment: root.centered ? Text.AlignHCenter : Text.AlignLeft
     font {
       family: root.tokens.mono
-      pixelSize: root.compact ? 10 : 11
-      letterSpacing: root.compact ? 1.8 : 2.4
+      pixelSize: root.tokens.captionSize + 1
+      letterSpacing: 2
       weight: Font.Medium
     }
   }
@@ -37,18 +38,18 @@ Column {
 
     Row {
       id: clockRow
-      anchors.centerIn: parent
-      spacing: root.compact ? 8 : 12
+      x: root.centered ? (parent.width - width) / 2 : 0
+      spacing: 8
 
       Text {
         id: clockText
         text: root.timeText
         color: root.tokens.text
         font {
-          family: root.tokens.font
-          pixelSize: root.compact ? 84 : 132
-          weight: Font.ExtraLight
-          letterSpacing: root.compact ? -4 : -6
+          family: root.tokens.mono
+          pixelSize: root.compact ? 56 : 88
+          weight: Font.Light
+          letterSpacing: -2
         }
       }
 
@@ -60,12 +61,12 @@ Column {
         Text {
           id: meridiem
           anchors.top: parent.top
-          anchors.topMargin: root.compact ? 10 : 20
+          anchors.topMargin: root.compact ? 8 : 16
           text: root.meridiemText
           color: root.tokens.muted
           font {
             family: root.tokens.mono
-            pixelSize: root.compact ? 10 : 12
+            pixelSize: root.tokens.captionSize + 2
             letterSpacing: 1
           }
         }

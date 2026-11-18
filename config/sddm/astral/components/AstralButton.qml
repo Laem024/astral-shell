@@ -5,27 +5,31 @@ Rectangle {
   required property var tokens
 
   property string label: ""
+  property string armedLabel: ""
   property bool solid: false
-  property bool flat: false
+  property string tone: "accent"
+  // Destructive actions arm on the first click and run on the second.
+  property bool confirm: false
+  property bool armed: false
+
+  readonly property color accent: root.tone === "alert" ? root.tokens.alert : root.tokens.cyan
+  readonly property bool hovered: mouse.containsMouse && root.enabled
+
   signal clicked()
 
-  implicitWidth: labelText.implicitWidth + (root.solid ? 48 : 30)
-  implicitHeight: root.solid ? 50 : 38
-  radius: root.solid ? 15 : 11
-  color: {
-    if (root.solid)
-      return !root.enabled ? Qt.alpha(root.tokens.cyan, 0.15)
-        : mouse.pressed ? Qt.darker(root.tokens.cyan, 1.1)
-        : mouse.containsMouse ? Qt.lighter(root.tokens.cyan, 1.06)
-        : root.tokens.cyan
-    if (root.flat)
-      return mouse.containsMouse && root.enabled ? Qt.alpha(root.tokens.cyan, 0.09) : "transparent"
-    return mouse.containsMouse && root.enabled ? root.tokens.glassDeep : root.tokens.glassSoft
-  }
-  border.width: root.solid && root.enabled ? 0 : 1
-  border.color: mouse.containsMouse && root.enabled && !root.solid
-    ? Qt.alpha(root.tokens.cyan, 0.42) : root.tokens.glassEdge
-  opacity: root.enabled ? 1 : 0.85
+  implicitWidth: labelText.implicitWidth + (root.solid ? 48 : 40)
+  implicitHeight: 40
+  radius: root.tokens.rowRadius
+  color: root.solid
+    ? (mouse.pressed ? Qt.darker(root.accent, 1.1) : root.hovered ? Qt.lighter(root.accent, 1.06) : root.accent)
+    : mouse.pressed || root.armed ? Qt.alpha(root.accent, 0.16)
+    : root.hovered ? Qt.alpha(root.accent, 0.08)
+    : "transparent"
+  border.width: root.solid ? 0 : 1
+  border.color: root.solid ? "transparent"
+    : root.armed || root.hovered ? Qt.alpha(root.accent, 0.7)
+    : root.tokens.border
+  opacity: root.enabled ? 1 : 0.4
 
   Behavior on color {
     ColorAnimation { duration: root.tokens.hoverDuration }
@@ -34,38 +38,33 @@ Rectangle {
     ColorAnimation { duration: root.tokens.hoverDuration }
   }
 
-  Rectangle {
-    visible: root.solid && root.enabled
-    anchors {
-      left: parent.left
-      right: parent.right
-      top: parent.top
-      leftMargin: 14
-      rightMargin: 14
-    }
-    height: 1
-    color: Qt.alpha("#FFFFFF", 0.35)
-  }
-
   Text {
     id: labelText
     anchors {
       left: parent.left
       right: parent.right
-      leftMargin: root.solid ? 20 : 14
-      rightMargin: root.solid ? 20 : 14
+      leftMargin: 16
+      rightMargin: 16
       verticalCenter: parent.verticalCenter
     }
-    text: root.label
-    color: root.solid ? (root.enabled ? root.tokens.background : root.tokens.muted) : root.tokens.text
+    text: root.armed && root.armedLabel.length > 0 ? root.armedLabel : root.label
+    color: root.solid ? root.tokens.background
+      : root.tone === "alert" || root.armed || root.hovered ? root.accent
+      : root.tokens.text
     horizontalAlignment: Text.AlignHCenter
     elide: Text.ElideRight
     font {
       family: root.tokens.font
-      pixelSize: 13
+      pixelSize: root.solid ? root.tokens.labelSize : root.tokens.bodySize
       weight: root.solid ? Font.DemiBold : Font.Medium
-      letterSpacing: 0.4
+      letterSpacing: 0.3
     }
+  }
+
+  Timer {
+    id: disarm
+    interval: 4000
+    onTriggered: root.armed = false
   }
 
   MouseArea {
@@ -73,6 +72,21 @@ Rectangle {
     anchors.fill: parent
     hoverEnabled: true
     cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-    onClicked: if (root.enabled) root.clicked()
+    onClicked: {
+      if (!root.enabled)
+        return
+      if (!root.confirm) {
+        root.clicked()
+        return
+      }
+      if (root.armed) {
+        disarm.stop()
+        root.armed = false
+        root.clicked()
+      } else {
+        root.armed = true
+        disarm.restart()
+      }
+    }
   }
 }

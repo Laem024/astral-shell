@@ -6,8 +6,8 @@ No se instalan paquetes adicionales, salvo los ya listados en el catálogo.
 
 ## Panel de conexiones
 
-La categoría **Connections** abre con tres fichas de estado (Wi-Fi, Bluetooth y VPN) que resumen la red o el dispositivo
-activo, la potencia y el número de perfiles guardados. Al pulsar una ficha, la vista se desplaza hasta su tarjeta.
+La categoría **Connections** abre con un selector Wi-Fi/Bluetooth/VPN, un estado breve y una sola sección visible.
+Los controladores siguen activos al cambiar de sección; se conservan adaptadores, búsqueda, formularios y perfiles.
 
 Cada tarjeta comparte la misma cabecera: sigilo de color, etiqueta monoespaciada, título, estado y un interruptor cuando
 el transporte lo admite. Wi-Fi usa cian, Bluetooth lavanda y VPN dorado. Las listas se separan con un control segmentado
@@ -70,9 +70,9 @@ Requiere `bluez` y `bluez-utils`, un servicio Bluetooth en ejecución y permisos
 
 ## Sonido (PipeWire)
 
-VOL y la categoría Sonido abren `panel/SoundPage.qml`.
+El icono de volumen y la categoría Sound abren `panel/SoundPage.qml`.
 
-- Las tarjetas **Output** e **Input** eligen el dispositivo predeterminado y controlan volumen y silencio.
+- Sin resúmenes repetidos: las secciones compactas **Output** y **Microphone** eligen el dispositivo predeterminado y controlan volumen y silencio.
 - La mezcla de aplicaciones muestra cada flujo de reproducción por separado. Los flujos de grabación no aparecen.
   Varios flujos de una misma aplicación tienen filas separadas con sus descripciones.
 - Cambiar el dispositivo predeterminado usa la política normal del gestor de sesión. No hay enrutamiento por aplicación.
@@ -85,6 +85,7 @@ VOL y la categoría Sonido abren `panel/SoundPage.qml`.
 
 - `data/MediaData.qml` es el singleton compartido por todas las barras y por la página de música.
 - `data/MediaService.qml` contiene la selección, las capacidades y el progreso.
+- La carátula de la barra y del panel usa el recorte redondeado compartido; los paneles pequeños conservan desplazamiento y selector de reproductor.
 - La barra muestra portada (o un motivo musical de respaldo), título, artista y progreso. En modo compacto, solo los controles.
   Pulsar la portada o el título abre la página de música.
 - Selector: **Automatic** mantiene el reproductor actual si está sonando; si no, elige uno que esté sonando y después el primero disponible.
@@ -110,7 +111,7 @@ bash tests/media/run.sh
 bash tests/media/run-layout.sh
 ```
 
-Validación manual recomendada en una sesión gráfica: NET con Wi-Fi y Ethernet a la vez (gana Ethernet), cambios de SSID,
+Validación manual recomendada en una sesión gráfica: el icono de conexión con Wi-Fi y Ethernet a la vez (gana Ethernet), cambios de SSID,
 contraseñas incorrectas, redes ocultas, reconexión tras reinicio, dispositivos Bluetooth reales, emparejamiento y su rechazo,
 dos aplicaciones reproduciendo, silencio independiente, cambio de dispositivo, desconexión de dispositivos y reproductores MPRIS reales.
 Compara con `nmcli device status`, `wpctl get-volume @DEFAULT_AUDIO_SINK@` y `upower -d`.

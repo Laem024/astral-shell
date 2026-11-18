@@ -26,7 +26,7 @@ ShellRoot {
   FloatingWindow {
     id: window
     title: "Astral Polkit preview"
-    implicitWidth: 800; implicitHeight: 650
+    implicitWidth: 640; implicitHeight: 560
     color: theme.background
     PolkitContent {
       anchors.fill: parent

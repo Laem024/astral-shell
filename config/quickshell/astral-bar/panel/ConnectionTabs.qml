@@ -4,8 +4,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "../../common" as Design
 
-// Segmented switch for a card's two lists. Labels carry their own counts so
-// the control stays a single line at panel width.
+// Segmented control for a card's lists. Labels carry their own counts so the
+// control stays on one line at panel width.
 Rectangle {
   id: root
   required property Design.Theme tokens
@@ -14,25 +14,28 @@ Rectangle {
   property string current: ""
   signal selected(string key)
   Layout.fillWidth: true
-  implicitHeight: 36
-  radius: 9
-  color: Qt.alpha(tokens.surface, 0.55)
-  border.color: tokens.border
+  implicitHeight: 44
+  radius: tokens.rowRadius
+  color: tokens.sunken
+  border.color: tokens.hairline
 
   RowLayout {
     anchors.fill: parent
-    anchors.margins: 3
-    spacing: 3
+    anchors.margins: 4
+    spacing: 4
     Repeater {
       model: root.options
       Button {
         id: tab
         required property var modelData
         readonly property bool current: root.current === tab.modelData.key
+        Layout.preferredWidth: 1
         Layout.fillWidth: true
         Layout.fillHeight: true
-        implicitHeight: 30
-        padding: 0
+        Layout.minimumWidth: 0
+        implicitHeight: 36
+        leftPadding: 10; rightPadding: 10
+        topPadding: 6; bottomPadding: 6
         focusPolicy: Qt.StrongFocus
         Accessible.name: tab.modelData.label
         Accessible.role: Accessible.RadioButton
@@ -46,14 +49,22 @@ Rectangle {
           horizontalAlignment: Text.AlignHCenter
           verticalAlignment: Text.AlignVCenter
           color: tab.current ? root.accent : root.tokens.muted
-          font { family: root.tokens.font; pixelSize: 10; weight: tab.current ? Font.Medium : Font.Normal }
+          font { family: root.tokens.font; pixelSize: 12; weight: tab.current ? Font.Medium : Font.Normal }
         }
         background: Rectangle {
-          radius: 6
-          color: tab.current ? Qt.alpha(root.accent, 0.16)
-            : tab.hovered ? Qt.alpha(root.accent, 0.06) : "transparent"
-          border.color: tab.activeFocus ? root.accent
-            : tab.current ? Qt.alpha(root.accent, 0.42) : "transparent"
+          radius: root.tokens.rowRadius - 2
+          color: tab.current ? root.tokens.raised
+            : tab.hovered ? Qt.alpha(root.tokens.text, 0.05) : "transparent"
+          border.width: tab.activeFocus ? 2 : tab.current ? 1 : 0
+          border.color: tab.activeFocus ? root.tokens.cyan
+            : tab.current ? root.tokens.border : "transparent"
+          Rectangle {
+            visible: tab.current
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; leftMargin: 10; rightMargin: 10 }
+            height: 2
+            radius: 1
+            color: root.accent
+          }
         }
       }
     }

@@ -21,17 +21,20 @@ Rectangle {
   readonly property bool primaryMode: theme.activationMode === "primary"
   readonly property bool active: root.primaryMode ? primaryScreen : Window.active
   readonly property bool canLogin: selectedUser.name !== "" && sessionIndex >= 0 && sessionProbe.count > 0
-  readonly property bool wide: root.width / Math.max(0.1, theme.scale) >= 1000
   readonly property bool showLayout: theme.showKeyboard && typeof keyboard !== "undefined"
     && keyboard.enabled && keyboard.layouts && keyboard.layouts.length > 0
   readonly property int layoutCount: root.showLayout ? keyboard.layouts.length : 0
   readonly property string layoutName: root.showLayout
     ? String(keyboard.layouts[Math.max(0, Math.min(keyboard.currentLayout, root.layoutCount - 1))].shortName || "").toUpperCase()
     : ""
-  readonly property real fit: Math.min(root.width / 620, root.height / 960)
+  readonly property bool compact: width < 1000 || height < 650 || width / factor < 1000
+  // The layout is authored on a 1280x800 canvas and scaled to the screen.
+  readonly property real fit: Math.min(root.width / 1280, root.height / 800)
   readonly property real factor: Math.max(0.5, Math.min(2.0,
-    root.height / 930, root.width / 500, root.fit * theme.scale))
-  readonly property real chrome: Math.max(1, Math.min(root.factor, 1.35))
+    (root.height - 120) / 520,
+    (root.width - 48) / theme.panelWidth,
+    theme.scale * Math.max(0.6, Math.min(1.25, root.fit))))
+  readonly property real chrome: Math.max(1, Math.min(root.factor, 1.25))
 
   color: theme.background
 
@@ -57,8 +60,16 @@ Rectangle {
     opacity: root.active ? 0 : theme.inactiveDim
 
     Behavior on opacity {
-      NumberAnimation { duration: theme.animations ? 320 : 0 }
+      NumberAnimation { duration: theme.entryDuration }
     }
+  }
+
+  Rectangle {
+    anchors.fill: parent
+    anchors.margins: 12 * root.chrome
+    radius: 24 * root.chrome
+    color: "transparent"
+    border.color: Qt.alpha(theme.text, 0.16)
   }
 
   Item {
@@ -75,24 +86,112 @@ Rectangle {
       scale: root.factor * (0.985 + 0.015 * root.entrance)
       transform: Translate { y: (1 - root.entrance) * 16 }
 
+      Rectangle {
+        visible: !root.compact
+        x: parent.width - theme.panelWidth - 112
+        y: 88
+        width: theme.panelWidth + 48
+        height: parent.height - 176
+        radius: theme.panelRadius + 12
+        color: Qt.alpha(theme.background, 0.48)
+        border.color: theme.border
+      }
+
       Column {
-        anchors.centerIn: parent
-        width: theme.panelWidth
-        spacing: root.wide ? 38 : 30
+        id: mainClock
+        x: root.compact ? (parent.width - width) / 2 : 88
+        y: root.compact ? Math.max(64, (parent.height - loginLoader.height - height - 24) / 2) : (parent.height - height) / 2
+        width: Math.min(theme.panelWidth, parent.width - 48)
+        spacing: root.compact ? 8 : 28
+
+        Text {
+          visible: !root.compact
+          text: "YOUR SPACE. YOUR ORBIT."
+          color: theme.cyan
+          font { family: theme.mono; pixelSize: 11; letterSpacing: 2 }
+        }
 
         Components.ClockBlock {
           width: parent.width
+          compact: root.compact
+          centered: root.compact
           tokens: theme
           dateTime: root.now
         }
 
-        Loader {
-          id: loginLoader
-          width: parent.width
-          active: root.active
-          sourceComponent: loginComponent
-          onLoaded: item.focusPassword()
+        Rectangle {
+          visible: !root.compact
+          width: 48
+          height: 2
+          color: theme.cyan
         }
+
+        Text {
+          visible: !root.compact
+          width: parent.width
+          text: "Welcome back."
+          color: theme.text
+          font { family: theme.font; pixelSize: 34; weight: Font.Light }
+        }
+
+        Text {
+          visible: !root.compact
+          width: parent.width
+          text: "A little focus. A world of possibilities."
+          wrapMode: Text.WordWrap
+          color: theme.muted
+          font { family: theme.font; pixelSize: 14 }
+        }
+      }
+
+      Loader {
+        id: loginLoader
+        x: root.compact ? (parent.width - width) / 2 : parent.width - width - 88
+        y: root.compact ? mainClock.y + mainClock.height + 24 : (parent.height - height) / 2
+        width: Math.min(theme.panelWidth, parent.width - 48)
+        active: root.active
+        sourceComponent: loginComponent
+        onLoaded: item.focusPassword()
+      }
+    }
+
+    Row {
+      id: powerRow
+      x: root.compact ? (parent.width - width) / 2 : parent.width - theme.panelWidth * root.factor - 88 * root.factor
+      anchors {
+        bottom: parent.bottom
+        bottomMargin: 24 * root.chrome
+      }
+      spacing: 8 * root.chrome
+
+      Components.AstralButton {
+        visible: theme.showPower && sddm.canPowerOff
+        height: 36 * root.chrome
+        tokens: theme
+        label: "Power off"
+        armedLabel: "Confirm power off"
+        tone: "alert"
+        confirm: true
+        onClicked: sddm.powerOff()
+      }
+
+      Components.AstralButton {
+        visible: theme.showPower && sddm.canReboot
+        height: 36 * root.chrome
+        tokens: theme
+        label: "Restart"
+        armedLabel: "Confirm restart"
+        tone: "alert"
+        confirm: true
+        onClicked: sddm.reboot()
+      }
+
+      Components.AstralButton {
+        visible: theme.showPower && sddm.canSuspend
+        height: 36 * root.chrome
+        tokens: theme
+        label: "Suspend"
+        onClicked: sddm.suspend()
       }
     }
   }
@@ -108,60 +207,45 @@ Rectangle {
     visible: opacity > 0.01
 
     Behavior on opacity {
-      NumberAnimation { duration: theme.animations ? 320 : 0 }
+      NumberAnimation { duration: theme.entryDuration }
     }
 
     onActivate: root.activateScreen()
   }
 
   Item {
+    id: topBar
     anchors {
       left: parent.left
       right: parent.right
       top: parent.top
-      leftMargin: 36 * root.chrome
-      rightMargin: 36 * root.chrome
-      topMargin: 32 * root.chrome
+      leftMargin: 24 * root.chrome
+      rightMargin: 24 * root.chrome
+      topMargin: 20 * root.chrome
     }
-    height: 22 * root.chrome
+    height: Math.round(24 * root.chrome)
 
     Row {
       anchors.verticalCenter: parent.verticalCenter
-      spacing: 18 * root.chrome
+      spacing: 8 * root.chrome
 
-      Item {
-        width: Math.round(16 * root.chrome)
-        height: Math.round(22 * root.chrome)
-
-        Text {
-          anchors.centerIn: parent
-          text: "✦"
-          color: theme.cyan
-          font.pixelSize: Math.round(15 * root.chrome)
-        }
+      Text {
+        text: "✦"
+        height: topBar.height
+        verticalAlignment: Text.AlignVCenter
+        color: theme.cyan
+        font.pixelSize: Math.round(12 * root.chrome)
       }
 
       Text {
-        text: "A S T R A L"
-        height: Math.round(22 * root.chrome)
+        text: "ASTRAL"
+        height: topBar.height
         verticalAlignment: Text.AlignVCenter
         color: theme.text
         font {
           family: theme.mono
-          pixelSize: Math.round(10 * root.chrome)
-          letterSpacing: 1
-        }
-      }
-
-      Text {
-        text: "S E C U R E   G R E E T E R"
-        height: Math.round(22 * root.chrome)
-        verticalAlignment: Text.AlignVCenter
-        color: theme.muted
-        font {
-          family: theme.mono
-          pixelSize: Math.round(9 * root.chrome)
-          letterSpacing: 0.8
+          pixelSize: Math.round(11 * root.chrome)
+          letterSpacing: 3
         }
       }
     }
@@ -171,44 +255,40 @@ Rectangle {
         right: parent.right
         verticalCenter: parent.verticalCenter
       }
-      spacing: 16 * root.chrome
+      spacing: 8 * root.chrome
 
       Text {
         visible: theme.showHostname && sddm.hostName.length > 0
         text: sddm.hostName
-        height: Math.round(22 * root.chrome)
+        height: topBar.height
         verticalAlignment: Text.AlignVCenter
         color: theme.muted
         font {
           family: theme.mono
-          pixelSize: Math.round(9 * root.chrome)
-          letterSpacing: 0.8
+          pixelSize: Math.round(10 * root.chrome)
+          letterSpacing: 1
         }
       }
 
-      Item {
+      Text {
         visible: root.showLayout && theme.showHostname && sddm.hostName.length > 0
-        width: 1
-        height: Math.round(22 * root.chrome)
-
-        Rectangle {
-          anchors.centerIn: parent
-          width: 1
-          height: Math.round(10 * root.chrome)
-          color: theme.glassLine
-        }
+        text: "·"
+        height: topBar.height
+        verticalAlignment: Text.AlignVCenter
+        color: theme.muted
+        font.pixelSize: Math.round(10 * root.chrome)
       }
 
       Text {
         visible: root.showLayout
         text: root.layoutName
-        height: Math.round(22 * root.chrome)
+        height: topBar.height
         verticalAlignment: Text.AlignVCenter
         color: layoutMouse.containsMouse && root.layoutCount > 1 ? theme.cyan : theme.muted
         font {
           family: theme.mono
-          pixelSize: Math.round(9 * root.chrome)
-          letterSpacing: 0.8
+          pixelSize: Math.round(10 * root.chrome)
+          letterSpacing: 1
         }
 
         MouseArea {
@@ -219,22 +299,6 @@ Rectangle {
           onClicked: root.cycleLayout()
         }
       }
-    }
-  }
-
-  Text {
-    anchors {
-      horizontalCenter: parent.horizontalCenter
-      bottom: parent.bottom
-      bottomMargin: 26 * root.chrome
-    }
-    text: "A S T R A L   S H E L L   ·   S D D M"
-    color: theme.muted
-    opacity: 0.5
-    font {
-      family: theme.mono
-      pixelSize: Math.round(8 * root.chrome)
-      letterSpacing: 2
     }
   }
 
@@ -357,7 +421,7 @@ Rectangle {
     id: loginComponent
 
     Components.LoginCard {
-      width: root.themeTokens.panelWidth
+      width: loginLoader.width
       tokens: root.themeTokens
       user: root.selectedUser
       userIndex: root.userIndex

@@ -7,7 +7,6 @@ import "../data" as Data
 PanelCard {
   id: root
   title: ""
-  radius: 12
   contentSpacing: 14
   readonly property color accent: root.tokens.lavender
   readonly property var service: Data.BluetoothData
@@ -28,51 +27,17 @@ PanelCard {
     textFormat: Text.PlainText
     wrapMode: Text.Wrap
     color: root.tokens.text
-    font { family: root.tokens.font; pixelSize: 12 }
+    font { family: root.tokens.font; pixelSize: 13 }
   }
-  component Caption: Label { color: root.tokens.muted; font.pixelSize: 10 }
+  component Caption: Label { color: root.tokens.muted; font.pixelSize: 11 }
   component Eyebrow: Caption {
     color: root.accent
-    font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1.2 }
+    font { family: root.tokens.mono; pixelSize: 10; letterSpacing: 1 }
   }
   component Action: PanelButton {
-    id: action
     tokens: root.tokens
-    property color tint: root.accent
-    readonly property color accent: action.destructive ? root.tokens.alert : action.tint
-    property string symbol: ""
-    property bool quiet: false
+    tint: root.accent
     Layout.minimumWidth: 0
-    implicitHeight: 34
-    opacity: enabled ? 1 : 0.4
-    contentItem: RowLayout {
-      spacing: 6
-      Text {
-        visible: action.symbol !== ""
-        text: action.symbol
-        color: action.accent
-        font { family: root.tokens.mono; pixelSize: 13 }
-      }
-      Text {
-        Layout.fillWidth: true
-        text: action.text
-        textFormat: Text.PlainText
-        elide: Text.ElideRight
-        horizontalAlignment: Text.AlignLeft
-        verticalAlignment: Text.AlignVCenter
-        color: action.destructive || action.selected ? action.accent : root.tokens.text
-        font { family: root.tokens.font; pixelSize: 11; weight: Font.Medium }
-      }
-    }
-    background: Rectangle {
-      radius: 7
-      color: action.quiet
-        ? (action.down || action.hovered || action.activeFocus ? Qt.alpha(action.accent, 0.07) : "transparent")
-        : Qt.alpha(action.accent, action.down ? 0.16 : action.selected ? 0.1 : action.hovered ? 0.06 : 0.025)
-      border.color: action.activeFocus ? root.tokens.gold
-        : action.quiet ? "transparent"
-        : Qt.alpha(action.accent, action.selected ? 0.38 : action.hovered ? 0.26 : 0.12)
-    }
   }
   component DeviceTile: Rectangle {
     id: tile
@@ -81,9 +46,9 @@ PanelCard {
     readonly property bool saved: tile.device.paired || tile.device.trusted
     Layout.fillWidth: true
     implicitHeight: tileBody.implicitHeight + 24
-    radius: 10
-    color: tile.live ? Qt.alpha(root.accent, 0.07) : Qt.alpha(root.tokens.surface, 0.5)
-    border.color: tile.live ? Qt.alpha(root.accent, 0.3) : root.tokens.border
+    radius: root.tokens.rowRadius
+    color: tile.live ? Qt.alpha(root.accent, 0.08) : root.tokens.background
+    border.color: tile.live ? Qt.alpha(root.accent, 0.35) : root.tokens.hairline
     ColumnLayout {
       id: tileBody
       anchors { left: parent.left; right: parent.right; top: parent.top; margins: 12 }
@@ -169,7 +134,7 @@ PanelCard {
         text: "Bluetooth"
         textFormat: Text.PlainText
         color: root.tokens.text
-        font { family: root.tokens.font; pixelSize: 19; weight: Font.Medium }
+        font { family: root.tokens.font; pixelSize: 18; weight: Font.Medium }
       }
       Caption { text: root.service.state }
     }
@@ -211,8 +176,9 @@ PanelCard {
       font { family: root.tokens.mono; pixelSize: 14 }
     }
     background: Rectangle {
-      radius: 7
-      color: adapterChoice.hovered || adapterChoice.popup.visible ? Qt.alpha(root.accent, 0.06) : Qt.alpha(root.tokens.surface, 0.7)
+      radius: root.tokens.rowRadius
+      color: adapterChoice.hovered || adapterChoice.popup.visible ? Qt.alpha(root.accent, 0.08) : root.tokens.background
+      border.width: adapterChoice.activeFocus ? 2 : 1
       border.color: adapterChoice.activeFocus ? root.accent : root.tokens.border
     }
     popup: Popup {
@@ -264,9 +230,9 @@ PanelCard {
     Layout.fillWidth: true
     visible: root.service.error !== ""
     implicitHeight: errorText.implicitHeight + 24
-    radius: 8
-    color: Qt.alpha(root.tokens.alert, 0.07)
-    border.color: Qt.alpha(root.tokens.alert, 0.3)
+    radius: root.tokens.rowRadius
+    color: Qt.alpha(root.tokens.alert, 0.1)
+    border.color: Qt.alpha(root.tokens.alert, 0.35)
     Label {
       id: errorText
       anchors { left: parent.left; right: parent.right; top: parent.top; margins: 12 }
@@ -318,8 +284,9 @@ PanelCard {
       selectedTextColor: root.tokens.background
       font { family: root.tokens.font; pixelSize: 12 }
       background: Rectangle {
-        radius: 7
-        color: Qt.alpha(root.tokens.surface, 0.7)
+        radius: root.tokens.rowRadius
+        color: root.tokens.background
+        border.width: pin.activeFocus ? 2 : 1
         border.color: pin.activeFocus ? root.accent : root.tokens.border
       }
       onAccepted: { root.service.answer(text); clear(); }

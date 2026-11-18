@@ -1,3 +1,23 @@
+-- Palette from docs/design-system.md. Set mode to "light" for light mode.
+local mode = "dark"
+
+local palette = {
+  dark = {
+    cyan     = "7FD0BF",
+    lavender = "A9B5D9",
+    muted    = "8D9994",
+    shadow   = 0xee0E1113,
+  },
+  light = {
+    cyan     = "17675A",
+    lavender = "3B4A7A",
+    muted    = "5A6764",
+    shadow   = 0x55141B1D,
+  },
+}
+
+local colors = palette[mode]
+
 hl.config({
   general = {
     gaps_in  = 5,
@@ -6,8 +26,8 @@ hl.config({
     border_size = 2,
 
     col = {
-      active_border   = { colors = {"rgba(33ccffee)", "rgba(00ff99ee)"}, angle = 45 },
-      inactive_border = "rgba(595959aa)",
+      active_border   = { colors = {"rgba(" .. colors.cyan .. "ee)", "rgba(" .. colors.lavender .. "ee)"}, angle = 45 },
+      inactive_border = "rgba(" .. colors.muted .. "66)",
     },
 
     resize_on_border = true,
@@ -20,7 +40,7 @@ hl.config({
   },
 
   decoration = {
-    rounding       = 10,
+    rounding       = 14,
     rounding_power = 2,
 
     active_opacity   = 1.0,
@@ -33,7 +53,7 @@ hl.config({
       enabled      = true,
       range        = 4,
       render_power = 3,
-      color        = 0xee1a1a1a,
+      color        = colors.shadow,
     },
 
     blur = {

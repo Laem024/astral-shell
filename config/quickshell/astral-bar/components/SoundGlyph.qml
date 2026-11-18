@@ -69,21 +69,14 @@ Item {
       joinStyle: ShapePath.RoundJoin
       capStyle: ShapePath.RoundCap
       fillColor: Qt.alpha(root.ink, 0.16)
-      PathSvg { path: "M12 2.5 A3.5 3.5 0 0 1 15.5 6 V11 A3.5 3.5 0 0 1 8.5 11 V6 A3.5 3.5 0 0 1 12 2.5 Z" }
+      PathSvg { path: "M9 6 C9 2 15 2 15 6 V11 C15 15 9 15 9 11 Z" }
     }
     ShapePath {
       strokeColor: root.ink
       strokeWidth: 1.5
       fillColor: "transparent"
       capStyle: ShapePath.RoundCap
-      PathSvg { path: "M5 11.5 A7 7 0 0 0 19 11.5 M12 18.5 V21 M8.5 21 H15.5" }
-    }
-    ShapePath {
-      strokeColor: Qt.alpha(root.ink, 0.4)
-      strokeWidth: 1.1
-      fillColor: "transparent"
-      capStyle: ShapePath.RoundCap
-      PathSvg { path: "M9.75 6.75 H14.25 M9.75 9.75 H14.25" }
+      PathSvg { path: "M6 10.5 V11.5 C6 19 18 19 18 11.5 V10.5 M12 17.2 V21 M9 21 H15" }
     }
   }
 

@@ -1,3 +1,7 @@
 AstralBar 1.0 AstralBar.qml
 BarContent 1.0 BarContent.qml
 BarRoot 1.0 BarRoot.qml
+FrameGeometry 1.0 FrameGeometry.qml
+FrameEdge 1.0 FrameEdge.qml
+FrameDrawing 1.0 FrameDrawing.qml
+BarPreview 1.0 BarPreview.qml

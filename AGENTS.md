@@ -8,9 +8,9 @@ Configuration lives in `config/`, installers and configuration management in
 The active Quickshell migration contains an orchestrator at
 `config/quickshell/shell.qml`, shared configuration and theme under `common/`,
 and `astral-bar/`, `astral-launcher/`, `astral-wallpaper/`, `astral-polkit/`,
-`astral-lock/` and `astral-session/`. Launch stock modules through root
+`astral-lock/`, `astral-session/` and `astral-settings/`. Launch stock modules through root
 `bar.qml`, `recorder.qml`, `launcher.qml`, `wallpaper.qml`, `polkit.qml`,
-`lock.qml`, `idle.qml` and `session.qml`; entries below the root cannot import shared
+`lock.qml`, `idle.qml`, `session.qml` and `settings.qml`; entries below the root cannot import shared
 parents through Quickshell’s URL interceptor. Keep explicit `qmldir` type
 indexes in module directories with hyphenated ancestors. The root `settings.json` owns shared appearance,
 applications, optional argument-array providers, and the module registry. Bar
@@ -18,7 +18,7 @@ preferences and visual replacement paths live in `astral-bar/settings.json`.
 `config/quickshell-old/` is reference only; do not install or autostart it.
 Clipboard, overview and shortcuts are active modules with root entries and QML controllers. Shared workspaceCount lives in root settings.json. External modules need only their QML entry point.
 Install only the `astral-shell`, `astral-bar`, `astral-launcher`, `astral-wallpaper`,
-`astral-polkit`, `astral-lock`, `astral-session`, `astral-clipboard`, `astral-overview` and `astral-shortcuts` public
+`astral-polkit`, `astral-lock`, `astral-session`, `astral-clipboard`, `astral-overview`, `astral-shortcuts` and `astral-settings` public
 Quickshell commands. Wallpaper preferences and the optional Wallhaven key live
 in XDG state; its bounded thumbnail queue uses XDG cache. Shared privacy and
 popup dismissal policies live in `common/`. Runtime wallpaper and launcher coordination
@@ -99,3 +99,14 @@ Native idle notifications and the logind delay inhibitor live in `astral-lock/`.
 Recheck media, caffeine, inhibitors and activity after locking before automatic
 suspend. Shared session actions, user/media services and startup coordination
 live in `common/`; keep the lock entry out of autostart.
+
+Astral Settings lives in `config/quickshell/astral-settings/`; its root controller
+uses the shared startup lock. Keep display transactions in the daemon, independent
+of the window. Persist display overrides only after confirmation and restore on
+expiry, close, privacy block, command failure or restart. Desktop preferences and
+the recovery journal use version 1 JSON under XDG state; managed confirmed Lua
+lives under `$XDG_CONFIG_HOME/astral-shell/astral-settings/`. The final Hyprland
+module validates the entire data table before applying overrides. Never force HDR
+capabilities. Settings previews simulate desktop operations; do not change real
+input, monitors or theme files. Run `bash tests/astral-settings/run.sh` for this
+subsystem (also included in the Quickshell suite).

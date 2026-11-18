@@ -26,7 +26,7 @@ TestCase {
       compare(WindowLogic.pidForAddress(JSON.stringify([{address: "0xaa", pid: pid}]), "aa"), 0);
   }
   function test_settings() {
-    compare(Validation.parse(JSON.stringify(Defaults.common), "common").modules.length, 10);
+    compare(Validation.parse(JSON.stringify(Defaults.common), "common").modules.length, 11);
     compare(Validation.parse(JSON.stringify(Defaults.bar), "bar").position, "top");
     let value = copy(Defaults.common);
     value.providers.lock = ["/home/user/a locker", "--option", "literal;$(test)"];

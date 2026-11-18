@@ -8,6 +8,7 @@ Item {
   required property var tokens
   property bool vertical: false
   property bool compact: false
+  property bool expanded: false
   property var media: Data.MediaData
   signal activated()
   readonly property string replacement: tokens.settings.value.components.music
@@ -28,7 +29,8 @@ Item {
           tokens: Qt.binding(() => root.tokens),
           media: Qt.binding(() => root.media),
           vertical: Qt.binding(() => root.vertical),
-          compact: Qt.binding(() => root.compact)
+          compact: Qt.binding(() => root.compact),
+          expanded: Qt.binding(() => root.expanded)
     });
   }
   Component.onCompleted: { ready = true; load(); }
@@ -42,7 +44,8 @@ Item {
           tokens: Qt.binding(() => root.tokens),
           media: Qt.binding(() => root.media),
           vertical: Qt.binding(() => root.vertical),
-          compact: Qt.binding(() => root.compact)
+          compact: Qt.binding(() => root.compact),
+          expanded: Qt.binding(() => root.expanded)
       });
     }
   }

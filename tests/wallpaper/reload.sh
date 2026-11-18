@@ -8,6 +8,7 @@ installed=$ASTRAL_TEST_DIR/reload-home/quickshell
 mkdir -p "$project/scripts/configs" "$project/config/quickshell/astral-wallpaper" "${installed%/*}"
 cp -rL "$config" "$installed"
 cp scripts/manage-configs.sh "$project/scripts/"
+cp scripts/cleanup-install.sh "$project/scripts/"
 cp scripts/configs/{common,quickshell}.sh "$project/scripts/configs/"
 cp "$config/astral-wallpaper/"{WallpaperContent,WallpaperComboBox}.qml "$project/config/quickshell/astral-wallpaper/"
 cp -a "$config/common" "$project/config/quickshell/common"

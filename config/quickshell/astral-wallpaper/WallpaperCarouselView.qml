@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import "../common" as Common
 
 // Cinematic coverflow used by the quick wallpaper selector. It is a plain Item
 // so tests can render it without a Wayland layershell.
@@ -137,7 +138,7 @@ Item {
       anchors { right: closeButton.left; rightMargin: 14; verticalCenter: parent.verticalCenter }
       spacing: 8
       Rectangle {
-        width: collectionLabel.implicitWidth + 18; height: 24; radius: 7
+        width: collectionLabel.implicitWidth + 20; height: 24; radius: 12
         color: Qt.alpha(root.tokens.cyan, 0.10)
         border.width: 1
         border.color: Qt.alpha(root.tokens.cyan, 0.30)
@@ -152,7 +153,7 @@ Item {
       }
       Rectangle {
         visible: root.monitorName.length > 0
-        width: monitorRow.implicitWidth + 18; height: 24; radius: 7
+        width: monitorRow.implicitWidth + 20; height: 24; radius: 12
         color: "transparent"
         border.width: 1
         border.color: root.tokens.border
@@ -243,6 +244,12 @@ Item {
 
         Item {
           id: holder
+          // Flatten before perspective, with transparent texels around the
+          // card so filtering can soften its outer silhouette as well.
+          layer.enabled: true
+          layer.smooth: true
+          layer.sourceRect: Qt.rect(-16, -16, width + 32, height + 32)
+          layer.textureSize: Qt.size(Math.ceil((width + 32) * 2), Math.ceil((height + 32) * 2))
           anchors.horizontalCenter: parent.horizontalCenter
           width: root.cardWidth
           height: root.cardHeight
@@ -273,59 +280,64 @@ Item {
 
           Rectangle {
             id: card
+            antialiasing: true
             anchors.fill: parent
-            radius: 18
-            clip: true
+            radius: root.tokens.cardRadius + 4
             color: root.tokens.background
-            Thumbnail {
+            Common.RoundedClip {
               anchors.fill: parent
-              service: root.service
-              path: tile.modelData.path
-              sourceSize.width: 640
-            }
-            Rectangle {
-              anchors.fill: parent
-              gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.alpha(root.tokens.background, 0.12) }
-                GradientStop { position: 0.55; color: "transparent" }
-                GradientStop { position: 1.0; color: Qt.alpha(root.tokens.background, 0.78) }
+              radius: card.radius
+              Thumbnail {
+                anchors.fill: parent
+                service: root.service
+                path: tile.modelData.path
+                sourceSize.width: 640
               }
-            }
-            Rectangle {
-              anchors { left: parent.left; top: parent.top; margins: 10 }
-              width: themeText.implicitWidth + 16; height: 22; radius: 6
-              color: Qt.alpha(root.tokens.background, 0.82)
-              border.width: 1
-              border.color: Qt.alpha(root.tokens.text, 0.10)
-              Text {
-                id: themeText
-                anchors.centerIn: parent
-                text: tile.modelData.theme === "light" ? "LIGHT" : tile.modelData.theme === "dark" ? "DARK" : "SHARED"
-                color: root.tokens.muted
-                font.family: root.tokens.font
-                font.pixelSize: 9; font.bold: true; font.letterSpacing: 1
+              Rectangle {
+                anchors.fill: parent
+                gradient: Gradient {
+                  GradientStop { position: 0.0; color: Qt.alpha(root.tokens.background, 0.12) }
+                  GradientStop { position: 0.55; color: "transparent" }
+                  GradientStop { position: 1.0; color: Qt.alpha(root.tokens.background, 0.78) }
+                }
               }
-            }
-            Rectangle {
-              visible: tile.inUse || tile.kind === "video" || tile.kind === "gif"
-              anchors { right: parent.right; top: parent.top; margins: 10 }
-              width: statusText.implicitWidth + 16; height: 22; radius: 6
-              color: tile.inUse ? Qt.alpha(root.tokens.cyan, 0.16) : Qt.alpha(root.tokens.background, 0.82)
-              border.width: 1
-              border.color: tile.inUse ? Qt.alpha(root.tokens.cyan, 0.45) : Qt.alpha(root.tokens.text, 0.10)
-              Text {
-                id: statusText
-                anchors.centerIn: parent
-                text: tile.inUse ? "● IN USE" : tile.kind === "video" ? "VIDEO" : "GIF"
-                color: tile.inUse ? root.tokens.cyan : root.tokens.muted
-                font.family: root.tokens.font
-                font.pixelSize: 9; font.bold: true; font.letterSpacing: 1
+              Rectangle {
+                anchors { left: parent.left; top: parent.top; margins: 10 }
+                width: themeText.implicitWidth + 16; height: 22; radius: 6
+                color: Qt.alpha(root.tokens.background, 0.82)
+                border.width: 1
+                border.color: Qt.alpha(root.tokens.text, 0.10)
+                Text {
+                  id: themeText
+                  anchors.centerIn: parent
+                  text: tile.modelData.theme === "light" ? "LIGHT" : tile.modelData.theme === "dark" ? "DARK" : "SHARED"
+                  color: root.tokens.muted
+                  font.family: root.tokens.font
+                  font.pixelSize: 9; font.bold: true; font.letterSpacing: 1
+                }
+              }
+              Rectangle {
+                visible: tile.inUse || tile.kind === "video" || tile.kind === "gif"
+                anchors { right: parent.right; top: parent.top; margins: 10 }
+                width: statusText.implicitWidth + 16; height: 22; radius: 6
+                color: tile.inUse ? Qt.alpha(root.tokens.cyan, 0.16) : Qt.alpha(root.tokens.background, 0.82)
+                border.width: 1
+                border.color: tile.inUse ? Qt.alpha(root.tokens.cyan, 0.45) : Qt.alpha(root.tokens.text, 0.10)
+                Text {
+                  id: statusText
+                  anchors.centerIn: parent
+                  text: tile.inUse ? "● IN USE" : tile.kind === "video" ? "VIDEO" : "GIF"
+                  color: tile.inUse ? root.tokens.cyan : root.tokens.muted
+                  font.family: root.tokens.font
+                  font.pixelSize: 9; font.bold: true; font.letterSpacing: 1
+                }
               }
             }
             Rectangle {
               anchors.fill: parent
               radius: card.radius
               color: "transparent"
+              antialiasing: true
               border.width: tile.selected ? 2 : 1
               border.color: tile.selected ? root.tokens.cyan : root.tokens.border
             }
@@ -471,7 +483,7 @@ Item {
       id: panel
       anchors { left: parent.left; right: parent.right; top: parent.top }
       height: 88
-      radius: 20
+      radius: root.tokens.panelRadius
       color: Qt.alpha(root.tokens.surface, 0.84)
       border.width: 1
       border.color: Qt.alpha(root.tokens.text, 0.07)
@@ -487,7 +499,7 @@ Item {
             id: numberText
             text: root.currentIndex >= 0 ? root.pad(root.currentIndex + 1) : "00"
             color: root.tokens.cyan
-            font.family: root.tokens.font
+            font.family: root.tokens.mono
             font.pixelSize: 30
             font.bold: true
             anchors.verticalCenter: parent.verticalCenter
@@ -497,7 +509,7 @@ Item {
             anchors { left: numberText.right; leftMargin: 3; baseline: numberText.baseline }
             text: "/ " + root.items.length
             color: root.tokens.muted
-            font.family: root.tokens.font
+            font.family: root.tokens.mono
             font.pixelSize: 12
           }
           Text {
@@ -560,7 +572,7 @@ Item {
               anchors.verticalCenter: parent.verticalCenter
               text: root.current ? (root.current.relative || root.current.path) : ""
               color: root.tokens.muted
-              font.family: root.tokens.font
+              font.family: root.tokens.mono
               font.pixelSize: 10
               elide: Text.ElideMiddle
             }
@@ -610,7 +622,7 @@ Item {
               anchors.centerIn: parent
               text: modelData.key
               color: root.tokens.text
-              font.family: root.tokens.font
+              font.family: root.tokens.mono
               font.pixelSize: 9
               font.bold: true
             }

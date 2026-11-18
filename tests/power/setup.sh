@@ -8,6 +8,7 @@ trap 'rm -rf -- "$runtime"' EXIT
 mkdir -p "$runtime/project/scripts/configs" "$runtime/bin"
 cp scripts/install-power.sh "$runtime/project/scripts/install-power.sh"
 cp scripts/configs/common.sh "$runtime/project/scripts/configs/common.sh"
+cp scripts/cleanup-install.sh "$runtime/project/scripts/cleanup-install.sh"
 export ASTRAL_SETUP_TEST=$runtime
 cat > "$runtime/bin/bash" <<'MOCK'
 #!/usr/bin/bash

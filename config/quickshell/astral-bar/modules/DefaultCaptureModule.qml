@@ -16,18 +16,23 @@ AbstractButton {
   property string captureState: "idle"
   property int duration: 0
   readonly property bool showElapsed: recordingVideo && ["recording", "finalizing"].includes(captureState)
-  readonly property color ink: recording ? tokens.alert : hovered ? tokens.lavender : tokens.cyan
+  readonly property color ink: recording ? tokens.alert : hovered ? tokens.cyan : tokens.text
   readonly property string elapsed: Math.floor(duration / 60).toString().padStart(2, "0") + ":" + (duration % 60).toString().padStart(2, "0")
   readonly property string detail: recording
     ? (({hiding: "Preparing capture", selecting: "Selecting source", preparing: captureKind === "shot" ? "Preparing screenshot" : "Preparing recording", recording: "Recording · " + elapsed, finalizing: captureKind === "shot" ? "Finishing screenshot" : "Finishing recording"})[captureState] || "Capture in progress") + (captureKind === "shot" ? " · Cancel capture" : " · Stop")
     : "Screen & capture"
   // Keep the shortcut compact, with room for the timer in either orientation.
-  implicitWidth: vertical ? 48 : compact ? 34 : 40
+  implicitWidth: vertical ? 48 : compact ? 32 : 40
   implicitHeight: vertical ? 38 : 40
   padding: 0
   Accessible.name: detail
   focusPolicy: Qt.StrongFocus
-  background: Item {
+  background: Components.BarTile {
+    tokens: root.tokens
+    accent: root.recording ? root.tokens.alert : root.tokens.cyan
+    hovered: root.hovered
+    selected: root.recording
+    focused: root.visualFocus
     Rectangle {
       objectName: "captureKeyboardFocus"
       anchors.horizontalCenter: parent.horizontalCenter
@@ -50,8 +55,10 @@ AbstractButton {
         width: 24; height: 24
         anchors.horizontalCenter: parent.horizontalCenter
         y: 0
-        Components.CaptureGlyph {
+        Components.BarGlyph {
+          kind: "capture"
           objectName: "captureGlyph"
+          width: 20; height: 20
           anchors.centerIn: parent
           visible: !root.recordingVideo
           ink: root.ink

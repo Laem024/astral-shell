@@ -7,7 +7,6 @@ import "../data" as Data
 PanelCard {
   id: root
   title: ""
-  radius: 12
   contentSpacing: 14
   signal navigationRequested()
   readonly property color accent: root.tokens.cyan
@@ -99,15 +98,15 @@ PanelCard {
     color: root.tokens.text
     textFormat: Text.PlainText
     wrapMode: Text.Wrap
-    font { family: root.tokens.font; pixelSize: 12 }
+    font { family: root.tokens.font; pixelSize: 13 }
   }
   component Caption: Label {
     color: root.tokens.muted
-    font.pixelSize: 10
+    font.pixelSize: 11
   }
   component Eyebrow: Caption {
     color: root.accent
-    font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1.2 }
+    font { family: root.tokens.mono; pixelSize: 10; letterSpacing: 1 }
   }
   component SignalMeter: Item {
     id: meter
@@ -140,11 +139,11 @@ PanelCard {
     id: mark
     property int strength: -1
     property bool active: false
-    implicitWidth: 32
-    implicitHeight: 32
-    radius: 9
-    color: mark.active ? Qt.alpha(root.accent, 0.1) : Qt.alpha(root.tokens.surface, 0.6)
-    border.color: mark.active ? Qt.alpha(root.accent, 0.3) : root.tokens.border
+    implicitWidth: 34
+    implicitHeight: 34
+    radius: root.tokens.rowRadius
+    color: mark.active ? Qt.alpha(root.accent, 0.12) : root.tokens.sunken
+    border.color: mark.active ? Qt.alpha(root.accent, 0.35) : root.tokens.hairline
     SignalMeter {
       anchors.centerIn: parent
       strength: mark.strength
@@ -152,43 +151,9 @@ PanelCard {
     }
   }
   component Action: PanelButton {
-    id: action
     tokens: root.tokens
-    property color tint: root.accent
-    readonly property color accent: action.destructive ? root.tokens.alert : action.tint
-    property string symbol: ""
-    property bool quiet: false
+    tint: root.accent
     Layout.minimumWidth: 0
-    implicitHeight: 36
-    opacity: enabled ? 1 : 0.4
-    contentItem: RowLayout {
-      spacing: 6
-      Text {
-        visible: action.symbol !== ""
-        text: action.symbol
-        color: action.accent
-        font { family: root.tokens.mono; pixelSize: 13 }
-      }
-      Text {
-        Layout.fillWidth: true
-        text: action.text
-        textFormat: Text.PlainText
-        elide: Text.ElideRight
-        horizontalAlignment: Text.AlignLeft
-        verticalAlignment: Text.AlignVCenter
-        color: action.destructive || action.selected ? action.accent : root.tokens.text
-        font { family: root.tokens.font; pixelSize: 11; weight: Font.Medium }
-      }
-    }
-    background: Rectangle {
-      radius: 7
-      color: action.quiet
-        ? (action.down || action.hovered || action.activeFocus ? Qt.alpha(action.accent, 0.07) : "transparent")
-        : Qt.alpha(action.accent, action.down ? 0.16 : action.selected ? 0.1 : action.hovered ? 0.06 : 0.025)
-      border.color: action.activeFocus ? root.tokens.gold
-        : action.quiet ? "transparent"
-        : Qt.alpha(action.accent, action.selected ? 0.38 : action.hovered ? 0.26 : 0.12)
-    }
   }
   component Field: TextField {
     Layout.fillWidth: true
@@ -199,21 +164,22 @@ PanelCard {
     placeholderTextColor: root.tokens.muted
     selectionColor: root.accent
     selectedTextColor: root.tokens.background
-    font { family: root.tokens.font; pixelSize: 12 }
+    font { family: root.tokens.font; pixelSize: 13 }
     background: Rectangle {
-      radius: 7
-      color: Qt.alpha(root.tokens.surface, 0.7)
-      border.color: parent.activeFocus ? root.accent : root.tokens.border
+      radius: root.tokens.rowRadius
+      color: root.tokens.background
+      border.width: parent.activeFocus ? 2 : 1
+      border.color: parent.activeFocus ? root.tokens.cyan : root.tokens.border
     }
   }
   component Choice: ComboBox {
     id: choice
     Layout.fillWidth: true
     Layout.minimumWidth: 0
-    implicitHeight: 38
-    leftPadding: 11
-    rightPadding: 30
-    font { family: root.tokens.font; pixelSize: 11 }
+    implicitHeight: 40
+    leftPadding: 12
+    rightPadding: 34
+    font { family: root.tokens.font; pixelSize: 13 }
     contentItem: Text {
       text: choice.displayText
       textFormat: Text.PlainText
@@ -223,23 +189,24 @@ PanelCard {
       elide: Text.ElideRight
     }
     indicator: Text {
-      x: choice.width - width - 11
+      x: choice.width - width - 12
       anchors.verticalCenter: parent.verticalCenter
       text: choice.popup.visible ? "−" : "+"
       color: root.accent
       font { family: root.tokens.mono; pixelSize: 14 }
     }
     background: Rectangle {
-      radius: 7
-      color: choice.hovered || choice.popup.visible ? Qt.alpha(root.accent, 0.06) : Qt.alpha(root.tokens.surface, 0.7)
-      border.color: choice.activeFocus ? root.accent : root.tokens.border
+      radius: root.tokens.rowRadius
+      color: root.tokens.background
+      border.width: choice.activeFocus ? 2 : 1
+      border.color: choice.activeFocus ? root.tokens.cyan : root.tokens.border
     }
     delegate: ItemDelegate {
       id: option
       required property int index
       required property string modelData
       width: choice.width - 2
-      implicitHeight: 36
+      implicitHeight: 38
       highlighted: choice.highlightedIndex === index
       Accessible.name: option.modelData
       contentItem: Text {
@@ -248,11 +215,11 @@ PanelCard {
         color: option.index === choice.currentIndex ? root.accent : root.tokens.text
         elide: Text.ElideRight
         verticalAlignment: Text.AlignVCenter
-        font { family: root.tokens.font; pixelSize: 11 }
+        font { family: root.tokens.font; pixelSize: 13 }
       }
       background: Rectangle {
-        radius: 6
-        color: option.highlighted ? Qt.alpha(root.accent, 0.1) : "transparent"
+        radius: root.tokens.rowRadius - 2
+        color: option.highlighted ? Qt.alpha(root.accent, 0.12) : "transparent"
       }
     }
     popup: Popup {
@@ -269,9 +236,9 @@ PanelCard {
         ScrollIndicator.vertical: ScrollIndicator {}
       }
       background: Rectangle {
-        radius: 8
+        radius: root.tokens.rowRadius
         color: root.tokens.surface
-        border.color: Qt.alpha(root.accent, 0.24)
+        border.color: root.tokens.border
       }
     }
   }
@@ -283,7 +250,7 @@ PanelCard {
     property bool active: false
     Layout.fillWidth: true
     Layout.minimumWidth: 0
-    implicitHeight: 58
+    implicitHeight: 60
     leftPadding: 10; rightPadding: 10; topPadding: 8; bottomPadding: 8
     opacity: enabled ? 1 : 0.45
     Accessible.name: name + ". " + detail
@@ -303,7 +270,7 @@ PanelCard {
           textFormat: Text.PlainText
           elide: Text.ElideRight
           color: networkRow.active ? root.accent : root.tokens.text
-          font { family: root.tokens.font; pixelSize: 12; weight: Font.Medium }
+          font { family: root.tokens.font; pixelSize: 13; weight: Font.Medium }
         }
         Caption { text: networkRow.detail }
       }
@@ -321,11 +288,12 @@ PanelCard {
       }
     }
     background: Rectangle {
-      radius: 9
-      color: networkRow.active ? Qt.alpha(root.accent, 0.06)
-        : networkRow.hovered ? Qt.alpha(root.tokens.surface, 0.7) : "transparent"
-      border.color: networkRow.activeFocus ? root.accent
-        : networkRow.active ? Qt.alpha(root.accent, 0.28) : "transparent"
+      radius: root.tokens.rowRadius
+      color: networkRow.active ? Qt.alpha(root.accent, 0.08)
+        : networkRow.hovered || networkRow.activeFocus ? Qt.alpha(root.tokens.text, 0.05) : root.tokens.background
+      border.width: networkRow.activeFocus ? 2 : 1
+      border.color: networkRow.activeFocus ? root.tokens.cyan
+        : networkRow.active ? Qt.alpha(root.accent, 0.35) : root.tokens.hairline
     }
   }
 
@@ -348,7 +316,7 @@ PanelCard {
         text: "Wi-Fi"
         textFormat: Text.PlainText
         color: root.tokens.text
-        font { family: root.tokens.font; pixelSize: 19; weight: Font.Medium }
+        font { family: root.tokens.font; pixelSize: 18; weight: Font.Medium }
       }
       Caption {
         text: root.service.busy ? root.service.pending
@@ -385,9 +353,9 @@ PanelCard {
     Layout.fillWidth: true
     visible: root.service.error !== ""
     implicitHeight: errorText.implicitHeight + 24
-    radius: 8
-    color: Qt.alpha(root.tokens.alert, 0.07)
-    border.color: Qt.alpha(root.tokens.alert, 0.3)
+    radius: root.tokens.rowRadius
+    color: Qt.alpha(root.tokens.alert, 0.1)
+    border.color: Qt.alpha(root.tokens.alert, 0.35)
     Text {
       id: errorText
       anchors { left: parent.left; right: parent.right; top: parent.top; margins: 12 }

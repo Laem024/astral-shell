@@ -9,6 +9,8 @@ import "../components" as Components
 ScrollView {
   id: root
   required property Design.Theme tokens
+  property string monitorName: ""
+  property string selectedMonitor: ""
   signal captureRequested()
   readonly property string task: Data.CapturePreferences.task
   readonly property string mode: Data.CapturePreferences.source
@@ -43,7 +45,7 @@ ScrollView {
   }
   component Section: PanelCard {
     tokens: root.tokens
-    radius: 10
+    accent: root.tokens.lavender
     contentSpacing: 14
   }
   component Choice: PanelButton {
@@ -52,28 +54,30 @@ ScrollView {
     Layout.preferredWidth: 1
     Layout.minimumWidth: 0
     tokens: root.tokens
-    implicitHeight: 36
+    implicitHeight: 38
     opacity: enabled ? 1 : 0.45
     contentItem: Text {
       text: choice.text
-      color: choice.selected ? root.tokens.cyan : root.tokens.muted
-      font { family: root.tokens.font; pixelSize: 11; weight: choice.selected ? Font.Medium : Font.Normal }
+      color: choice.selected ? root.tokens.cyan : root.tokens.text
+      font { family: root.tokens.font; pixelSize: 12; weight: choice.selected ? Font.Medium : Font.Normal }
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter
       elide: Text.ElideRight
-    }
-    background: Rectangle {
-      radius: 7
-      color: Qt.alpha(root.tokens.cyan, choice.selected ? 0.09 : choice.hovered ? 0.04 : 0)
-      border.color: choice.activeFocus ? root.tokens.cyan : choice.selected ? Qt.alpha(root.tokens.cyan, 0.4) : root.tokens.border
     }
   }
   ColumnLayout {
     width: root.availableWidth
     spacing: 12
+    PageIntro {
+      tokens: root.tokens
+      title: "Create & capture"
+      subtitle: root.statusLabel
+      symbol: "screen"
+      accent: root.tokens.lavender
+    }
     Section {
       objectName: "captureSourceCard"
-      title: "CAPTURE"
+      title: "CAPTURE STUDIO"
       RowLayout {
         Layout.fillWidth: true
         spacing: 8
@@ -92,7 +96,7 @@ ScrollView {
             id: sourceChoice
             required property var modelData
             objectName: "captureSource-" + modelData.key
-            implicitHeight: 70
+            implicitHeight: 90
             enabled: !root.busy
             selected: root.mode === modelData.key
             text: modelData.label
@@ -110,18 +114,32 @@ ScrollView {
         id: outputs
         objectName: "captureMonitorSelector"
         Layout.fillWidth: true
-        implicitHeight: 38
+        implicitHeight: 40
         visible: root.mode === "monitor"
         enabled: !root.busy && count > 0
         model: Data.BrightnessData.outputNames
-        currentIndex: Math.max(0, model.indexOf(Data.CapturePreferences.monitor))
-        onActivated: index => Data.CapturePreferences.selectMonitor(model[index])
+        currentIndex: {
+          for (const name of [root.selectedMonitor, root.monitorName, Data.CapturePreferences.monitor]) {
+            const index = model.indexOf(name);
+            if (index >= 0) return index;
+          }
+          return count > 0 ? 0 : -1;
+        }
+        onActivated: index => {
+          root.selectedMonitor = model[index];
+          Data.CapturePreferences.selectMonitor(model[index]);
+        }
         displayText: count > 0 ? currentText : "No displays connected"
         Accessible.name: "Capture display"
         leftPadding: 12; rightPadding: 30
         contentItem: Text { text: outputs.displayText; color: root.tokens.text; font { family: root.tokens.mono; pixelSize: 11 } verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
         indicator: Text { x: outputs.width - width - 12; anchors.verticalCenter: parent.verticalCenter; text: outputs.popup.visible ? "−" : "+"; color: root.tokens.cyan }
-        background: Rectangle { radius: 7; color: root.tokens.surface; border.color: outputs.activeFocus ? root.tokens.cyan : root.tokens.border }
+        background: Rectangle {
+          radius: root.tokens.rowRadius
+          color: root.tokens.background
+          border.width: outputs.activeFocus ? 2 : 1
+          border.color: outputs.activeFocus ? root.tokens.cyan : root.tokens.border
+        }
         delegate: ItemDelegate {
           id: monitorOption
           required property string modelData
@@ -210,7 +228,7 @@ ScrollView {
     }
     Section {
       objectName: "displayBrightnessCard"
-      title: "BRIGHTNESS"
+      title: "DISPLAY BRIGHTNESS"
       Repeater {
         model: Data.BrightnessData.monitorModel
         ColumnLayout {

@@ -14,6 +14,7 @@ Package management | required | @aur-helper@ # AUR helper chosen at installation
 Terminal | required | fish # Interactive shell for the supplied configuration.
 Terminal | required | cachyos-fish-config | fish # CachyOS Fish configuration and prompt dependencies.
 Terminal | recommended | kitty # Terminal emulator.
+Terminal | recommended | fastfetch # PC information in the interactive Fish welcome.
 Terminal | required | btop # System resource dashboard for the Ctrl+Shift+Esc monitor workspace.
 
 # Category: Productivity
@@ -51,7 +52,7 @@ Internet | recommended | firefox # Web browser.
 
 # Category: Multimedia
 Multimedia | recommended | loupe # Simple image viewer.
-Multimedia | recommended | haruna # Qt/QML video player using libmpv.
+Multimedia | recommended | vlc # Multimedia player.
 
 # Category: Utilities
 Utilities | required | wl-clipboard # Clipboard history capture and replay for the astral-clipboard module.

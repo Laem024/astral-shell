@@ -85,7 +85,7 @@ Rectangle {
     Rectangle {
       width: root.width * 0.6; height: 1; rotation: -35
       x: root.width * 0.57; y: root.height * 0.13
-      color: Qt.alpha(root.tokens.gold, 0.12)
+      color: Qt.alpha(root.tokens.gold, 0.1)
     }
   }
   Item {
@@ -96,61 +96,62 @@ Rectangle {
     scale: root.factor * (0.975 + 0.025 * root.entranceProgress + 0.018 * root.exitProgress)
     transform: Translate { y: (1 - root.entranceProgress) * 14 - root.exitProgress * 16 }
     RowLayout {
-      anchors { left: parent.left; right: parent.right; top: parent.top; margins: 36 }
-      spacing: 10
-      Text { text: "✦"; color: root.tokens.cyan; font.pixelSize: 22 }
+      anchors { left: parent.left; right: parent.right; top: parent.top; margins: 32 }
+      spacing: 8
+      Text { text: "✦"; color: root.tokens.cyan; font.pixelSize: 18 }
       Text { text: "A S T R A L"; color: root.tokens.text; font { family: root.tokens.mono; pixelSize: 12 } }
       Item { Layout.fillWidth: true }
-      Text { text: root.unlocking ? "\uf09c" : "\uf023"; color: root.tokens.gold; font { family: root.tokens.mono; pixelSize: 12 } }
-      Text { text: root.unlocking ? "ACCESS CONFIRMED" : "SESSION LOCKED"; color: root.tokens.muted; font { family: root.tokens.mono; pixelSize: 10; letterSpacing: 1 } }
+      Text { text: root.unlocking ? "\uf09c" : "\uf023"; color: root.tokens.muted; font { family: root.tokens.mono; pixelSize: 12 } }
+      Text { text: root.unlocking ? "ACCESS CONFIRMED" : "SESSION LOCKED"; color: root.tokens.muted; font { family: root.tokens.mono; pixelSize: 10; letterSpacing: 1.2 } }
     }
     GridLayout {
       id: composition
       anchors.centerIn: parent
-      width: Math.min(parent.width - 96, root.wide ? 1120 : 400)
+      width: Math.min(parent.width - 96, root.wide ? 1040 : 400)
       columns: root.wide ? 2 : 1
-      columnSpacing: 104; rowSpacing: 30
+      columnSpacing: 96; rowSpacing: 32
       ColumnLayout {
         Layout.fillWidth: true
-        Layout.preferredWidth: root.wide ? 530 : 400
+        Layout.preferredWidth: root.wide ? 520 : 400
         Layout.alignment: Qt.AlignVCenter
-        spacing: 18
+        spacing: 8
         Text {
           Layout.fillWidth: true
-          text: root.dateTime.toLocaleDateString(Qt.locale("en_US"), "dddd, d MMMM").toUpperCase()
-          color: root.tokens.gold
+          text: root.dateTime.toLocaleDateString(Qt.locale("en_US"), "dddd, d MMMM")
+          color: root.tokens.lavender
           horizontalAlignment: root.wide ? Text.AlignLeft : Text.AlignHCenter
-          font { family: root.tokens.mono; pixelSize: 12; letterSpacing: 1.5 }
+          font { family: root.tokens.font; pixelSize: 14; weight: Font.Medium }
         }
         RowLayout {
           Layout.alignment: root.wide ? Qt.AlignLeft : Qt.AlignHCenter
-          spacing: 12
+          spacing: 8
           Text {
             objectName: "lockClock"
             text: root.settings.value.clockFormat === "24h" ? Qt.formatDateTime(root.dateTime, "HH:mm")
               : root.dateTime.toLocaleTimeString(Qt.locale("en_US"), "hh:mm AP").split(" ")[0]
             color: root.tokens.text
-            font { family: root.tokens.font; pixelSize: root.wide ? 128 : 88; weight: Font.ExtraLight; letterSpacing: -5 }
+            font { family: root.tokens.font; pixelSize: root.wide ? 128 : 88; weight: Font.ExtraLight; letterSpacing: -4 }
           }
           Text {
             visible: root.settings.value.clockFormat !== "24h"
             text: root.dateTime.toLocaleTimeString(Qt.locale("en_US"), "AP")
             color: root.tokens.muted
-            Layout.alignment: Qt.AlignBottom; Layout.bottomMargin: root.wide ? 26 : 18
+            Layout.alignment: Qt.AlignBottom; Layout.bottomMargin: root.wide ? 28 : 18
             font { family: root.tokens.mono; pixelSize: 12 }
           }
         }
-        Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: root.tokens.border; visible: root.wide }
         Text {
           visible: root.wide
+          Layout.topMargin: 4
           text: "A moment of pause."
           color: root.tokens.muted
-          font { family: root.tokens.font; pixelSize: 18; weight: Font.Light }
+          font { family: root.tokens.font; pixelSize: 16; weight: Font.Light }
         }
         LockMedia {
           objectName: "lockMedia"
           visible: root.showMusic && root.wide
-          Layout.fillWidth: true; Layout.topMargin: 22
+          Layout.fillWidth: true; Layout.topMargin: 32
+          Layout.maximumWidth: 440
           tokens: root.tokens; media: root.media
         }
       }
@@ -158,58 +159,64 @@ Rectangle {
         Layout.fillWidth: true
         Layout.preferredWidth: 380
         Layout.alignment: Qt.AlignVCenter
-        spacing: 24
+        spacing: 16
         Rectangle {
           id: accessCard
           objectName: "lockAccessCard"
           Layout.fillWidth: true
-          implicitHeight: access.implicitHeight + 64
+          implicitHeight: access.implicitHeight + 48
           color: root.tokens.surface
-          radius: 24; border.color: root.tokens.border
+          radius: root.tokens.panelRadius; border.color: root.tokens.border
           ColumnLayout {
             id: access
-            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 32 }
+            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 24 }
             spacing: 20
             RowLayout {
               Layout.fillWidth: true; spacing: 16
               Rectangle {
+                id: avatarFrame
                 visible: root.showProfile
-                Layout.preferredWidth: 58; Layout.preferredHeight: 58; radius: 18
-                color: root.tokens.background; border.color: root.tokens.border
-                Image {
-                  id: photo
-                  anchors.fill: parent; anchors.margins: 5
-                  source: root.avatar.toString().startsWith("file:") || root.avatar.toString().startsWith("/") ? root.avatar : ""
-                  fillMode: Image.PreserveAspectFit
+                Layout.preferredWidth: 56; Layout.preferredHeight: 56; radius: 28
+                color: root.tokens.raised
+                border.width: 1; border.color: Qt.alpha(root.tokens.cyan, 0.3)
+                Common.RoundedClip {
+                  anchors.fill: parent; anchors.margins: 3
+                  radius: height / 2
+                  Image {
+                    id: photo
+                    anchors.fill: parent
+                    source: root.avatar.toString().startsWith("file:") || root.avatar.toString().startsWith("/") ? root.avatar : ""
+                    fillMode: Image.PreserveAspectCrop
+                  }
                 }
                 Text {
                   anchors.centerIn: parent; visible: photo.status !== Image.Ready
                   text: root.displayName.trim().split(/\s+/).map(word => word[0] || "").slice(0, 2).join("").toUpperCase() || "?"
-                  color: root.tokens.cyan; font { family: root.tokens.mono; pixelSize: 20 }
+                  color: root.tokens.cyan; font { family: root.tokens.mono; pixelSize: 18 }
                 }
               }
               ColumnLayout {
-                Layout.fillWidth: true; spacing: 5
-                Text { text: "WELCOME BACK"; color: root.tokens.muted; font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1 } }
+                Layout.fillWidth: true; spacing: 2
+                Text { text: "Welcome back"; color: root.tokens.muted; font { family: root.tokens.font; pixelSize: 12 } }
                 Text {
                   Layout.fillWidth: true
                   text: root.showProfile ? root.displayName : "Your space awaits"
                   textFormat: Text.PlainText; elide: Text.ElideRight
-                  color: root.tokens.text; font { family: root.tokens.font; pixelSize: 20; weight: Font.Medium }
+                  color: root.tokens.text; font { family: root.tokens.font; pixelSize: 18; weight: Font.DemiBold }
                 }
               }
             }
-            Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: root.tokens.border }
+            Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: root.tokens.hairline }
             ColumnLayout {
-              Layout.fillWidth: true; spacing: 9
-              Text { text: "PASSWORD"; color: root.tokens.muted; font { family: root.tokens.mono; pixelSize: 10; letterSpacing: 1 } }
+              Layout.fillWidth: true; spacing: 8
+              Text { text: "Password"; color: root.tokens.muted; font { family: root.tokens.font; pixelSize: 12 } }
               TextField {
                 id: password
                 objectName: "lockPassword"
                 // The only keyboard target of the lock surface: declaring focus
                 // lets Qt restore it when the window regains the keyboard.
                 focus: true
-                Layout.fillWidth: true; Layout.preferredHeight: 52
+                Layout.fillWidth: true; Layout.preferredHeight: 48
                 enabled: root.secure && root.promptReady && !root.busy && !root.unlocking
                 echoMode: TextInput.Password; passwordMaskDelay: 0
                 selectByMouse: false; persistentSelection: false
@@ -219,8 +226,15 @@ Rectangle {
                 color: root.tokens.text; placeholderTextColor: root.tokens.muted
                 font { family: root.tokens.mono; pixelSize: 13; letterSpacing: password.length > 0 ? 4 : 0 }
                 background: Rectangle {
-                  radius: 12; color: root.tokens.background
-                  border.color: root.error ? root.tokens.alert : password.activeFocus ? root.tokens.cyan : root.tokens.border
+                  id: fieldFrame
+                  radius: root.tokens.rowRadius; color: root.tokens.sunken
+                  border.width: password.activeFocus ? 2 : 1
+                  border.color: root.error ? root.tokens.alert
+                    : password.activeFocus ? root.tokens.cyan
+                    : fieldHover.hovered && password.enabled ? root.tokens.muted
+                    : root.tokens.border
+                  HoverHandler { id: fieldHover }
+                  Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
                 }
                 Keys.onPressed: event => {
                   if (event.matches(StandardKey.Copy) || event.matches(StandardKey.Cut)
@@ -237,12 +251,12 @@ Rectangle {
             }
             // Always reserve this space so messages never shift the field.
             RowLayout {
-              Layout.fillWidth: true; Layout.preferredHeight: 54
-              spacing: 10
+              Layout.fillWidth: true; Layout.preferredHeight: 40
+              spacing: 8
               BusyIndicator {
                 objectName: "lockBusy"
                 visible: root.busy; running: root.busy
-                Layout.preferredWidth: 22; Layout.preferredHeight: 22
+                Layout.preferredWidth: 20; Layout.preferredHeight: 20
                 palette.dark: root.tokens.cyan
               }
               Text {
@@ -268,16 +282,25 @@ Rectangle {
               id: authenticate
               objectName: "lockAuthenticate"
               focusPolicy: Qt.NoFocus
-              Layout.fillWidth: true; Layout.preferredHeight: 48
+              Layout.fillWidth: true; Layout.preferredHeight: 46
               enabled: root.secure && !root.busy && !root.unlocking && (!root.promptReady || password.length > 0)
-              text: root.unlocking ? "Access confirmed" : root.busy ? "Verifying…" : root.promptReady ? "Unlock  →" : "Retry  →"
+              text: root.unlocking ? "Access confirmed" : root.busy ? "Verifying…" : root.promptReady ? "Unlock" : "Retry"
               onClicked: root.submit()
               contentItem: Text {
                 text: authenticate.text; color: root.tokens.background
                 horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                 font { family: root.tokens.font; pixelSize: 14; weight: Font.DemiBold }
               }
-              background: Rectangle { radius: 12; color: root.tokens.cyan; opacity: authenticate.enabled ? 1 : 0.45 }
+              background: Rectangle {
+                radius: root.tokens.controlRadius
+                color: authenticate.down ? Qt.alpha(root.tokens.cyan, 0.85)
+                  : authenticate.hovered && authenticate.enabled ? Qt.lighter(root.tokens.cyan, 1.08)
+                  : root.tokens.cyan
+                opacity: authenticate.enabled ? 1 : 0.4
+                border.width: authenticate.visualFocus ? 2 : 0
+                border.color: root.tokens.text
+                Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
+              }
             }
           }
         }
@@ -290,10 +313,10 @@ Rectangle {
       }
     }
     Text {
-      anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter; bottomMargin: 28 }
+      anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter; bottomMargin: 24 }
       text: "YOUR SESSION CONTINUES, AT YOUR PACE."
       color: root.tokens.muted; opacity: 0.6
-      font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1.5 }
+      font { family: root.tokens.mono; pixelSize: 10; letterSpacing: 1.2 }
     }
   }
 }

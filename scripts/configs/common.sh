@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/../cleanup-install.sh"
+
 die() { printf 'Error: %s\n' "$*" >&2; exit 1; }
 
 # Callers set these explicitly; defaults keep standalone modules safe under
@@ -48,7 +50,7 @@ install_public_command() {
     return
   fi
   mkdir -p -- "$command_dir"
-  temporary=$(mktemp "$command_dir/.$name.XXXXXX")
+  temporary=$(astral_install_mktemp "$command_dir/.$name.XXXXXX")
   { printf '#!/usr/bin/env bash\n'; printf '%s\n' "$body"; } > "$temporary"
   chmod 755 "$temporary"
   if [[ -f $command_file ]] && cmp -s -- "$temporary" "$command_file"; then

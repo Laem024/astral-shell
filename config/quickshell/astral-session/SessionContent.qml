@@ -12,27 +12,29 @@ FocusScope {
   readonly property var actions: Logic.actions.filter(action => Common.SessionActions.available(action.id))
   readonly property bool busy: Common.SessionActions.pending
   readonly property bool failed: Common.SessionActions.error !== ""
-  readonly property bool compact: width < 760 || height < 470
+  readonly property bool compact: width < 700
+  readonly property int actionColumns: width >= 700 ? 5 : width >= 420 ? 3 : 2
   readonly property string subtitle: root.busy ? "Working…"
     : root.failed ? Common.SessionActions.error
-    : "Choose an action. Destructive ones need a short hold."
+    : "Lock, rest, or end your session."
   readonly property color subtitleColor: root.busy ? root.tokens.gold
     : root.failed ? root.tokens.alert : root.tokens.muted
   property string holding: ""
   property real holdProgress: 0
   property int focusIndex: 0
+  implicitHeight: contentLayout.implicitHeight + 2 * (root.compact ? 16 : 24)
   signal closeRequested()
 
   onActiveChanged: {
     if (!active) cancelHold();
-    else Qt.callLater(() => { if (root.active) root.forceActiveFocus(); });
+    else Qt.callLater(() => { if (root.active) root.focusTile(0); });
   }
   onActiveFocusChanged: if (!activeFocus) cancelHold()
 
   function reset() {
     cancelHold();
     Common.SessionActions.error = "";
-    if (root.active) root.forceActiveFocus();
+    if (root.active) root.focusTile(0);
   }
   function trigger(id) {
     if (Common.SessionActions.pending || Common.SessionActions.blocked) return;
@@ -79,7 +81,16 @@ FocusScope {
     if (index < 0 || index >= count) return;
     root.focusIndex = index;
     const item = listRepeater.itemAt(index);
-    if (item) item.forceActiveFocus();
+    if (item) {
+      item.forceActiveFocus();
+      revealTile(item);
+    }
+  }
+
+  function revealTile(item) {
+    if (item.y < actionScroll.contentY) actionScroll.contentY = item.y;
+    else if (item.y + item.height > actionScroll.contentY + actionScroll.height)
+      actionScroll.contentY = item.y + item.height - actionScroll.height;
   }
 
   Keys.onPressed: event => {
@@ -93,7 +104,8 @@ FocusScope {
       root.cancelHold();
       const count = root.actions.length;
       if (count === 0) return;
-      const step = event.key === Qt.Key_Left || event.key === Qt.Key_Up ? -1 : 1;
+      const step = event.key === Qt.Key_Up ? -root.actionColumns
+        : event.key === Qt.Key_Down ? root.actionColumns : event.key === Qt.Key_Left ? -1 : 1;
       root.focusTile((root.focusIndex + step + count) % count);
       event.accepted = true;
       return;
@@ -125,26 +137,28 @@ FocusScope {
   }
 
   ColumnLayout {
+    id: contentLayout
     anchors.fill: parent
-    anchors.margins: root.compact ? 18 : 28
-    spacing: root.compact ? 10 : 14
+    anchors.margins: root.compact ? 16 : 24
+    spacing: root.compact ? 12 : 16
 
     RowLayout {
       Layout.fillWidth: true
-      spacing: root.compact ? 12 : 16
+      spacing: 16
 
       Rectangle {
-        Layout.preferredWidth: root.compact ? 46 : 54
+        Layout.preferredWidth: root.compact ? 44 : 48
         Layout.preferredHeight: Layout.preferredWidth
         Layout.alignment: Qt.AlignTop
         radius: width / 2
-        color: Qt.alpha(root.tokens.cyan, 0.08)
-        border.color: Qt.alpha(root.tokens.cyan, 0.24)
+        color: Qt.alpha(root.tokens.cyan, 0.1)
+        border.width: 1
+        border.color: Qt.alpha(root.tokens.cyan, 0.3)
         Text {
           anchors.centerIn: parent
           text: "✦"
           color: root.tokens.cyan
-          font { family: root.tokens.mono; pixelSize: root.compact ? 23 : 27 }
+          font { family: root.tokens.mono; pixelSize: root.compact ? 20 : 22 }
         }
       }
 
@@ -155,25 +169,25 @@ FocusScope {
         Text {
           text: "ASTRAL"
           color: root.tokens.cyan
-          font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1.8 }
+          font { family: root.tokens.mono; pixelSize: 10; letterSpacing: 1.6 }
         }
         Text {
           Layout.fillWidth: true
-          text: "End session"
+          text: "Session"
           color: root.tokens.text
           elide: Text.ElideRight
-          font { family: root.tokens.font; pixelSize: root.compact ? 24 : 30; weight: Font.DemiBold }
+          font { family: root.tokens.font; pixelSize: root.compact ? 20 : 22; weight: Font.DemiBold }
         }
         Text {
           Layout.fillWidth: true
-          Layout.topMargin: 1
+          Layout.topMargin: 2
           text: root.subtitle
           textFormat: Text.PlainText
           color: root.subtitleColor
           wrapMode: Text.Wrap
           maximumLineCount: 2
           elide: Text.ElideRight
-          font { family: root.tokens.font; pixelSize: root.compact ? 11 : 12 }
+          font { family: root.tokens.font; pixelSize: 12 }
         }
       }
 
@@ -186,15 +200,18 @@ FocusScope {
         onClicked: root.closeRequested()
         contentItem: Text {
           text: "×"
-          color: root.tokens.muted
-          font.pixelSize: 23
+          color: closeButton.hovered ? root.tokens.text : root.tokens.muted
+          font { family: root.tokens.font; pixelSize: 20 }
           horizontalAlignment: Text.AlignHCenter
           verticalAlignment: Text.AlignVCenter
         }
         background: Rectangle {
-          radius: 16
-          color: closeButton.hovered ? Qt.alpha(root.tokens.muted, 0.12) : "transparent"
-          border.color: closeButton.activeFocus ? root.tokens.cyan : "transparent"
+          radius: root.tokens.controlRadius
+          color: closeButton.down ? Qt.alpha(root.tokens.muted, 0.18)
+            : closeButton.hovered ? Qt.alpha(root.tokens.muted, 0.1)
+            : "transparent"
+          border.width: closeButton.visualFocus ? 2 : 0
+          border.color: root.tokens.cyan
         }
       }
     }
@@ -202,37 +219,64 @@ FocusScope {
     Rectangle {
       Layout.fillWidth: true
       implicitHeight: 1
-      color: root.tokens.border
+      color: root.tokens.hairline
     }
 
-    ColumnLayout {
+    Flickable {
+      id: actionScroll
+      objectName: "sessionActionScroll"
       Layout.fillWidth: true
       Layout.fillHeight: true
-      spacing: root.compact ? 4 : 6
-
-      Repeater {
-        id: listRepeater
-        model: root.actions
-        delegate: ActionTile {
-          required property var modelData
-          required property int index
-          Layout.fillWidth: true
-          Layout.fillHeight: true
-          Layout.minimumHeight: 46
-          Layout.preferredHeight: root.compact ? 54 : 62
-          compact: root.compact
-          tokens: root.tokens
-          actionData: modelData
-          enabled: !Common.SessionActions.pending
-          opacity: enabled ? 1 : 0.45
-          holding: root.holding === modelData.id
-          progress: root.holding === modelData.id ? root.holdProgress : 0
-          onActiveFocusChanged: if (activeFocus) root.focusIndex = index
-          onHoldStarted: root.startHold(modelData.id)
-          onHoldEnded: root.cancelHold()
-          onActivated: root.trigger(modelData.id)
+      Layout.minimumHeight: 0
+      Layout.preferredHeight: actionRow.implicitHeight
+      contentWidth: width
+      contentHeight: actionRow.implicitHeight
+      clip: true
+      boundsBehavior: Flickable.StopAtBounds
+      flickableDirection: Flickable.VerticalFlick
+      interactive: contentHeight > height
+      ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+      GridLayout {
+        id: actionRow
+        width: actionScroll.width
+        columns: root.actionColumns
+        columnSpacing: 10
+        rowSpacing: 10
+        Repeater {
+          id: listRepeater
+          model: root.actions
+          delegate: ActionTile {
+            id: actionTile
+            required property var modelData
+            required property int index
+            Layout.fillWidth: true
+            Layout.minimumWidth: 0
+            Layout.preferredHeight: root.compact ? 158 : 172
+            compact: root.compact
+            tokens: root.tokens
+            actionData: modelData
+            enabled: !Common.SessionActions.pending
+            opacity: enabled ? 1 : 0.45
+            holding: root.holding === modelData.id
+            progress: root.holding === modelData.id ? root.holdProgress : 0
+            onActiveFocusChanged: if (activeFocus) {
+              root.focusIndex = index;
+              root.revealTile(actionTile);
+            }
+            onHoldStarted: root.startHold(modelData.id)
+            onHoldEnded: root.cancelHold()
+            onActivated: root.trigger(modelData.id)
+          }
         }
       }
+    }
+    Text {
+      Layout.fillWidth: true
+      text: root.holding ? "Keep holding to confirm" : "Press L or S     ·     Hold O, R or P to confirm     ·     Esc  Close"
+      color: root.holding ? root.tokens.gold : root.tokens.muted
+      font { family: root.tokens.font; pixelSize: 10 }
+      horizontalAlignment: Text.AlignHCenter
+      wrapMode: Text.Wrap
     }
   }
 }

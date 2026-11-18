@@ -10,6 +10,7 @@ Scope {
   id: root
   property int stage: 0
   property int ticks: 0
+  property int closeRequests: 0
   readonly property string library: Quickshell.env("HOME") + "/Pictures/Wallpapers"
   function findItem(item, name) {
     if (item.objectName === name) return item;
@@ -27,7 +28,7 @@ Scope {
     Item {
       anchors.centerIn: parent
       width: parent.width / theme.scale; height: parent.height / theme.scale; scale: theme.scale
-      Wallpaper.WallpaperContent { id: content; anchors.fill: parent; service: controller; tokens: theme }
+      Wallpaper.WallpaperContent { id: content; anchors.fill: parent; service: controller; tokens: theme; onCloseRequested: root.closeRequests++ }
     }
     Wallpaper.Thumbnail { id: still; visible: false; service: controller; path: root.library + "/00 first.png" }
     Wallpaper.Thumbnail { id: video; visible: false; service: controller; path: root.library + "/motion.mp4" }
@@ -54,7 +55,15 @@ Scope {
         root.check(content.selected.name === "00 first.png", "card selection");
         root.check(content.previewEntry && content.previewEntry.path === content.selected.path && content.confirmationOpen, "popup shows only selected wallpaper");
         root.check(!controller.transaction && Object.keys(controller.activePaths).length === 0, "browsing never applies wallpaper");
+        pointer.keyClick(Qt.Key_Escape);
+        root.check(!content.confirmationOpen && root.closeRequests === 0, "Escape closes preview first");
+        root.check(root.findItem(content, "wallpaperGrid").activeFocus, "closing preview restores gallery focus");
+        pointer.keyClick(Qt.Key_Escape);
+        root.check(root.closeRequests === 1, "Escape closes manager after preview dismissal");
+        content.choose(index);
         content.dismissConfirmation();
+        pointer.keyClick(Qt.Key_Escape);
+        root.check(root.closeRequests === 2, "Escape works after Back dismisses preview");
         root.stage = 1;
       } else if (root.stage === 1) {
         if (video.requestedPath !== video.path || video.status !== Image.Ready) return;
@@ -81,6 +90,18 @@ Scope {
       } else if (root.stage === 3) {
         const actions = root.findItem(testWindow.contentItem, "wallpaperActions");
         root.check(!!actions, "confirmation actions exist");
+        const dialog = root.findItem(content, "wallpaperPreviewDialog");
+        const previewScroll = root.findItem(content, "wallpaperPreviewScroll");
+        root.check(dialog && dialog.clip && previewScroll && previewScroll.clip,
+          "preview and scrolling details clip inside the dialog");
+        const dialogTop = dialog.mapToItem(testWindow.contentItem, 0, 0);
+        const dialogBottom = dialog.mapToItem(testWindow.contentItem, dialog.width, dialog.height);
+        root.check(dialogTop.y >= 0 && dialogBottom.y <= testWindow.height,
+          "preview dialog stays inside the vertical screen bounds");
+        const scrollTop = previewScroll.mapToItem(dialog, 0, 0);
+        root.check(scrollTop.y >= dialog.topPadding - 0.5
+          && scrollTop.y + previewScroll.height <= dialog.height - dialog.bottomPadding + 0.5,
+          "scrolling preview stays inside dialog padding: " + [scrollTop.y, previewScroll.height, dialog.height, dialog.topPadding, dialog.bottomPadding].join(", "));
         const labels = [];
         for (const child of actions.children) if (typeof child.text === "string") labels.push(child.text);
         root.check(!labels.some(text => text.startsWith("Assign to ")), "no Light/Dark assignment button");

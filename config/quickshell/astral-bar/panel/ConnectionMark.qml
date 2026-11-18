@@ -23,25 +23,12 @@ Item {
     border.color: Qt.alpha(root.accent, root.active ? 0.28 : 0.12)
   }
 
-  Row {
+  CategoryGlyph {
     visible: root.kind === "wifi"
     anchors.centerIn: parent
-    width: 25
-    height: 17
-    spacing: 2.5
-    Repeater {
-      model: [4, 7, 10, 13, 16]
-      Rectangle {
-        required property int index
-        required property int modelData
-        width: 3
-        height: modelData
-        y: 17 - height
-        radius: 1.5
-        color: root.active ? root.accent : Qt.alpha(root.tokens.muted, 0.7)
-        opacity: index === 4 ? 1 : 0.45 + index * 0.13
-      }
-    }
+    width: 24; height: 24
+    kind: "connections"
+    ink: root.active ? root.accent : root.tokens.muted
   }
 
   Text {

@@ -37,7 +37,7 @@ ScrollView {
   }
   component Eyebrow: Caption {
     color: root.tokens.cyan
-    font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 1.3 }
+    font { family: root.tokens.mono; pixelSize: 10; letterSpacing: 1 }
   }
   component Diagnostic: Caption {
     visible: text !== ""
@@ -46,7 +46,7 @@ ScrollView {
   }
   component Section: PanelCard {
     tokens: root.tokens
-    radius: 12
+    accent: root.tokens.gold
     contentSpacing: 12
   }
   component ProfileIcon: Shape {
@@ -73,12 +73,10 @@ ScrollView {
   component Action: PanelButton {
     id: action
     property string symbol: ""
-    readonly property color accent: destructive ? root.tokens.alert : root.tokens.cyan
     tokens: root.tokens
     Layout.fillWidth: true
     Layout.minimumWidth: 0
-    implicitHeight: 38
-    opacity: enabled ? 1 : 0.4
+    implicitHeight: 40
     contentItem: RowLayout {
       spacing: 8
       Text {
@@ -92,22 +90,23 @@ ScrollView {
         text: action.text
         textFormat: Text.PlainText
         elide: Text.ElideRight
-        color: action.destructive || action.selected ? action.accent : root.tokens.text
-        font { family: root.tokens.font; pixelSize: 11; weight: Font.Medium }
+        color: action.ink
+        font { family: root.tokens.font; pixelSize: 12; weight: Font.Medium }
         verticalAlignment: Text.AlignVCenter
       }
-    }
-    background: Rectangle {
-      radius: 8
-      color: Qt.alpha(action.accent, action.down ? 0.16 : action.selected ? 0.1 : action.hovered ? 0.07 : 0.025)
-      border.color: action.visualFocus ? root.tokens.gold : Qt.alpha(action.accent, action.selected ? 0.4 : action.hovered ? 0.3 : 0.13)
-      Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
     }
   }
 
   ColumnLayout {
     width: root.availableWidth
     spacing: 12
+    PageIntro {
+      tokens: root.tokens
+      title: "Energy & session"
+      subtitle: root.profileLabel + (Data.SystemData.externalPower ? " · Connected to power" : " · " + (root.batteryAvailable ? "On battery" : "Battery unavailable"))
+      symbol: "bolt"
+      accent: root.tokens.gold
+    }
     Section {
       objectName: "powerBatteryCard"
       border.color: Qt.alpha(root.batteryAccent, 0.22)
@@ -128,7 +127,7 @@ ScrollView {
             anchors.centerIn: parent
             text: Data.SystemData.externalPower ? "PLUGGED IN" : root.batteryAvailable ? "BATTERY" : "NO DATA"
             color: root.batteryAccent
-            font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 0.8 }
+            font { family: root.tokens.mono; pixelSize: 9; letterSpacing: 0.8 }
           }
         }
       }
@@ -160,28 +159,27 @@ ScrollView {
           }
         }
         Item {
-          Layout.preferredWidth: 72
-          Layout.preferredHeight: 40
+          Layout.preferredWidth: 88
+          Layout.preferredHeight: 88
           Accessible.ignored: true
-          Rectangle {
-            width: 66; height: 36; y: 2
-            radius: 9
-            color: Qt.alpha(root.batteryAccent, 0.035)
-            border.color: Qt.alpha(root.batteryAccent, 0.45)
-            Row {
-              anchors { fill: parent; margins: 5 }
-              spacing: 3
-              Repeater {
-                model: 5
-                Rectangle {
-                  required property int index
-                  width: 8.8; height: 26; radius: 3
-                  color: Qt.alpha(root.batteryAccent, root.batteryLevel > index / 5 ? 0.85 : 0.1)
-                }
-              }
+          Shape {
+            anchors.fill: parent
+            preferredRendererType: Shape.CurveRenderer
+            ShapePath {
+              fillColor: "transparent"
+              strokeColor: Qt.alpha(root.batteryAccent, 0.1)
+              strokeWidth: 5
+              PathAngleArc { centerX: 44; centerY: 44; radiusX: 37; radiusY: 37; startAngle: -90; sweepAngle: 360 }
+            }
+            ShapePath {
+              fillColor: "transparent"
+              strokeColor: root.batteryAccent
+              strokeWidth: 5
+              capStyle: ShapePath.RoundCap
+              PathAngleArc { centerX: 44; centerY: 44; radiusX: 37; radiusY: 37; startAngle: -90; sweepAngle: 360 * root.batteryLevel }
             }
           }
-          Rectangle { x: 68; y: 13; width: 4; height: 14; radius: 2; color: Qt.alpha(root.batteryAccent, 0.45) }
+          CategoryGlyph { anchors.centerIn: parent; kind: "bolt"; ink: root.batteryAccent; width: 24; height: 24 }
         }
       }
       Rectangle {
@@ -217,7 +215,7 @@ ScrollView {
             id: profile
             required property var modelData
             Layout.preferredWidth: 1
-            implicitHeight: root.compact ? 40 : 72
+            implicitHeight: root.compact ? 44 : 86
             text: modelData.label
             selected: root.power.profilesAvailable && root.power.profile === modelData.name
             enabled: root.power.profilesAvailable && !root.power.profilePending && (modelData.name !== "performance" || root.power.performanceAvailable)
@@ -262,30 +260,16 @@ ScrollView {
           }
           Caption { text: "Keeps your device awake while you work." }
         }
-        Switch {
+        PanelSwitch {
           id: caffeineToggle
           objectName: "powerCaffeineToggle"
-          implicitWidth: 44; implicitHeight: 32
+          tokens: root.tokens
           checked: root.power.caffeineSaved
           enabled: root.power.caffeineAvailable && !root.power.caffeinePending
           opacity: enabled ? 1 : 0.4
-          focusPolicy: Qt.StrongFocus
           Accessible.name: "Caffeine"
           Accessible.description: "Preference " + (root.power.caffeineSaved ? "on" : "off") + (root.power.caffeineActive ? ", service active" : ", service inactive")
           onToggled: root.power.caffeineToggle()
-          indicator: Rectangle {
-            x: 2; y: (caffeineToggle.height - height) / 2
-            implicitWidth: 40; implicitHeight: 24; radius: 12
-            color: caffeineToggle.checked ? root.tokens.cyan : Qt.alpha(root.tokens.muted, 0.15)
-            border.color: caffeineToggle.visualFocus ? root.tokens.gold : root.tokens.border
-            Rectangle {
-              x: caffeineToggle.checked ? 19 : 3; y: 3
-              width: 18; height: 18; radius: 9
-              color: caffeineToggle.checked ? root.tokens.background : root.tokens.muted
-              Behavior on x { NumberAnimation { duration: root.tokens.hoverDuration } }
-            }
-          }
-          contentItem: Item {}
         }
       }
       Diagnostic { text: root.power.caffeineError }
@@ -345,8 +329,9 @@ ScrollView {
           validator: IntValidator { bottom: 1; top: 100 }
           Accessible.name: "Charge limit percentage"
           background: Rectangle {
-            radius: 8
-            color: root.tokens.surface
+            radius: root.tokens.rowRadius
+            color: root.tokens.background
+            border.width: threshold.activeFocus ? 2 : 1
             border.color: threshold.activeFocus ? root.tokens.gold : root.tokens.border
           }
         }
@@ -377,6 +362,7 @@ ScrollView {
             Layout.preferredWidth: 1
             Layout.columnSpan: modelData.action === "poweroff" && !root.compact ? 2 : 1
             text: modelData.label
+            implicitHeight: 56
             symbol: modelData.symbol
             enabled: Data.SessionData.available(modelData.action) && !Data.SessionData.blocked && !Data.SessionData.pending && Data.SessionData.confirmation === ""
             destructive: modelData.action === "poweroff"
@@ -393,9 +379,9 @@ ScrollView {
         Layout.fillWidth: true
         implicitHeight: confirmationBody.implicitHeight + 24
         visible: Data.SessionData.confirmation !== ""
-        radius: 8
-        color: Qt.alpha(root.tokens.alert, 0.055)
-        border.color: Qt.alpha(root.tokens.alert, 0.2)
+        radius: root.tokens.rowRadius
+        color: Qt.alpha(root.tokens.alert, 0.08)
+        border.color: Qt.alpha(root.tokens.alert, 0.35)
         ColumnLayout {
           id: confirmationBody
           anchors { left: parent.left; right: parent.right; top: parent.top; margins: 12 }

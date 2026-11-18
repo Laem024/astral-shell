@@ -20,8 +20,6 @@ Item {
   readonly property int step: compact ? 26 : 32
   readonly property int normalLength: count * step
   readonly property int length: normalLength + 10 + step
-  property int hoveredIndex: -1
-  readonly property Item hoveredItem: hoveredIndex < 0 ? null : nodes.itemAt(hoveredIndex)
   signal selected(int workspace)
   signal specialSelected(string name)
   implicitWidth: vertical ? 46 : length
@@ -44,7 +42,7 @@ Item {
     x: root.vertical ? (root.width - width) / 2 : (root.active - 1) * root.step + (root.step - width) / 2
     y: root.vertical ? (root.active - 1) * root.step + (root.step - height) / 2 : (root.height - height) / 2 - 2
     width: 24; height: 24
-    radius: 5
+    radius: 0
     color: Qt.alpha(root.tokens.cyan, 0.14)
     border.color: root.tokens.cyan
     Rectangle {
@@ -81,6 +79,24 @@ Item {
       y: root.vertical ? offset : 0
       width: root.vertical ? root.width : root.step
       height: root.vertical ? root.step : root.height
+      function activateNode() {
+        if (!root.interactive) return;
+        if (node.special) { if (node.current) root.specialSelected(String(node.info.identity || node.info.name)); }
+        else root.activate(node.workspaceId);
+      }
+      activeFocusOnTab: root.interactive && (!special || current)
+      Keys.onSpacePressed: activateNode()
+      Keys.onReturnPressed: activateNode()
+      Keys.onEnterPressed: activateNode()
+      Accessible.onPressAction: activateNode()
+      Rectangle {
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: root.vertical ? 0 : -2
+        width: 24; height: 24
+        radius: node.special ? 12 : 0
+        color: "transparent"
+        border.color: node.activeFocus ? root.tokens.gold : "transparent"
+      }
       Accessible.role: Accessible.Button
       Accessible.name: special && !current ? "Special workspace · closed"
         : (special ? "Special workspace " + info.name : "Workspace " + workspaceId) + " · " + apps + " open apps"
@@ -93,7 +109,7 @@ Item {
         text: String(node.workspaceId)
         color: node.ink
         font.family: root.tokens.mono
-        font.pixelSize: 12
+        font.pixelSize: root.tokens.textSize
         Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
       }
       Shape {
@@ -141,7 +157,7 @@ Item {
         visible: node.special && node.current
         anchors.centerIn: parent
         anchors.verticalCenterOffset: root.vertical ? 0 : -2
-        width: 24; height: 24; radius: 5
+        width: 24; height: 24; radius: 12
         color: Qt.alpha(node.specialInk, 0.12); border.color: node.specialInk
         Behavior on color { ColorAnimation { duration: root.tokens.hoverDuration } }
         Behavior on border.color { ColorAnimation { duration: root.tokens.hoverDuration } }
@@ -151,16 +167,11 @@ Item {
         anchors.verticalCenterOffset: root.vertical ? 0 : -2
         width: 24; height: 24
         tokens: root.tokens
+        radius: node.special ? 12 : 0
         accent: node.special ? node.specialInk : root.tokens.cyan
         active: node.hovered && (!node.special || node.current)
       }
-      HoverHandler {
-        id: hover
-        onHoveredChanged: {
-          if (hovered) root.hoveredIndex = node.index;
-          else if (root.hoveredIndex === node.index) root.hoveredIndex = -1;
-        }
-      }
+      HoverHandler { id: hover }
       TapHandler {
         enabled: root.interactive && (!node.special || node.current)
         onTapped: {

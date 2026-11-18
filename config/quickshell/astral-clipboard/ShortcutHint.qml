@@ -10,18 +10,23 @@ RowLayout {
   property bool accent: false
   spacing: 6
   Rectangle {
-    implicitWidth: keyText.implicitWidth + 10
+    implicitWidth: keyText.implicitWidth + 12
     implicitHeight: 22
-    radius: 5
-    color: hint.tokens.background
-    border.color: hint.tokens.border
+    radius: 6
+    color: hint.accent ? Qt.alpha(hint.tokens.cyan, 0.12) : hint.tokens.raised
+    border.width: 1
+    border.color: hint.accent ? Qt.alpha(hint.tokens.cyan, 0.4) : hint.tokens.border
     Text {
       id: keyText
       anchors.centerIn: parent
       text: hint.keys
-      color: hint.accent ? hint.tokens.cyan : hint.tokens.muted
-      font.family: hint.tokens.mono; font.pixelSize: 10
+      color: hint.accent ? hint.tokens.cyan : hint.tokens.text
+      font.family: hint.tokens.mono; font.pixelSize: 10; font.weight: Font.DemiBold
     }
   }
-  Text { text: hint.label; color: hint.accent ? hint.tokens.cyan : hint.tokens.muted; font.family: hint.tokens.font; font.pixelSize: 10 }
+  Text {
+    text: hint.label
+    color: hint.accent ? hint.tokens.cyan : hint.tokens.muted
+    font.family: hint.tokens.font; font.pixelSize: 11
+  }
 }

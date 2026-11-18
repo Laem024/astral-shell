@@ -5,19 +5,20 @@ const palette = {
   cyan: "color", lavender: "color", gold: "color", alert: "color"
 };
 const shape = {
-  position: "string", mode: "string", scale: "number", margin: "number", animations: "boolean",
+  position: "string", frame: "string", mode: "string", scale: "number", margin: "number", animations: "boolean",
   colors: { light: palette, dark: palette },
   clockFormat: "string", workspaceDisplay: "string",
   modules: {
     logo: "boolean", workspaces: "boolean", window: "boolean", clock: "boolean",
     music: "boolean", network: "boolean", audio: "boolean", battery: "boolean",
-    notifications: "boolean", tray: "boolean"
+    notifications: "boolean", tray: "boolean", capture: "boolean"
   },
   applications: { fileManager: "strings", terminal: "strings", videoPlayer: "strings" },
   weather: { temperatureUnit: "string", windUnit: "string" },
   logo: { glyph: "string", image: "string" }
 };
 const choices = {
+  frame: ["off", "folds", "full"],
   position: ["top", "bottom", "left", "right"], mode: ["light", "dark"],
   clockFormat: ["12h", "24h"], workspaceDisplay: ["icons", "numbers"],
   temperatureUnit: ["celsius", "fahrenheit"], windUnit: ["kmh", "mph", "ms", "kn"]
@@ -64,6 +65,7 @@ function argv(value, path, optional) {
 function parse(text, scope) {
   const value = JSON.parse(text);
   if (!value || Array.isArray(value) || typeof value !== "object") throw new Error("settings");
+  if (scope !== "common" && value.frame === undefined) value.frame = "off";
   const commonKeys = ["mode", "scale", "animations", "colors", "clockFormat", "applications"];
   const schema = {};
   for (const key of Object.keys(shape))
@@ -100,4 +102,25 @@ function parse(text, scope) {
       if (typeof value.components[key] !== "string" || /[\u0000\r\n]/.test(value.components[key])) throw new Error("components." + key);
   }
   return value;
+}
+
+// Merge only explicitly edited leaf paths against a fresh disk snapshot.
+function at(object, path) { return path.split(".").reduce((v, k) => v === undefined ? undefined : v[k], object); }
+function patch(current, baseline, changes, scope) {
+  const next = JSON.parse(JSON.stringify(current));
+  for (const path of Object.keys(changes)) {
+    const keys = path.split(".");
+    if (keys.some(k => !/^[A-Za-z][A-Za-z0-9]*$/.test(k) || ["constructor", "prototype", "__proto__"].includes(k))) throw new Error("Invalid field: " + path);
+    const commonKeys = ["mode", "scale", "animations", "colors", "clockFormat", "applications"];
+    const allowed = scope === "common" ? Object.assign({}, optionalCommon) : {};
+    for (const key of Object.keys(shape)) if (commonKeys.includes(key) === (scope === "common")) allowed[key] = shape[key];
+    let rule = allowed;
+    for (const k of keys) rule = rule && typeof rule === "object" ? rule[k] : undefined;
+    if (!rule || (typeof rule === "object")) throw new Error("Unsupported field: " + path);
+    if (JSON.stringify(at(current, path)) !== JSON.stringify(at(baseline, path))) throw new Error("Changed externally: " + path + ". Reload before applying.");
+    let target = next;
+    for (const k of keys.slice(0, -1)) { if (!target[k]) target[k] = {}; target = target[k]; }
+    target[keys[keys.length - 1]] = changes[path];
+  }
+  return parse(JSON.stringify(next), scope);
 }
