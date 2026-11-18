@@ -62,7 +62,7 @@ ShellRoot {
       if (root.step === 0) {
         if (Data.BrightnessData.monitors.length !== 2) return;
         root.check(Data.CaptureData.audio === "none", "silent default");
-        root.check(Data.NotificationData.applications.fileManager[0] === "thunar" && Data.NotificationData.applications.videoPlayer[0] === "haruna", "project application defaults");
+        root.check(Data.NotificationData.applications.fileManager[0] === "thunar" && Data.NotificationData.applications.videoPlayer[0] === "vlc", "project application defaults");
         root.check(root.find(displayPage, "takeScreenshot").enabled, "screenshot action available");
         root.find(displayPage, "captureSource-window").clicked();
         root.check(displayPage.mode === "window" && !root.find(displayPage, "captureMonitorSelector").visible, "window source hides monitor selector");

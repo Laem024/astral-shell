@@ -41,7 +41,7 @@ const common = {
       "kitty"
     ],
     "videoPlayer": [
-      "haruna"
+      "vlc"
     ]
   },
   "providers": {
