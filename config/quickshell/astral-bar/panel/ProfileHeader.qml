@@ -92,8 +92,6 @@ Rectangle {
       topPadding: 5
       bottomPadding: 5
       onClicked: root.editRequested("avatar")
-      ToolTip.visible: hovered
-      ToolTip.text: text
       background: Rectangle {
         radius: portrait.width * 0.3
         color: root.tokens.surface

@@ -89,8 +89,6 @@ Item {
               Accessible.role: Accessible.RadioButton
               Accessible.checkable: true
               Accessible.checked: selected
-              ToolTip.visible: hovered && root.compact
-              ToolTip.text: text
               contentItem: RowLayout {
                 spacing: 10
                 CategoryGlyph {

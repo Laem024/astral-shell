@@ -36,9 +36,6 @@ ColumnLayout {
     padding: 0
     focusPolicy: Qt.StrongFocus
     Accessible.name: label
-    ToolTip.visible: hovered
-    ToolTip.delay: 600
-    ToolTip.text: label
     opacity: enabled ? 1 : 0.3
     background: Rectangle {
       radius: width / 2

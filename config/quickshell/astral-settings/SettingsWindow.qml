@@ -300,8 +300,6 @@ Window {
                 required property string modelData
                 Layout.fillWidth:true; height:48; radius:8
                 color:root.value({scope:'common',key:'colors.'+root.value({scope:'common',key:'mode'})+'.'+modelData}) || root.tokens.surface
-                ToolTip.visible: swatchHover.hovered; ToolTip.text:modelData
-                HoverHandler { id:swatchHover }
               }
             }
           }
