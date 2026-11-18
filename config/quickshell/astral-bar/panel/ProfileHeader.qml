@@ -14,7 +14,7 @@ Rectangle {
   readonly property string profileName: Data.UserData.displayName
   readonly property string initials: profileName.split(/\s+/).filter(word => word.length).slice(0, 2).map(word => word[0]).join("").toUpperCase()
   signal editRequested(string mode)
-  implicitHeight: compact ? 152 : 184
+  implicitHeight: compact ? 168 : 204
   radius: tokens.cardRadius
   color: tokens.background
   border.color: tokens.border
@@ -83,8 +83,9 @@ Rectangle {
       id: portrait
       tokens: root.tokens
       text: "Change account photo"
-      Layout.preferredWidth: root.compact ? 66 : 82
-      Layout.preferredHeight: root.compact ? 66 : 82
+      Layout.minimumWidth: root.compact ? 88 : 112
+      Layout.preferredWidth: root.compact ? 88 : 112
+      Layout.preferredHeight: root.compact ? 88 : 112
       padding: 5
       leftPadding: 5
       rightPadding: 5
@@ -94,7 +95,7 @@ Rectangle {
       ToolTip.visible: hovered
       ToolTip.text: text
       background: Rectangle {
-        radius: 28
+        radius: portrait.width * 0.3
         color: root.tokens.surface
         border.width: portrait.visualFocus ? 2 : 1
         border.color: portrait.hovered || portrait.visualFocus ? root.tokens.cyan : Qt.alpha(root.tokens.cyan, 0.4)
@@ -102,12 +103,12 @@ Rectangle {
       contentItem: Item {
         Rectangle {
           anchors.fill: parent
-          radius: 22
+          radius: portrait.width * 0.25
           color: Qt.tint(root.tokens.raised, Qt.alpha(root.tokens.lavender, 0.12))
         }
         Components.RoundedClip {
           anchors.fill: parent
-          radius: 22
+          radius: portrait.width * 0.25
           visible: avatar.status === Image.Ready
           Image {
             id: avatar
@@ -123,7 +124,7 @@ Rectangle {
           visible: avatar.status !== Image.Ready
           text: root.initials
           color: root.tokens.cyan
-          font { family: root.tokens.font; pixelSize: root.compact ? 22 : 28; weight: Font.DemiBold }
+          font { family: root.tokens.font; pixelSize: root.compact ? 30 : 38; weight: Font.DemiBold }
         }
         Rectangle {
           anchors { right: parent.right; bottom: parent.bottom; rightMargin: -7; bottomMargin: -7 }

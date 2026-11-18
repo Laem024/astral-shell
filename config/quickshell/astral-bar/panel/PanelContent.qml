@@ -32,6 +32,7 @@ Item {
     visible: root.pickerMode === ""
     spacing: 16
     ProfileHeader {
+      id: profileHeader
       Layout.fillWidth: true
       Layout.preferredHeight: implicitHeight
       tokens: root.tokens
@@ -184,7 +185,7 @@ Item {
     sourceComponent: AvatarPicker {
       tokens: root.tokens
       mode: root.pickerMode
-      bannerAspect: root.width / (root.shortPanel ? 152 : 184)
+      bannerAspect: root.width / profileHeader.implicitHeight
       onClosed: root.pickerMode = ""
     }
   }

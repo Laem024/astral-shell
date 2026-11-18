@@ -112,7 +112,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           visible: card.tokens.showAvatar
           tokens: card.tokens
-          size: 48
+          size: 96
           source: card.tokens.customAvatar || (card.user.icon || "")
           initials: card.initials(card.user.realName || card.user.name)
         }
@@ -323,7 +323,7 @@ Item {
 
       delegate: Rectangle {
         width: userList.width
-        height: 56
+        height: 68
         radius: card.tokens.rowRadius
         color: userList.currentIndex === index ? Qt.alpha(card.tokens.cyan, 0.12)
           : userMouse.containsMouse ? Qt.alpha(card.tokens.text, 0.05)
@@ -339,7 +339,7 @@ Item {
             verticalCenter: parent.verticalCenter
           }
           tokens: card.tokens
-          size: 36
+          size: 48
           source: model.icon || ""
           initials: card.initials(model.realName || model.name)
         }
