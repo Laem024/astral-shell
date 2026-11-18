@@ -63,6 +63,18 @@ Scope {
     onTriggered: {
       const categories = root.find(panel, "panelCategories");
       root.check(!!categories, "navigation exists");
+      const settingsButton = root.find(panel, "astralSettingsButton");
+      const settingsGlyph = root.find(settingsButton, "astralSettingsGlyph");
+      const glyphBounds = settingsGlyph.mapToItem(settingsButton, 0, 0, settingsGlyph.width, settingsGlyph.height);
+      const buttonPosition = settingsButton.mapToItem(categories, 0, 0);
+      root.check(settingsButton.width === settingsButton.height && settingsButton.width >= 32, "settings has a square click target");
+      root.check(Math.abs(glyphBounds.x + glyphBounds.width / 2 - settingsButton.width / 2) < 1
+        && Math.abs(glyphBounds.y + glyphBounds.height / 2 - settingsButton.height / 2) < 1, "settings icon is centered");
+      root.check(glyphBounds.x >= 0 && glyphBounds.y >= 0
+        && glyphBounds.x + glyphBounds.width <= settingsButton.width
+        && glyphBounds.y + glyphBounds.height <= settingsButton.height, "settings icon fits its button");
+      root.check(buttonPosition.x >= 0 && buttonPosition.x + settingsButton.width <= categories.width + 1
+        && buttonPosition.y >= 0 && buttonPosition.y + settingsButton.height <= categories.height + 1, "settings button fits the sidebar");
       for (const category of panel.categories) {
         const button = root.find(categories, "panelCategory-" + category.key);
         const position = button.mapToItem(categories, 0, 0);

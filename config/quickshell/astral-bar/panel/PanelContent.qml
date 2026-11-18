@@ -118,22 +118,39 @@ Item {
             Text {
               visible: !root.compact
               Layout.fillWidth: true
+              Layout.minimumWidth: 0
               Layout.leftMargin: 10
               text: "ASTRAL SHELL"
+              elide: Text.ElideRight
               color: root.tokens.muted
               font { family: root.tokens.mono; pixelSize: 8; letterSpacing: 1.4 }
             }
             PanelButton {
+              id: settingsButton
               objectName: "astralSettingsButton"
+              Layout.minimumWidth: 38
               Layout.preferredWidth: 38
+              Layout.maximumWidth: 38
+              Layout.minimumHeight: 38
               Layout.preferredHeight: 38
+              Layout.maximumHeight: 38
               Layout.alignment: Qt.AlignHCenter
               tokens: root.tokens
               text: "Settings"
-              padding: 8
-              ToolTip.visible: hovered
-              ToolTip.text: text
-              contentItem: CategoryGlyph { kind: "sliders"; ink: root.tokens.muted }
+              leftPadding: 0
+              rightPadding: 0
+              topPadding: 0
+              bottomPadding: 0
+              contentItem: Item {
+                CategoryGlyph {
+                  objectName: "astralSettingsGlyph"
+                  anchors.centerIn: parent
+                  width: 24; height: 24
+                  scale: 0.85
+                  kind: "sliders"
+                  ink: settingsButton.hovered || settingsButton.activeFocus ? root.tokens.cyan : root.tokens.muted
+                }
+              }
               onClicked: settingsCommand.run(["astral-settings", "open"], () => {})
             }
           }
