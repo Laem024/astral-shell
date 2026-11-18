@@ -112,9 +112,9 @@ module_prepare_settings() {
   # apply_configs has already backed up the entire destination, including old preferences.
   # The dry run returns before this function and never creates a staging file here.
   mkdir -p -- "$root"
-  merged=$(mktemp "$root/.preferences-XXXXXX")
-  temporary=$(mktemp "$root/.settings-XXXXXX")
-  existing=$(mktemp "$root/.existing-XXXXXX")
+  merged=$(astral_install_mktemp "$root/.preferences-XXXXXX")
+  temporary=$(astral_install_mktemp "$root/.settings-XXXXXX")
+  existing=$(astral_install_mktemp "$root/.existing-XXXXXX")
   printf '{}\n' > "$merged"
   if [[ -f $bar ]]; then jq -s '.[0] * .[1]' "$merged" "$bar" > "$existing"; cp -- "$existing" "$merged"; fi
   if [[ -f $common ]]; then jq -s '.[0] * .[1]' "$merged" "$common" > "$existing"; cp -- "$existing" "$merged"; fi

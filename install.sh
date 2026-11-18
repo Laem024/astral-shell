@@ -10,6 +10,22 @@ case $mode in
   *) printf 'Usage: %s [install|update]\n' "$0" >&2; exit 1 ;;
 esac
 
+source "$PROJECT_ROOT/scripts/cleanup-install.sh"
+astral_install_begin
+install_scratch=$ASTRAL_INSTALL_WORKDIR
+finish_install() {
+  local result=$?
+  trap - EXIT
+  if ! bash "$PROJECT_ROOT/scripts/cleanup-install.sh" "$install_scratch"; then
+    printf 'Installation scratch cleanup failed: %s\n' "$install_scratch" >&2
+    if (( result == 0 )); then result=1; fi
+  fi
+  exit "$result"
+}
+trap finish_install EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
 # Start from a clean terminal so earlier commands and package-manager output
 # never mix with the installation prompts.
 if [[ -t 1 && ${TERM:-} != dumb ]]; then

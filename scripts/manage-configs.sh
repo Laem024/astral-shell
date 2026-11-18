@@ -147,7 +147,7 @@ if [[ -n $selected_module ]]; then
   staging_root=${XDG_CACHE_HOME:-$HOME/.cache}/astral-shell/install
   [[ $staging_root == /* ]] || die 'XDG_CACHE_HOME must be absolute.'
   mkdir -p -m 700 -- "$staging_root"
-  staging=$(mktemp -d "$staging_root/staging-XXXXXXXX")
+  staging=$(astral_install_mktemp -d "$staging_root/staging-XXXXXXXX")
   trap 'rm -rf -- "$staging"' EXIT
   cp -a -- "$PROJECT_ROOT/config/quickshell/common" "$staging/common"
   for root_file in shell.qml bar.qml recorder.qml launcher.qml launcher-control.qml wallpaper.qml wallpaper-control.qml polkit.qml polkit-control.qml lock.qml lock-control.qml idle.qml session.qml session-control.qml clipboard.qml clipboard-control.qml overview.qml overview-control.qml shortcuts.qml shortcuts-control.qml settings.qml settings-control.qml settings.json dispatch.sh; do cp -- "$PROJECT_ROOT/config/quickshell/$root_file" "$staging/$root_file"; done

@@ -64,6 +64,14 @@ The eleven public commands are `astral-shell`, `astral-bar`, `astral-launcher`, 
 
 For the complete machine setup, `./install.sh` and `./install.sh update` run the existing package, configuration, SDDM, and power installers. They request system privileges where required. This migration does not automatically install dependencies during validation or preview. See [installation](docs/instalacion.md).
 
+`scripts/cleanup-install.sh` removes the current installation's private scratch
+directory under `${XDG_CACHE_HOME:-$HOME/.cache}/astral-shell/install/` on exit,
+including failures and handled interruptions. Configuration migration, command
+generation, module staging and MSI downloads use this directory during the run.
+Cleanup preserves backups, installed files, package caches and other runs;
+it does not scan for old leftovers. Forced termination or power loss can leave
+the interrupted run's directory for manual inspection.
+
 Clipboard preferences (`historySize`, `maxImageBytes`, `enterAction`, and `pasteShortcut`), overview `previews`, and the shared `workspaceCount` belong to root `settings.json`. Installation migrates the old bar workspace count and module preferences without replacing root preferences. Clipboard history stays at `$XDG_STATE_HOME/astral-shell/astral-clipboard/history.json` (version 1), with private image files in `images/`.
 
 `astral-clipboard/`, `astral-overview/`, and `astral-shortcuts/` contain the active UI and Qt JavaScript services. Root `clipboard.qml`, `overview.qml`, and `shortcuts.qml` are stock entries; their `*-control.qml` files use `common/PanelControl.qml`. Tests in `tests/panels/` cover startup, simulated previews, and controller concurrency. Preview panels use sample data in ordinary windows and never capture or paste clipboard contents or dispatch window actions.

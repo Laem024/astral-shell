@@ -5,6 +5,7 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 export PATH=/usr/bin:/usr/sbin
 script=$(realpath -- "${BASH_SOURCE[0]}")
+source "${script%/*}/cleanup-install.sh"
 revision=c8cbd48ed01f5c4fa7e34ff622a66f5a5380c705
 version=0.18
 stored=/usr/src/msi-ec-$version
@@ -84,12 +85,12 @@ case ${1:-install} in
     if sudo bash "$script" --system; then exit; else result=$?; fi
     [[ $result == 20 ]] || exit "$result"
     command -v git >/dev/null || fail "git is required to download the reviewed MSI source."
-    download_root=${XDG_CACHE_HOME:-$HOME/.cache}/astral-shell/msi
+    download_root=${ASTRAL_INSTALL_WORKDIR:-${XDG_CACHE_HOME:-$HOME/.cache}/astral-shell/msi}
     [[ $download_root == /* ]] || fail 'XDG cache must be absolute.'
     [[ ! -L $download_root ]] || fail 'Invalid MSI download cache.'
     mkdir -p -m700 -- "$download_root"
     [[ -O $download_root && $(stat -c %a "$download_root") == 700 ]] || fail 'MSI download cache must be private and owned by this user.'
-    download=$(mktemp -d "$download_root/download-XXXXXXXX")
+    download=$(astral_install_mktemp -d "$download_root/download-XXXXXXXX")
     trap 'rm -rf -- "$download"' EXIT
     git -C "$download" init --quiet
     git -C "$download" fetch --quiet --depth 1 https://github.com/MControlSuite/msi-ec.git "$revision"
