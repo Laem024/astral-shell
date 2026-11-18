@@ -31,7 +31,7 @@ ShellRoot {
             columns: width >= 652 ? 5 : width >= 372 ? 3 : 2
             spacing: 10
             Repeater {
-              model: ["lock", "logout", "suspend", "reboot", "poweroff"].map(id => Logic.byId(id))
+              model: Logic.actions
               delegate: ActionTile {
                 required property var modelData
                 width: (previewGrid.width - (previewGrid.columns - 1) * previewGrid.spacing) / previewGrid.columns

@@ -12,9 +12,10 @@ Button {
   property bool holding: false
   property real progress: 0
   readonly property bool holdRequired: actionData.hold === true
-  readonly property bool destructive: actionData.id === "reboot" || actionData.id === "poweroff"
-  readonly property color accent: destructive || actionData.accent === "alert" ? tokens.alert
-    : actionData.accent === "gold" ? tokens.gold : tokens.cyan
+  readonly property bool destructive: holdRequired
+  readonly property color accent: actionData.accent === "alert" ? tokens.alert
+    : actionData.accent === "gold" ? tokens.gold
+    : actionData.accent === "lavender" ? tokens.lavender : tokens.cyan
   readonly property string detail: actionData.detail || ""
   readonly property int orbSize: root.compact ? 40 : 48
   signal holdStarted()

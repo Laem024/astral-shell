@@ -9,7 +9,7 @@ FocusScope {
   id: root
   required property var tokens
   property bool active: false
-  readonly property var actions: ["lock", "logout", "suspend", "reboot", "poweroff"].map(id => Logic.byId(id)).filter(action => Common.SessionActions.available(action.id))
+  readonly property var actions: Logic.actions.filter(action => Common.SessionActions.available(action.id))
   readonly property bool busy: Common.SessionActions.pending
   readonly property bool failed: Common.SessionActions.error !== ""
   readonly property bool compact: width < 700
