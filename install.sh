@@ -53,6 +53,7 @@ if ((${#config_options[@]})); then
 else
   bash "$PROJECT_ROOT/scripts/manage-configs.sh" apply all
 fi
+bash "$PROJECT_ROOT/scripts/install-keyd.sh"
 bash "$PROJECT_ROOT/scripts/install-sddm.sh" "$mode"
 # Power helpers must follow dotfile installation: caffeine cancellation uses it.
 bash "$PROJECT_ROOT/scripts/install-power.sh" "$mode"

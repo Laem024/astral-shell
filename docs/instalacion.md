@@ -9,7 +9,9 @@ Use a regular user account on CachyOS. Never rename the machine account or home 
 ./install.sh update
 ```
 
-The entry point runs package selection, service setup, configuration copying, SDDM setup, and power setup. Package and system operations request privileges through their existing installers. A failed step stops later steps. Review package catalogs in `packages/` before using the complete installer; migration validation and preview do not install packages.
+The entry point runs package selection, service setup, configuration copying, keyd setup, SDDM setup and power setup. Package and system operations request privileges through their installers. A failed step stops later steps. Review package catalogs in `packages/` before using the complete installer. Validation and preview use the dependencies already installed.
+
+Both modes install the required `keyd` package, migrate the [numeric keypad profile](hyprland.md#numeric-keypad) and enable `keyd.service`. Replacing an existing default profile creates a separate system backup under `/etc/keyd/`.
 
 Prerequisites include Bash, systemd, the CachyOS repositories, Hyprland/Wayland, Quickshell, PipeWire and its PulseAudio compatibility service, and the existing tools used by enabled controls. Optional external actions remain hidden until configured. Graphical charge authentication uses Astral Polkit, which starts with the shell. Run only one authentication agent per session.
 

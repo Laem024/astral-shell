@@ -62,7 +62,7 @@ The installer backs up the existing destination in `.backups/` before changes. I
 
 The eleven public commands are `astral-shell`, `astral-bar`, `astral-launcher`, `astral-wallpaper`, `astral-polkit`, `astral-lock`, `astral-session`, `astral-clipboard`, `astral-overview`, `astral-shortcuts`, and `astral-settings`. The bar supports `start`, `daemon`, and `close-panels`. `astral-shell workspace-count` reads the installed root settings without starting Quickshell; `astral-bar workspace-count` aliases that query. Commands remember the chosen destination.
 
-For the complete machine setup, `./install.sh` and `./install.sh update` run the existing package, configuration, SDDM, and power installers. They request system privileges where required. This migration does not automatically install dependencies during validation or preview. See [installation](docs/instalacion.md).
+For the complete machine setup, `./install.sh` and `./install.sh update` run the package, configuration, keyd, SDDM and power installers. They request system privileges where required. Validation and preview run with the dependencies already installed. See [installation](docs/instalacion.md).
 
 `scripts/cleanup-install.sh` removes the current installation's private scratch
 directory under `${XDG_CACHE_HOME:-$HOME/.cache}/astral-shell/install/` on exit,
@@ -103,6 +103,7 @@ Clipboard preferences (`historySize`, `maxImageBytes`, `enterAction`, and `paste
 | `config/quickshell/wallpaper-control.qml` | Single-start readiness and IPC command coordination |
 | `config/quickshell/dispatch.sh` | Public bar, launcher and wallpaper command dispatch |
 | `config/hyprland/` | Hyprland configuration and workspace grouping |
+| `config/keyd/numpad.conf` | Windows-style numeric keypad navigation for [Hyprland](docs/hyprland.md#numeric-keypad) |
 | `config/monitor/` | Separate `astral-monitor` resource workspace |
 | `config/sddm/` | SDDM theme with welcome, clock and separate sign-in panel |
 | `config/fish/config.fish` | Astral prompt and Fastfetch welcome with RAM, swap, disks, display, desktop and system information |

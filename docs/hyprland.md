@@ -13,3 +13,16 @@ Install with `bash scripts/manage-configs.sh apply hyprland --dry-run` first, th
 `Super+R` requires `qalculate-gtk`, `Super+N` requires `mousepad`, and track/playback keys require `playerctl`. These packages are not installed automatically.
 
 Updates retire `start-idle.sh` and `hypridle.conf` only when their contents exactly match the retired project versions. They are included in the normal full backup first (`--no-backup` skips it); `--dry-run` reports removals without writing. Customized copies remain in place with a review message. No external process is stopped or package uninstalled.
+
+## Numeric keypad
+
+The [keyd profile](../config/keyd/numpad.conf) maps keypad `1 2 3 4 6 7 8 9` to End, Down, Page Down, Left, Right, Home, Up and Page Up.
+
+| Num Lock | Keypad alone | One Shift + keypad | Both Shift keys + keypad |
+| --- | --- | --- | --- |
+| On | Types digits | Moves the cursor | Extends the selection |
+| Off | Moves the cursor | Extends the selection | Extends the selection |
+
+`./install.sh` and `./install.sh update` install this profile as `/etc/keyd/default.conf` and enable and start `keyd.service`. The installer backs up a changed default profile to `default.conf.backup-*` and restarts the service when it replaces the profile. The profile matches all keyboards by default. To restore a previous profile, copy its backup to `/etc/keyd/default.conf` and restart `keyd.service`.
+
+Keep Hyprland's `input.numlock_by_default` enabled. The physical Num Lock key changes both the keyd layer and the compositor's Num Lock state. If the states diverge after a configuration reload, run `sudo systemctl restart keyd` to recreate the virtual keyboard and return to numeric mode.

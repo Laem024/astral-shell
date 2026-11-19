@@ -3,7 +3,7 @@ hl.config({
     kb_layout  = "us",
     kb_variant = "altgr-intl",
     kb_model   = "",
-    kb_options = "numpad:point,compose:ralt,terminate:ctrl_alt_bksp,numpad:microsoft",
+    kb_options = "",
     kb_rules   = "",
 
     follow_mouse = 1,
