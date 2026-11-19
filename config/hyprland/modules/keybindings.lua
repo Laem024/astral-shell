@@ -94,7 +94,9 @@ for i = 1, 10 do
   local key = i % 10
   hl.bind(main_mod .. " + " .. key, function()
     local target = workspaces.target(i)
-    if target then hl.dispatch(hl.dsp.focus({ workspace = target })) end
+    if target and target ~= workspaces.active_id() then
+      hl.dispatch(hl.dsp.focus({ workspace = target }))
+    end
   end, described("Workspaces · Go to slot " .. key))
   hl.bind(main_mod .. " + SHIFT + " .. key, function()
     local target = workspaces.target(i)
