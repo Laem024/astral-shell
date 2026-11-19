@@ -1,8 +1,6 @@
 hl.config({
   input = {
     kb_layout  = "us",
-    -- AltGr internacional: ' y " se escriben directamente y las tildes o
-    -- diéresis quedan en AltGr + tecla (por ejemplo, AltGr + ').
     kb_variant = "altgr-intl",
     kb_model   = "",
     kb_options = "",
@@ -18,7 +16,7 @@ hl.config({
 
     touchpad = {
       natural_scroll       = false,
-      clickfinger_behavior = true,
+      clickfinger_behavior = false,
     },
   },
 })

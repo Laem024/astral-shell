@@ -170,6 +170,14 @@ case $action in
     [[ -z $root_path ]] || die 'apply does not accept --root; it uses config/<application>/ in the project.'
     [[ $EUID -ne 0 ]] || die 'Apply configurations as a regular user, without sudo.'
     apply_configs
+
+    # Enable dark mode for GTK applications.
+    if [[ $application == gtk-3.0 || $application == gtk-4.0 ]]; then
+      if [[ $dry_run == false ]] && command -v gsettings >/dev/null 2>&1; then
+        gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+      fi
+    fi
+    
     if declare -F module_install_command >/dev/null; then module_install_command; fi
     if [[ -n ${staging:-} ]]; then rm -rf -- "$staging"; fi
     ;;

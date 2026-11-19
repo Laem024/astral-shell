@@ -4,6 +4,7 @@
 
 # Category: Desktop
 Desktop | required | hyprland # Wayland compositor for the desktop.
+Desktop | required | keyd # Windows-style numeric keypad navigation and selection.
 Desktop | required | sddm # Graphical login manager; install.sh enables it for next boot unless already active.
 Desktop | required | quickshell | ttf-jetbrains-mono-nerd,jq,networkmanager,bluez,bluez-utils,brightnessctl,grim,slurp,ddcutil,wf-recorder,libpulse,upower,power-profiles-daemon,qt6-multimedia,qt6-multimedia-ffmpeg,qt6-imageformats,ffmpeg,curl # QtQuick toolkit for building the desktop interface.
 
