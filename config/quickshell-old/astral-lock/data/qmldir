@@ -1,4 +1,0 @@
-singleton ClockData 1.0 ClockData.qml
-singleton UserData 1.0 UserData.qml
-singleton MediaData 1.0 MediaData.qml
-MediaService 1.0 MediaService.qml
